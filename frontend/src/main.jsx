@@ -4,8 +4,8 @@ import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
 import App from "./App.jsx";
-import { ToastProvider } from "./context/ToastContext";
-import { WalletProvider } from "./context/WalletContext";
+import { ToastProvider } from "./shared/components/ToastContext";
+import { WalletProvider } from "./shared/components/WalletContext";
 import { config } from "./wagmi";
 
 const queryClient = new QueryClient();

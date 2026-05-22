@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 const User = require("../../database/models/User");
-const Student = require("../../database/models/Student");
-const Teacher = require("../../database/models/Teacher");
 const Follow = require("../../database/models/Follow");
 const { findUserByAnyId } = require("../utils/userSync");
 
@@ -292,79 +290,9 @@ async function getUserMutuals(req, res) {
   }
 }
 
-async function getLeaderboard(req, res) {
-  try {
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
-    const skip = (page - 1) * limit;
-    const { role } = req.query;
-
-    const matchStage = {
-      role: { $in: ["student", "teacher", "community_manager"] },
-    };
-    if (role && ["student", "teacher", "community_manager"].includes(role)) {
-      matchStage.role = role;
-    }
-
-    const [users, total] = await Promise.all([
-      User.aggregate([
-        { $match: matchStage },
-        {
-          $addFields: {
-            followerCountNum: { $ifNull: ["$followerCount", 0] },
-            followingCountNum: { $ifNull: ["$followingCount", 0] },
-          },
-        },
-        { $sort: { followerCountNum: -1 } },
-        { $skip: skip },
-        { $limit: limit },
-        {
-          $project: {
-            publicId: 1,
-            name: 1,
-            role: 1,
-            collegeName: 1,
-            institutionType: 1,
-            institutionName: 1,
-            avatar: 1,
-            walletAddress: 1,
-            followerCount: "$followerCountNum",
-            followingCount: "$followingCountNum",
-            communityCount: { $size: { $ifNull: ["$communities", []] } },
-            nftCount: {
-              $size: {
-                $filter: {
-                  input: { $ifNull: ["$nftCertificates", []] },
-                  as: "nft",
-                  cond: { $eq: ["$$nft.status", "confirmed"] },
-                },
-              },
-            },
-          },
-        },
-      ]),
-      User.countDocuments(matchStage),
-    ]);
-
-    return res.json({
-      users,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    });
-  } catch (err) {
-    console.error("getLeaderboard error:", err);
-    return res.status(500).json({ error: "Failed to load leaderboard" });
-  }
-}
-
 module.exports = {
   getUserPublicProfile,
   getUserFollowers,
   getUserFollowing,
   getUserMutuals,
-  getLeaderboard,
 };

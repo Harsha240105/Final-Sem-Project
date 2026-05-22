@@ -30,8 +30,6 @@ const {
   deleteCommunityMessage,
   deleteCollabMessage,
 } = require("../controllers/communityController");
-const { getCommunityLeaderboard } = require("../controllers/leaderboardController");
-
 // ── Multer config for community uploads ──
 const uploadDir = path.join(__dirname, "..", "uploads", "communities");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -90,9 +88,6 @@ router.post("/:id/contribution", authMiddleware, addContribution);
 
 // ─── File uploads (admin / community_manager) ───
 router.post("/:id/upload", authMiddleware, communityUpload, uploadFiles);
-
-// ─── Leaderboard ───
-router.get("/:id/leaderboard", authMiddleware, getCommunityLeaderboard);
 
 // ─── Collaborations ───
 router.post("/:id/collab/create", authMiddleware, createCollab);
