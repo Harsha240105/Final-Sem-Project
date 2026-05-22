@@ -1,0 +1,19 @@
+{
+  "name": "web3connect",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Web3Connect – Virtual Campus Platform",
+  "scripts": {
+    "server": "npm --prefix backend run dev",
+    "client": "npm --prefix frontend run dev",
+    "dev": "concurrently -k -n \"server,client\" -c \"green,cyan\" \"npm run server\" \"npm run client\"",
+    "install:all": "npm install && npm --prefix backend install && npm --prefix frontend install",
+    "start": "npm --prefix backend start"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "dependencies": {}
+}

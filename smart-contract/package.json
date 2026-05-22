@@ -1,0 +1,18 @@
+{
+  "name": "web3connect-contracts",
+  "version": "1.0.0",
+  "description": "Web3Connect smart contracts",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy:amoy": "hardhat run scripts/deploy.js --network polygonAmoy",
+    "verify:amoy": "hardhat verify --network polygonAmoy"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.4.0"
+  }
+}
