@@ -110,10 +110,6 @@ const communitySchema = new mongoose.Schema(
     rules: { type: String, default: "", trim: true, maxlength: 3000 },
     colorAccent: { type: String, default: "", trim: true },
     linkedSubjects: [{ type: String, trim: true }],
-    mapPosition: {
-      x: { type: Number, default: 0 },
-      y: { type: Number, default: 0 },
-    },
     invitedMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

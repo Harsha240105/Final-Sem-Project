@@ -1,8 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMarketplacePosts } from "../../../../shared/services/api";
+import { getCollabPosts } from "../../../../shared/services/api";
 
-const TYPE_ICONS = { Job: "💼", Event: "📅", Project: "🚀" };
+const POST_TYPE_ICONS = {
+  looking_for_dev: "💻",
+  looking_for_designer: "🎨",
+  open_collaboration: "🤝",
+  research_project: "🔬",
+  community_recruitment: "🌐",
+};
 
 function timeAgo(date) {
   const s = Math.floor((Date.now() - new Date(date)) / 1000);
@@ -23,9 +29,9 @@ function ActiveCollaborations() {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      const data = await getMarketplacePosts(token);
-      const list = Array.isArray(data) ? data : data?.listings || [];
-      setItems(list.filter(i => i.status !== "closed").slice(0, 5));
+      const data = await getCollabPosts(token, { status: "active" });
+      const list = Array.isArray(data) ? data : [];
+      setItems(list.filter(i => i.status !== "archived").slice(0, 5));
     } catch {
       // silent
     } finally {
@@ -64,10 +70,10 @@ function ActiveCollaborations() {
           onClick={() => navigate("/marketplace")}
           className="w-full flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/[0.04] transition text-left"
         >
-          <span className="text-lg shrink-0">{TYPE_ICONS[item.type] || "📌"}</span>
+          <span className="text-lg shrink-0">{POST_TYPE_ICONS[item.postType] || "🤝"}</span>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-white truncate">{item.title}</p>
-            <p className="text-xs text-gray-500">{item.type} · {timeAgo(item.createdAt)}</p>
+            <p className="text-xs text-gray-500">{item.postType?.replace(/_/g, " ") || "Collaboration"} · {timeAgo(item.createdAt)}</p>
           </div>
         </button>
       ))}

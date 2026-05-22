@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Users, UserPlus, Search, ArrowLeft } from "lucide-react";
+import { Users, UserPlus, Search, ArrowLeft, Grid3X3 } from "lucide-react";
 import { useAuth } from "../../shared/hooks/useAuth";
 import { getConnectionsOverview } from "../../shared/services/api";
 import ProfileLink from "../../shared/components/ProfileLink";
 import FollowButton from "../../shared/components/FollowButton";
+import { NetworkGraph } from "./components/NetworkGraph";
 
 const TABS = [
   { id: "followers", label: "Followers" },
@@ -67,6 +68,7 @@ export default function Connections() {
   const followers = overview?.followers || [];
   const following = overview?.following || [];
   const displayList = activeTab === "followers" ? followers : following;
+  const graphData = overview?.graph;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6">
@@ -77,13 +79,28 @@ export default function Connections() {
         >
           <ArrowLeft size={18} />
         </button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-xl font-bold text-white">Connections</h1>
           <p className="text-sm text-gray-400">
             {overview?.stats?.followers || 0} followers · {overview?.stats?.following || 0} following
           </p>
         </div>
+        <button
+          onClick={() => navigate("/collaboration")}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-teal-500/10 to-emerald-500/10 border border-teal-500/20 text-teal-400 text-sm hover:from-teal-500/20 hover:to-emerald-500/20 transition-all"
+        >
+          <Grid3X3 size={14} />
+          Visual Canvas
+        </button>
       </div>
+
+      {graphData && graphData.nodes?.length > 0 && (
+        <NetworkGraph
+          nodes={graphData.nodes}
+          edges={graphData.edges}
+          centerUserId={graphData.centerUserId || user?.id}
+        />
+      )}
 
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -91,7 +108,7 @@ export default function Connections() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search connections..."
-          className="w-full rounded-xl border border-white/[0.06] bg-black/40 pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-purple-500/40 transition-all"
+          className="w-full rounded-xl border border-white/[0.06] bg-black/40 pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-teal-500/40 transition-all"
         />
       </div>
 
@@ -102,7 +119,7 @@ export default function Connections() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
               activeTab === tab.id
-                ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                ? "bg-teal-500/20 text-teal-300 border border-teal-500/30"
                 : "text-gray-400 hover:text-white"
             }`}
           >

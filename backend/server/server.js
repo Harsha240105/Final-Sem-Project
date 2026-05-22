@@ -28,6 +28,7 @@ const dmRoutes = require("./routes/dm.routes");
 const serverRoutes = require("./routes/server.routes");
 const verificationRoutes = require("./routes/verification.routes");
 const networkRoutes = require("./routes/network.routes");
+const canvasRoutes = require("./routes/canvas.routes");
 const setupSocket = require("./socket");
 
 const app = express();
@@ -189,6 +190,7 @@ app.use("/api/dm", dmRoutes);
 app.use("/api/servers", serverRoutes);
 app.use("/api/verify", verificationRoutes);
 app.use("/api/network", networkRoutes);
+app.use("/api/canvas", canvasRoutes);
 app.use("/api/social", require("./routes/social.routes"));
 app.use((req, res) => {
   console.warn(`[404] ${req.method} ${req.originalUrl}`);

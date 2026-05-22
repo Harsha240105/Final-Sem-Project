@@ -88,6 +88,83 @@ function setupSocket(io) {
       socket.leave(`server:${serverId}:${channel}`);
     });
 
+    // ── Canvas Room Join/Leave ──
+    socket.on("canvas:join", ({ canvasId }) => {
+      socket.join(`canvas:${canvasId}`);
+      socket.to(`canvas:${canvasId}`).emit("canvas:presence", {
+        userId,
+        userName: socket.userName,
+        action: "joined",
+      });
+    });
+
+    socket.on("canvas:leave", ({ canvasId }) => {
+      socket.leave(`canvas:${canvasId}`);
+      socket.to(`canvas:${canvasId}`).emit("canvas:presence", {
+        userId,
+        userName: socket.userName,
+        action: "left",
+      });
+    });
+
+    socket.on("canvas:node-move", ({ canvasId, nodeId, position }) => {
+      socket.to(`canvas:${canvasId}`).emit("canvas:node-moved", {
+        nodeId,
+        position,
+        userId,
+        timestamp: Date.now(),
+      });
+    });
+
+    socket.on("canvas:node-add", ({ canvasId, node }) => {
+      socket.to(`canvas:${canvasId}`).emit("canvas:node-added", {
+        node,
+        userId,
+        timestamp: Date.now(),
+      });
+    });
+
+    socket.on("canvas:node-remove", ({ canvasId, nodeId }) => {
+      socket.to(`canvas:${canvasId}`).emit("canvas:node-removed", {
+        nodeId,
+        userId,
+        timestamp: Date.now(),
+      });
+    });
+
+    socket.on("canvas:node-update", ({ canvasId, nodeId, data }) => {
+      socket.to(`canvas:${canvasId}`).emit("canvas:node-updated", {
+        nodeId,
+        data,
+        userId,
+        timestamp: Date.now(),
+      });
+    });
+
+    socket.on("canvas:edge-add", ({ canvasId, edge }) => {
+      socket.to(`canvas:${canvasId}`).emit("canvas:edge-added", {
+        edge,
+        userId,
+        timestamp: Date.now(),
+      });
+    });
+
+    socket.on("canvas:edge-remove", ({ canvasId, edgeId }) => {
+      socket.to(`canvas:${canvasId}`).emit("canvas:edge-removed", {
+        edgeId,
+        userId,
+        timestamp: Date.now(),
+      });
+    });
+
+    socket.on("canvas:viewport", ({ canvasId, viewport }) => {
+      socket.to(`canvas:${canvasId}`).emit("canvas:viewport-updated", {
+        viewport,
+        userId,
+        timestamp: Date.now(),
+      });
+    });
+
     // ── Community Room Join/Leave ──
     socket.on("join_community", ({ communityId }) => {
       socket.join(`community:${communityId}`);

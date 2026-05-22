@@ -326,49 +326,6 @@ const uploadFiles = async (req, res) => {
 };
 
 // ─── GET /api/communities/map (returns communities with computed connections) ───
-const getCommunitiesMap = async (req, res) => {
-  try {
-    const communities = await Community.find()
-      .populate(listPopulateFields)
-      .sort({ createdAt: -1 })
-      .lean();
-
-    const communityIds = communities.map(c => c._id.toString());
-
-    const mapData = communities.map(c => {
-      const memberIdSet = new Set((c.members || []).map(m => (m._id || m).toString()));
-
-      const connections = communities
-        .filter(other => other._id.toString() !== c._id.toString())
-        .map(other => {
-          let type = "related";
-          const otherMemberIds = new Set((other.members || []).map(m => (m._id || m).toString()));
-          const sharedMembers = [...memberIdSet].filter(id => otherMemberIds.has(id)).length;
-          const sameCategory = c.category && other.category && c.category === other.category;
-
-          if (sameCategory && sharedMembers > 0) type = "strong";
-          else if (sameCategory) type = "similar";
-          else if (sharedMembers > 1) type = "connection";
-
-          return { communityId: other._id, type, sharedMembers };
-        })
-        .filter(conn => conn.type !== "related" || conn.sharedMembers > 0)
-        .slice(0, 8);
-
-      return {
-        ...c,
-        connections,
-        memberCount: c.members?.length || 0,
-      };
-    });
-
-    res.json(mapData);
-  } catch (err) {
-    console.error("getCommunitiesMap error:", err);
-    res.status(500).json({ error: "Failed to fetch communities map" });
-  }
-};
-
 // ─── PUT /api/communities/:id (admin or community_manager of that community) ───
 const updateCommunity = async (req, res) => {
   try {
@@ -410,24 +367,6 @@ const updateCommunity = async (req, res) => {
   }
 };
 
-// ─── PUT /api/communities/:id/position (update map position) ───
-const updateCommunityPosition = async (req, res) => {
-  try {
-    const { x, y } = req.body;
-    if (typeof x !== "number" || typeof y !== "number") {
-      return res.status(400).json({ error: "x and y coordinates are required" });
-    }
-    const community = await Community.findByIdAndUpdate(
-      req.params.id,
-      { mapPosition: { x, y } },
-      { new: true }
-    );
-    if (!community) return res.status(404).json({ error: "Community not found" });
-    res.json({ _id: community._id, mapPosition: community.mapPosition });
-  } catch (err) {
-    console.error("updateCommunityPosition error:", err);
-    res.status(500).json({ error: "Failed to update position" });
-  }
 };
 
 // ─── DELETE /api/communities/:id/members/:memberId (admin only) ───
@@ -877,8 +816,6 @@ const getCommunityStats = async (req, res) => {
 
 module.exports = {
   getCommunities,
-  getCommunity,
-  getCommunitiesMap,
   createCommunity,
   joinCommunity,
   leaveCommunity,
@@ -888,7 +825,6 @@ module.exports = {
   deleteCommunity,
   uploadFiles,
   updateCommunity,
-  updateCommunityPosition,
   removeMember,
   assignManager,
   createCollab,

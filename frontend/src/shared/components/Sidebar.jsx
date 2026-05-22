@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "../hooks/useAuth";
 import {
   LayoutDashboard, MessageSquare, Gamepad2, Monitor,
-  ShoppingCart, Compass, Award, Link2, Settings,
+  ShoppingCart, Compass, Award, Link2, Settings, Grid3X3,
 } from "lucide-react";
 
 const baseLinks = [
@@ -15,6 +15,7 @@ const baseLinks = [
   { to: "/marketplace", label: "Marketplace", icon: ShoppingCart, color: "from-orange-500 to-red-500", glow: "shadow-orange-500/20" },
   { to: "/discover", label: "Discover", icon: Compass, color: "from-cyan-500 to-purple-500", glow: "shadow-cyan-500/20" },
   { to: "/connections", label: "Connections", icon: Link2, color: "from-cyan-500 to-green-500", glow: "shadow-cyan-500/20" },
+  { to: "/collaboration", label: "Collaboration", icon: Grid3X3, color: "from-teal-500 to-emerald-500", glow: "shadow-teal-500/20" },
 ];
 
 const certLink = { to: "/my-certificates", label: "Certificates", icon: Award, color: "from-yellow-500 to-orange-500", glow: "shadow-yellow-500/20" };

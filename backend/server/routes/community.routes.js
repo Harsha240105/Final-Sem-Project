@@ -9,7 +9,6 @@ const { teacherApprovedAuth } = require("../middleware/role.middleware");
 const {
   getCommunities,
   getCommunity,
-  getCommunitiesMap,
   createCommunity,
   joinCommunity,
   leaveCommunity,
@@ -19,7 +18,6 @@ const {
   deleteCommunity,
   uploadFiles,
   updateCommunity,
-  updateCommunityPosition,
   removeMember,
   assignManager,
   createCollab,
@@ -69,12 +67,10 @@ const communityUpload = upload.fields([
 ]);
 
 // ─── Community CRUD ───
-router.get("/map", authMiddleware, getCommunitiesMap);
 router.get("/", authMiddleware, getCommunities);
 router.get("/:id", authMiddleware, getCommunity);
 router.post("/", authMiddleware, teacherApprovedAuth, communityUpload, createCommunity);
 router.put("/:id", authMiddleware, communityUpload, updateCommunity);
-router.put("/:id/position", authMiddleware, updateCommunityPosition);
 router.delete("/:id", elevatedAuth, deleteCommunity);
 
 // ─── Membership ───

@@ -201,30 +201,62 @@ export async function getTaskChatMessages(taskId, token) {
   return request(apiClient.get(`/tasks/chat/${taskId}`, withAuth(token)));
 }
 
-export async function getMarketplacePosts(token) {
-  return request(apiClient.get("/marketplace", withAuth(token)));
+// ── Marketplace / Collaboration Hub ──
+
+export async function getCollabPosts(token, params = {}) {
+  const query = Object.entries(params)
+    .filter(([, v]) => v !== undefined && v !== null && v !== "")
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join("&");
+  return request(apiClient.get(`/marketplace${query ? `?${query}` : ""}`, withAuth(token)));
 }
 
-export async function deleteMarketplacePost(postId, token) {
-  return request(apiClient.delete(`/marketplace/${postId}/delete`, withAuth(token)));
+export async function createCollabPost(data, token) {
+  return request(apiClient.post("/marketplace", data, withAuth(token)));
 }
 
-export async function rewardNFTAndClose(postId, token) {
-  return request(
-    apiClient.post(`/marketplace/${postId}/reward-nft`, {}, withAuth(token, { timeout: 120000 }))
-  );
+export async function getCollabPost(postId, token) {
+  return request(apiClient.get(`/marketplace/${postId}`, withAuth(token)));
 }
 
-export async function getMyNFTs(token) {
-  return request(apiClient.get("/marketplace/me/nfts", withAuth(token)));
+export async function updateCollabPost(postId, data, token) {
+  return request(apiClient.put(`/marketplace/${postId}`, data, withAuth(token)));
+}
+
+export async function deleteCollabPost(postId, token) {
+  return request(apiClient.delete(`/marketplace/${postId}`, withAuth(token)));
+}
+
+export async function addCollabComment(postId, text, token) {
+  return request(apiClient.post(`/marketplace/${postId}/comment`, { text }, withAuth(token)));
+}
+
+export async function requestCollab(postId, token, role) {
+  return request(apiClient.post(`/marketplace/${postId}/collab`, { role: role || "" }, withAuth(token)));
+}
+
+export async function updateCollabStatus(postId, collaboratorId, status, token) {
+  return request(apiClient.put(`/marketplace/${postId}/collab`, { collaboratorId, status }, withAuth(token)));
+}
+
+export async function updateProjectStatus(postId, status, token) {
+  return request(apiClient.put(`/marketplace/${postId}/status`, { status }, withAuth(token)));
+}
+
+export async function publishCollabShowcase(postId, data, token) {
+  return request(apiClient.post(`/marketplace/${postId}/showcase`, data, withAuth(token)));
+}
+
+export async function getMyCollabPosts(token) {
+  return request(apiClient.get("/marketplace/my", withAuth(token)));
+}
+
+export async function getMyCollabRequests(token) {
+  return request(apiClient.get("/marketplace/collaborations", withAuth(token)));
 }
 
 export async function getCommunities(token) {
   return request(apiClient.get("/communities", withAuth(token)));
-}
-
-export async function getCommunitiesMap(token) {
-  return request(apiClient.get("/communities/map", withAuth(token)));
 }
 
 export async function createCommunityForm(data, token) {
@@ -650,6 +682,55 @@ export async function getUserFollowing(userId, token, page = 1, limit = 20) {
 
 export async function getUserMutuals(userId, token, page = 1, limit = 20) {
   return request(apiClient.get(`/social/${userId}/mutuals?page=${page}&limit=${limit}`, withAuth(token)));
+}
+
+// ── Canvas API ──
+export async function getMyCanvases(token) {
+  return request(apiClient.get("/canvas", withAuth(token)));
+}
+
+export async function getCanvas(canvasId, token) {
+  return request(apiClient.get(`/canvas/${canvasId}`, withAuth(token)));
+}
+
+export async function createCanvas(data, token) {
+  return request(apiClient.post("/canvas", data, withAuth(token)));
+}
+
+export async function updateCanvas(canvasId, data, token) {
+  return request(apiClient.put(`/canvas/${canvasId}`, data, withAuth(token)));
+}
+
+export async function deleteCanvas(canvasId, token) {
+  return request(apiClient.delete(`/canvas/${canvasId}`, withAuth(token)));
+}
+
+export async function addCanvasCollaborator(canvasId, userId, token) {
+  return request(apiClient.post(`/canvas/${canvasId}/collaborators`, { userId }, withAuth(token)));
+}
+
+export async function removeCanvasCollaborator(canvasId, userId, token) {
+  return request(apiClient.delete(`/canvas/${canvasId}/collaborators`, { data: { userId }, ...withAuth(token) }));
+}
+
+export async function addCanvasNode(canvasId, data, token) {
+  return request(apiClient.post(`/canvas/${canvasId}/nodes`, data, withAuth(token)));
+}
+
+export async function updateCanvasNode(canvasId, nodeId, data, token) {
+  return request(apiClient.put(`/canvas/${canvasId}/nodes/${nodeId}`, data, withAuth(token)));
+}
+
+export async function deleteCanvasNode(canvasId, nodeId, token) {
+  return request(apiClient.delete(`/canvas/${canvasId}/nodes/${nodeId}`, withAuth(token)));
+}
+
+export async function addCanvasEdge(canvasId, data, token) {
+  return request(apiClient.post(`/canvas/${canvasId}/edges`, data, withAuth(token)));
+}
+
+export async function deleteCanvasEdge(canvasId, edgeId, token) {
+  return request(apiClient.delete(`/canvas/${canvasId}/edges/${edgeId}`, withAuth(token)));
 }
 
 

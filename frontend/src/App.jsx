@@ -19,6 +19,7 @@ const Dashboard = lazy(() => import("./features/dashboard/Dashboard"));
 const Communities = lazy(() => import("./features/communities/Communities"));
 const CommunityView = lazy(() => import("./features/communities/CommunityView"));
 const Servers = lazy(() => import("./features/collaboration/Servers"));
+const CollaborationHub = lazy(() => import("./features/collaboration/pages/CollaborationHub"));
 const Marketplace = lazy(() => import("./features/marketplace/Marketplace"));
 const Profile = lazy(() => import("./features/profiles/Profile"));
 const UserProfile = lazy(() => import("./features/profiles/UserProfile"));
@@ -92,6 +93,16 @@ function AppRoutes() {
             <Route path="/marketplace" element={
               <MainLayout>
                 <Suspense fallback={<MarketplaceSkeleton />}><Marketplace /></Suspense>
+              </MainLayout>
+            } />
+            <Route path="/collaboration" element={
+              <MainLayout>
+                <Suspense fallback={<CardSkeleton count={4} />}><CollaborationHub /></Suspense>
+              </MainLayout>
+            } />
+            <Route path="/collaboration/:canvasId" element={
+              <MainLayout>
+                <Suspense fallback={<CardSkeleton count={4} />}><CollaborationHub /></Suspense>
               </MainLayout>
             } />
             <Route path="/profile" element={
