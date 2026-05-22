@@ -1,24 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// IPFS Service — Certificate & Metadata Upload to IPFS
-// ─────────────────────────────────────────────────────────────
-// This service handles uploading certificate images and NFT
-// metadata to IPFS using Pinata (a popular IPFS pinning service).
-//
-// WORKFLOW:
-// 1. The certificate image (PNG buffer) is uploaded to Pinata.
-// 2. Pinata pins the file and returns an IPFS CID (content hash).
-// 3. NFT metadata JSON is created following the ERC721 standard,
-//    with the image field pointing to the IPFS image URI.
-// 4. The metadata JSON is also uploaded to Pinata.
-// 5. The final metadata URI (ipfs://...) is returned for use
-//    in the smart contract's mintCertificate function.
-//
-// SETUP:
-// 1. Create a free account at https://www.pinata.cloud
-// 2. Generate an API Key and Secret from the Pinata dashboard
-// 3. Set PINATA_API_KEY and PINATA_SECRET_KEY in your .env file
-// ─────────────────────────────────────────────────────────────
-
 const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
@@ -28,34 +7,76 @@ const PINATA_API_KEY = process.env.PINATA_API_KEY;
 const PINATA_SECRET_KEY = process.env.PINATA_SECRET_KEY;
 const PINATA_BASE_URL = "https://api.pinata.cloud";
 
-/**
- * Upload a file buffer (e.g., certificate PNG) to IPFS via Pinata.
- *
- * @param {Buffer} fileBuffer - The file content as a Buffer
- * @param {string} fileName   - Name for the file on IPFS
- * @returns {string} IPFS URI (ipfs://Qm...)
- */
-async function uploadFileToIPFS(fileBuffer, fileName) {
-  try {
-    if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
-      throw new Error("Pinata API credentials not configured. Set PINATA_API_KEY and PINATA_SECRET_KEY in .env");
-    }
+const IPFS_GATEWAYS = [
+  "https://gateway.pinata.cloud/ipfs",
+  "https://ipfs.io/ipfs",
+  "https://cloudflare-ipfs.com/ipfs",
+  "https://w3s.link/ipfs",
+];
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function checkCredentials() {
+  if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
+    throw new Error("Pinata API credentials not configured. Set PINATA_API_KEY and PINATA_SECRET_KEY in .env");
+  }
+}
+
+function getPinataHeaders() {
+  return {
+    pinata_api_key: PINATA_API_KEY,
+    pinata_secret_api_key: PINATA_SECRET_KEY,
+  };
+}
+
+async function uploadWithRetry(uploadFn, retries = MAX_RETRIES) {
+  let lastError;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const result = await uploadFn();
+      return result;
+    } catch (err) {
+      lastError = err;
+      console.error(`[IPFS] Upload attempt ${attempt}/${retries} failed:`, err.response?.data || err.message);
+      if (attempt < retries) {
+        const delay = RETRY_DELAY_MS * Math.pow(2, attempt - 1);
+        console.log(`[IPFS] Retrying in ${delay}ms...`);
+        await sleep(delay);
+      }
+    }
+  }
+  throw new Error(`IPFS upload failed after ${retries} retries: ${lastError.message}`);
+}
+
+async function verifyIPFSHash(cid) {
+  for (const gateway of IPFS_GATEWAYS) {
+    try {
+      const url = `${gateway}/${cid}`;
+      const response = await axios.head(url, { timeout: 10000 });
+      if (response.status >= 200 && response.status < 400) {
+        return { verified: true, gateway };
+      }
+    } catch { /* try next gateway */ }
+  }
+  return { verified: false, reason: "CID not found on any gateway" };
+}
+
+async function uploadFileToIPFS(fileBuffer, fileName) {
+  checkCredentials();
+
+  return uploadWithRetry(async () => {
     const formData = new FormData();
     formData.append("file", fileBuffer, {
       filename: fileName,
       contentType: "image/png",
     });
+    formData.append("pinataMetadata", JSON.stringify({ name: fileName }));
+    formData.append("pinataOptions", JSON.stringify({ cidVersion: 1 }));
 
-    // Pinata metadata — helps organize files on the dashboard
-    const pinataMetadata = JSON.stringify({ name: fileName });
-    formData.append("pinataMetadata", pinataMetadata);
-
-    // Pinata options — pin the file so it persists
-    const pinataOptions = JSON.stringify({ cidVersion: 1 });
-    formData.append("pinataOptions", pinataOptions);
-
-    console.log(`[IPFS Service] Uploading file: ${fileName}`);
+    console.log(`[IPFS] Uploading file: ${fileName}`);
 
     const response = await axios.post(
       `${PINATA_BASE_URL}/pinning/pinFileToIPFS`,
@@ -65,8 +86,7 @@ async function uploadFileToIPFS(fileBuffer, fileName) {
         timeout: 60000,
         headers: {
           ...formData.getHeaders(),
-          pinata_api_key: PINATA_API_KEY,
-          pinata_secret_api_key: PINATA_SECRET_KEY,
+          ...getPinataHeaders(),
         },
       }
     );
@@ -74,37 +94,29 @@ async function uploadFileToIPFS(fileBuffer, fileName) {
     const ipfsHash = response.data.IpfsHash;
     const ipfsURI = `ipfs://${ipfsHash}`;
 
-    console.log(`[IPFS Service] File uploaded: ${ipfsURI}`);
+    const verification = await verifyIPFSHash(ipfsHash);
+    if (!verification.verified) {
+      console.warn(`[IPFS] File uploaded but hash verification inconclusive: ${ipfsURI}`);
+    }
+
+    console.log(`[IPFS] File uploaded: ${ipfsURI} (verified: ${verification.verified})`);
     return ipfsURI;
-  } catch (error) {
-    console.error("[IPFS Service] File upload failed:", error.response?.data || error.message);
-    throw new Error(`IPFS file upload failed: ${error.message}`);
-  }
+  });
 }
 
-/**
- * Upload a local file to IPFS via Pinata.
- *
- * @param {string} filePath
- * @param {string} fileName
- * @returns {string} IPFS URI
- */
 async function uploadFilePathToIPFS(filePath, fileName) {
-  try {
-    if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
-      throw new Error("Pinata API credentials not configured. Set PINATA_API_KEY and PINATA_SECRET_KEY in .env");
-    }
+  checkCredentials();
 
-    if (!fs.existsSync(filePath)) {
-      throw new Error(`Certificate file not found at ${filePath}`);
-    }
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`File not found at ${filePath}`);
+  }
 
+  return uploadWithRetry(async () => {
     const formData = new FormData();
     formData.append("file", fs.createReadStream(filePath), {
       filename: fileName || path.basename(filePath),
       contentType: "image/png",
     });
-
     formData.append("pinataMetadata", JSON.stringify({ name: fileName || path.basename(filePath) }));
     formData.append("pinataOptions", JSON.stringify({ cidVersion: 1 }));
 
@@ -116,40 +128,21 @@ async function uploadFilePathToIPFS(filePath, fileName) {
         timeout: 60000,
         headers: {
           ...formData.getHeaders(),
-          pinata_api_key: PINATA_API_KEY,
-          pinata_secret_api_key: PINATA_SECRET_KEY,
+          ...getPinataHeaders(),
         },
       }
     );
 
-    return `ipfs://${response.data.IpfsHash}`;
-  } catch (error) {
-    console.error("[IPFS Service] File path upload failed:", error.response?.data || error.message);
-    throw new Error(`IPFS file upload failed: ${error.message}`);
-  }
+    const ipfsHash = response.data.IpfsHash;
+    return `ipfs://${ipfsHash}`;
+  });
 }
 
-/**
- * Upload NFT metadata JSON to IPFS via Pinata.
- *
- * The metadata follows the ERC721 Metadata Standard:
- * {
- *   "name": "Certificate Title",
- *   "description": "...",
- *   "image": "ipfs://...",
- *   "attributes": [...]
- * }
- *
- * @param {Object} metadata - The NFT metadata object
- * @returns {string} IPFS URI pointing to the metadata JSON
- */
 async function uploadMetadataToIPFS(metadata) {
-  try {
-    if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
-      throw new Error("Pinata API credentials not configured. Set PINATA_API_KEY and PINATA_SECRET_KEY in .env");
-    }
+  checkCredentials();
 
-    console.log("[IPFS Service] Uploading metadata JSON...");
+  return uploadWithRetry(async () => {
+    console.log(`[IPFS] Uploading metadata JSON: ${metadata.name}`);
 
     const response = await axios.post(
       `${PINATA_BASE_URL}/pinning/pinJSONToIPFS`,
@@ -158,16 +151,13 @@ async function uploadMetadataToIPFS(metadata) {
         pinataMetadata: {
           name: `${metadata.name || "NFT"}-metadata.json`,
         },
-        pinataOptions: {
-          cidVersion: 1,
-        },
+        pinataOptions: { cidVersion: 1 },
       },
       {
         timeout: 30000,
         headers: {
           "Content-Type": "application/json",
-          pinata_api_key: PINATA_API_KEY,
-          pinata_secret_api_key: PINATA_SECRET_KEY,
+          ...getPinataHeaders(),
         },
       }
     );
@@ -175,32 +165,15 @@ async function uploadMetadataToIPFS(metadata) {
     const ipfsHash = response.data.IpfsHash;
     const metadataURI = `ipfs://${ipfsHash}`;
 
-    console.log(`[IPFS Service] Metadata uploaded: ${metadataURI}`);
+    console.log(`[IPFS] Metadata uploaded: ${metadataURI}`);
     return metadataURI;
-  } catch (error) {
-    console.error("[IPFS Service] Metadata upload failed:", error.response?.data || error.message);
-    throw new Error(`IPFS metadata upload failed: ${error.message}`);
-  }
+  });
 }
 
-const IPFS_GATEWAYS = [
-  "https://gateway.pinata.cloud/ipfs",
-  "https://ipfs.io/ipfs",
-  "https://cloudflare-ipfs.com/ipfs",
-  "https://w3s.link/ipfs",
-];
-
-/**
- * Convert IPFS URI to multiple HTTPS gateway URLs for MetaMask compatibility.
- * MetaMask and most browsers need https:// URLs, not ipfs://
- * Returns primary gateway URL; use getAllGatewayUrls() for fallbacks.
- * @param {string} ipfsURI - IPFS URI like ipfs://QmXXX or /ipfs/QmXXX
- * @returns {string} Primary HTTPS gateway URL
- */
 function convertIPFSToHTTPS(ipfsURI) {
   if (!ipfsURI) return "";
   if (ipfsURI.startsWith("https://")) return ipfsURI;
-  
+
   let cid;
   if (ipfsURI.startsWith("ipfs://")) {
     cid = ipfsURI.replace("ipfs://", "");
@@ -209,7 +182,7 @@ function convertIPFSToHTTPS(ipfsURI) {
   } else {
     cid = ipfsURI;
   }
-  
+
   return `${IPFS_GATEWAYS[0]}/${cid}`;
 }
 
@@ -230,49 +203,26 @@ function getAllGatewayUrls(ipfsURI) {
   return IPFS_GATEWAYS.map(g => `${g}/${cid}`);
 }
 
-/**
- * Complete upload pipeline:
- * 1. Upload certificate image to IPFS
- * 2. Build ERC721 metadata JSON with HTTPS gateway image URL
- * 3. Upload metadata to IPFS
- * 4. Return the final metadata URI for minting (stored as ipfs://) and HTTPS gateway URLs
- *
- * @param {Object} params
- * @param {Buffer} [params.imageBuffer]    - Certificate PNG buffer
- * @param {string} [params.certificatePath] - Local certificate image path
- * @param {string} params.studentName    - Student's full name
- * @param {string} params.communityName  - Community name
- * @param {string} params.collegeName    - College name
- * @param {string} params.certificateId  - Unique certificate identifier
- * @returns {Object} { metadataURI, imageURI, imageHTTPS, metadataHTTPS }
- */
 async function uploadCertificateToIPFS({ imageBuffer, certificatePath, studentName, communityName, collegeName, certificateId }) {
-  // Step 1: Upload the certificate image
   let imageURI;
   if (certificatePath) {
     imageURI = await uploadFilePathToIPFS(certificatePath, `${certificateId}.png`);
   } else if (imageBuffer) {
     imageURI = await uploadFileToIPFS(imageBuffer, `${certificateId}.png`);
   } else {
-    throw new Error("Either imageBuffer or certificatePath is required for certificate upload");
+    throw new Error("Either imageBuffer or certificatePath is required");
   }
 
-  // Convert to HTTPS gateway URL for MetaMask/browser compatibility
   const imageHTTPS = convertIPFSToHTTPS(imageURI);
-  console.log(`[IPFS Service] Image IPFS: ${imageURI}`);
-  console.log(`[IPFS Service] Image HTTPS: ${imageHTTPS}`);
+  console.log(`[IPFS] Image IPFS: ${imageURI}`);
+  console.log(`[IPFS] Image HTTPS: ${imageHTTPS}`);
 
-  // Step 2: Build ERC721-compliant metadata
-  // 🔴 CRITICAL: Use HTTPS gateway URL in the `image` field so MetaMask
-  //    can reliably resolve it. MetaMask uses Infura's IPFS nodes which
-  //    may not have the content if it hasn't propagated widely.
-  //    HTTPS gateway URLs work everywhere without extra configuration.
   const metadata = {
     name: `Campus Certificate – ${communityName}`,
     description: `NFT Certificate of Achievement awarded to ${studentName} for successfully completing all tasks in the ${communityName} community at ${collegeName}. Issued on the Blockchain Enabled Virtual Campus Platform.`,
-    image: imageHTTPS,     // ✅ HTTPS — reliably resolvable by MetaMask
-    image_url: imageHTTPS, // ✅ HTTPS fallback for other wallets
-    external_url: imageHTTPS || (imageURI ? getAllGatewayUrls(imageURI)[0] : "https://virtual-campus.example.com"),
+    image: imageHTTPS,
+    image_url: imageHTTPS,
+    external_url: imageHTTPS || "https://virtual-campus.example.com",
     attributes: [
       { trait_type: "Student", value: studentName },
       { trait_type: "Community", value: communityName },
@@ -284,11 +234,10 @@ async function uploadCertificateToIPFS({ imageBuffer, certificatePath, studentNa
     ],
   };
 
-  // Step 3: Upload metadata JSON
   const metadataURI = await uploadMetadataToIPFS(metadata);
   const metadataHTTPS = convertIPFSToHTTPS(metadataURI);
-  console.log(`[IPFS Service] Metadata IPFS: ${metadataURI}`);
-  console.log(`[IPFS Service] Metadata HTTPS: ${metadataHTTPS}`);
+  console.log(`[IPFS] Metadata IPFS: ${metadataURI}`);
+  console.log(`[IPFS] Metadata HTTPS: ${metadataHTTPS}`);
 
   return { metadataURI, imageURI, imageHTTPS, metadataHTTPS };
 }

@@ -364,6 +364,31 @@ export async function syncCertificateStatus(token) {
   );
 }
 
+export async function enqueueMintJob(communityId, token, userId) {
+  const body = userId ? { communityId, userId } : { communityId };
+  return request(apiClient.post("/blockchain/enqueue", body, withAuth(token)));
+}
+
+export async function getQueueStatus(token) {
+  return request(apiClient.get("/blockchain/queue/user", withAuth(token)));
+}
+
+export async function getJobStatus(jobId, token) {
+  return request(apiClient.get(`/blockchain/queue/${jobId}`, withAuth(token)));
+}
+
+export async function retryMintJob(jobId, token) {
+  return request(apiClient.post("/blockchain/retry", { jobId }, withAuth(token)));
+}
+
+export async function getMintProgress(token) {
+  return request(apiClient.get("/certificates/progress", withAuth(token)));
+}
+
+export async function verifyCertificateOnChain(certificateId) {
+  return request(apiClient.get(`/blockchain/verify/${certificateId}`));
+}
+
 export async function getNotifications(token) {
   return request(apiClient.get("/notifications", withAuth(token)));
 }

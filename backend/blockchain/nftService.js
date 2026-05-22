@@ -8,6 +8,8 @@ const OWNERSHIP_ABI = ["function owner() view returns (address)"];
 
 let wallet;
 let contract;
+let transactionHistory = new Map();
+const MAX_TX_HISTORY = 100;
 
 function logBlockchainEvent(stage, payload = {}) {
   try {
@@ -17,19 +19,22 @@ function logBlockchainEvent(stage, payload = {}) {
   }
 }
 
+function trackTransaction(txHash, state) {
+  transactionHistory.set(txHash, { ...state, lastUpdated: new Date() });
+  if (transactionHistory.size > MAX_TX_HISTORY) {
+    const oldest = transactionHistory.keys().next().value;
+    transactionHistory.delete(oldest);
+  }
+}
+
+function getTransactionState(txHash) {
+  return transactionHistory.get(txHash) || null;
+}
+
 function normalizePrivateKey(rawPrivateKey) {
-  const value = String(rawPrivateKey || "")
-    .trim()
-    .replace(/^['"]|['"]$/g, "");
-
-  if (/^[a-fA-F0-9]{64}$/.test(value)) {
-    return `0x${value}`;
-  }
-
-  if (/^0x[a-fA-F0-9]{64}$/.test(value)) {
-    return value;
-  }
-
+  const value = String(rawPrivateKey || "").trim().replace(/^['"]|['"]$/g, "");
+  if (/^[a-fA-F0-9]{64}$/.test(value)) return `0x${value}`;
+  if (/^0x[a-fA-F0-9]{64}$/.test(value)) return value;
   return null;
 }
 
@@ -37,7 +42,6 @@ function ensureContractAddress() {
   if (!CONTRACT_ADDRESS || !ethers.isAddress(CONTRACT_ADDRESS)) {
     throw new Error("Invalid or missing CONTRACT_ADDRESS in environment");
   }
-
   return CONTRACT_ADDRESS;
 }
 
@@ -56,9 +60,7 @@ function getBlockchainClient() {
     hasWalletPrivateKey: Boolean(process.env.WALLET_PRIVATE_KEY),
   });
 
-  if (wallet && contract) {
-    return { wallet, contract };
-  }
+  if (wallet && contract) return { wallet, contract };
 
   const privateKey = normalizePrivateKey(process.env.WALLET_PRIVATE_KEY);
   if (!privateKey) {
@@ -68,20 +70,32 @@ function getBlockchainClient() {
   wallet = new ethers.Wallet(privateKey, provider);
   contract = new ethers.Contract(ensureContractAddress(), contractABI, wallet);
 
-  logBlockchainEvent("client:ready", {
-    contractAddress: CONTRACT_ADDRESS,
+  logBlockchainEvent("client:ready", { contractAddress: CONTRACT_ADDRESS });
+  return { wallet, contract };
+}
+
+async function waitForTransaction(txHash, confirmations = 1, timeoutMs = 120000) {
+  trackTransaction(txHash, { status: "pending", confirmations: 0 });
+
+  const receipt = await provider.waitForTransaction(txHash, confirmations, timeoutMs);
+  if (!receipt) {
+    trackTransaction(txHash, { status: "timeout", confirmations: 0 });
+    throw new Error(`Transaction ${txHash} failed to confirm within ${timeoutMs}ms timeout`);
+  }
+
+  trackTransaction(txHash, {
+    status: receipt.status === 1 ? "confirmed" : "reverted",
+    confirmations: 1,
+    blockNumber: receipt.blockNumber,
+    gasUsed: receipt.gasUsed?.toString(),
   });
 
-  return { wallet, contract };
+  return receipt;
 }
 
 async function verifyCertificateOnChain({ tokenId, expectedOwner = null, expectedMetadataURI = null }) {
   if (tokenId === null || tokenId === undefined || tokenId === "") {
-    return {
-      exists: false,
-      verified: false,
-      reason: "Missing tokenId",
-    };
+    return { exists: false, verified: false, reason: "Missing tokenId" };
   }
 
   try {
@@ -106,11 +120,7 @@ async function verifyCertificateOnChain({ tokenId, expectedOwner = null, expecte
       reason: ownerMatches && tokenUriMatches ? null : "On-chain owner or tokenURI mismatch",
     };
   } catch (error) {
-    return {
-      exists: false,
-      verified: false,
-      reason: error.message,
-    };
+    return { exists: false, verified: false, reason: error.message };
   }
 }
 
@@ -122,7 +132,6 @@ async function mintCertificate(studentWallet, metadataURI) {
   try {
     const { contract, wallet } = getBlockchainClient();
 
-    // ─── PRE-FLIGHT VALIDATION (Fail fast before expensive IPFS operations) ───
     if (!ethers.isAddress(studentWallet)) {
       throw new Error(`Invalid wallet address: ${studentWallet}`);
     }
@@ -135,7 +144,6 @@ async function mintCertificate(studentWallet, metadataURI) {
     const network = await provider.getNetwork();
     const contractOwner = await getContractOwner().catch(() => null);
 
-    // CRITICAL: Signer must own the contract to mint
     if (contractOwner && contractOwner.toLowerCase() !== signerAddress.toLowerCase()) {
       throw new Error(
         `CRITICAL: Signer address mismatch!\n` +
@@ -147,55 +155,39 @@ async function mintCertificate(studentWallet, metadataURI) {
     }
 
     logBlockchainEvent("mint:preflight-passed", {
-      signerAddress,
-      contractOwner,
-      studentWallet,
+      signerAddress, contractOwner, studentWallet,
       network: network.name,
     });
 
-    // ─── ESTIMATE GAS ───
     const estimatedGas = await contract.mintCertificate.estimateGas(studentWallet, metadataURI);
-    const gasLimit = (estimatedGas * 120n) / 100n; // 20% buffer
+    const gasLimit = (estimatedGas * 120n) / 100n;
+
+    const nonce = await wallet.getNonce();
 
     logBlockchainEvent("mint:prepared", {
-      signerAddress,
-      contractOwner,
-      studentWallet,
-      metadataURI,
+      signerAddress, contractOwner, studentWallet, metadataURI,
       contractAddress: CONTRACT_ADDRESS,
       chainId: Number(network.chainId),
       estimatedGas: estimatedGas.toString(),
       gasLimit: gasLimit.toString(),
+      nonce,
     });
 
-    // ─── SUBMIT TRANSACTION ───
-    tx = await contract.mintCertificate(studentWallet, metadataURI, { gasLimit });
+    tx = await contract.mintCertificate(studentWallet, metadataURI, { gasLimit, nonce });
+    trackTransaction(tx.hash, { status: "submitted", nonce, studentWallet });
 
     logBlockchainEvent("mint:submitted", {
-      txHash: tx.hash,
-      studentWallet,
-      metadataURI,
+      txHash: tx.hash, studentWallet, metadataURI, nonce,
     });
 
-    // ─── WAIT FOR CONFIRMATION (1 block) ───
-    receipt = await tx.wait(1);
-    if (!receipt) {
-      throw new Error(
-        `Transaction ${tx.hash} failed to confirm within timeout.\n` +
-        `Check Polygon Scanner: https://amoy.polygonscan.com/tx/${tx.hash}`
-      );
-    }
-
+    receipt = await waitForTransaction(tx.hash, 1, 120000);
     if (receipt.status !== 1) {
       throw new Error(
         `Transaction ${tx.hash} was reverted on-chain.\n` +
-        `Status: ${receipt.status}\n` +
         `Check Polygon Scanner: https://amoy.polygonscan.com/tx/${tx.hash}`
       );
     }
 
-    // ─── EXTRACT TOKEN ID FROM TRANSACTION LOGS ───
-    // Method 1: Parse Transfer event from receipt logs
     let transferEventFound = false;
     for (const log of receipt.logs) {
       try {
@@ -203,47 +195,33 @@ async function mintCertificate(studentWallet, metadataURI) {
           topics: log.topics,
           data: log.data,
         });
-
         if (parsed && parsed.name === "Transfer") {
-          // Transfer event: (from, to, tokenId)
           tokenId = parsed.args[2]?.toString() || parsed.args.tokenId?.toString();
           transferEventFound = true;
           logBlockchainEvent("mint:transfer-event-found", { tokenId });
           break;
         }
-      } catch (parseErr) {
-        // Continue - not all logs match ABI
-      }
+      } catch { /* continue */ }
     }
 
-    // Method 2: Fallback - Query totalSupply() which should have incremented
     if (!tokenId || !transferEventFound) {
       try {
         const readContract = getReadOnlyContract();
         const totalSupply = await readContract.totalSupply();
         tokenId = totalSupply.toString();
-        logBlockchainEvent("mint:token-id-fallback", {
-          method: "totalSupply",
-          tokenId,
-        });
+        logBlockchainEvent("mint:token-id-fallback", { method: "totalSupply", tokenId });
       } catch (supplyErr) {
-        logBlockchainEvent("mint:token-id-fallback-failed", {
-          error: supplyErr.message,
-        });
+        logBlockchainEvent("mint:token-id-fallback-failed", { error: supplyErr.message });
       }
     }
 
     if (!tokenId) {
       throw new Error(
         `Token ID extraction failed from transaction ${tx.hash}.\n` +
-        `Transfer event not found and fallback failed.\n` +
-        `Verify contract is deployed correctly and implements ERC721.\n` +
         `Check Polygon Scanner: https://amoy.polygonscan.com/tx/${tx.hash}`
       );
     }
 
-    // ─── ON-CHAIN VERIFICATION ───
-    // Verify the NFT actually exists and is owned by the student
     const onChainVerification = await verifyCertificateOnChain({
       tokenId,
       expectedOwner: studentWallet,
@@ -255,13 +233,17 @@ async function mintCertificate(studentWallet, metadataURI) {
         `On-chain verification FAILED after mint.\n` +
         `Token ID: ${tokenId}\n` +
         `Expected owner: ${studentWallet}\n` +
-        `Actual owner: ${onChainVerification.owner || "unknown"}\n` +
         `Expected URI: ${metadataURI}\n` +
-        `Actual URI: ${onChainVerification.tokenURI || "unknown"}\n` +
         `Reason: ${onChainVerification.reason || "unknown"}\n` +
         `Check Polygon Scanner: https://amoy.polygonscan.com/nft/${CONTRACT_ADDRESS}/${tokenId}`
       );
     }
+
+    trackTransaction(tx.hash, {
+      status: "verified",
+      tokenId,
+      blockNumber: receipt.blockNumber,
+    });
 
     logBlockchainEvent("mint:confirmed", {
       txHash: receipt.transactionHash,
@@ -272,7 +254,6 @@ async function mintCertificate(studentWallet, metadataURI) {
       tokenUriMatches: onChainVerification.tokenUriMatches,
     });
 
-    // ─── SUCCESS RESPONSE ───
     return {
       success: true,
       transactionHash: receipt.transactionHash,
@@ -280,6 +261,7 @@ async function mintCertificate(studentWallet, metadataURI) {
       blockNumber: receipt.blockNumber,
       contractAddress: CONTRACT_ADDRESS,
       network: "Polygon Amoy Testnet",
+      chainId: Number(network.chainId),
       gasUsed: receipt.gasUsed?.toString?.() || null,
       signerAddress,
       contractOwner,
@@ -292,6 +274,11 @@ async function mintCertificate(studentWallet, metadataURI) {
       txHash: tx?.hash || null,
       studentWallet,
     });
+
+    if (tx?.hash) {
+      trackTransaction(tx.hash, { status: "failed", error: error.message });
+    }
+
     throw new Error(`NFT minting failed: ${error.message}`);
   }
 }
@@ -338,9 +325,9 @@ async function getBlockchainStatus() {
       chainId: Number(network.chainId),
       chainName: network.name,
       contractAddress: CONTRACT_ADDRESS,
-      contractOwner: contractOwner,
-      signerAddress: signerAddress,
-      signerMatches: signerMatches,
+      contractOwner,
+      signerAddress,
+      signerMatches,
       canMint: signerMatches,
       totalSupply: totalSupply.toString(),
       walletPrivateKeyConfigured: Boolean(process.env.WALLET_PRIVATE_KEY),
@@ -357,35 +344,21 @@ async function getBlockchainStatus() {
   }
 }
 
-/**
- * Validate complete blockchain configuration before attempting to mint
- * Returns all validation errors found
- */
 async function validateBlockchainConfiguration() {
   const errors = [];
   const warnings = [];
 
-  // Check environment variables
-  if (!process.env.CONTRACT_ADDRESS) {
-    errors.push("CONTRACT_ADDRESS not set");
-  } else if (!ethers.isAddress(process.env.CONTRACT_ADDRESS)) {
-    errors.push("CONTRACT_ADDRESS is not a valid EVM address");
-  }
+  if (!process.env.CONTRACT_ADDRESS) errors.push("CONTRACT_ADDRESS not set");
+  else if (!ethers.isAddress(process.env.CONTRACT_ADDRESS)) errors.push("CONTRACT_ADDRESS is not a valid EVM address");
 
-  if (!process.env.WALLET_PRIVATE_KEY) {
-    errors.push("WALLET_PRIVATE_KEY not set");
-  } else {
+  if (!process.env.WALLET_PRIVATE_KEY) errors.push("WALLET_PRIVATE_KEY not set");
+  else {
     const normalizedKey = normalizePrivateKey(process.env.WALLET_PRIVATE_KEY);
-    if (!normalizedKey) {
-      errors.push("WALLET_PRIVATE_KEY format invalid (must be 0x + 64 hex chars)");
-    }
+    if (!normalizedKey) errors.push("WALLET_PRIVATE_KEY format invalid (must be 0x + 64 hex chars)");
   }
 
-  if (!process.env.POLYGON_RPC_URL) {
-    warnings.push("POLYGON_RPC_URL not set, using default RPC");
-  }
+  if (!process.env.POLYGON_RPC_URL) warnings.push("POLYGON_RPC_URL not set, using default RPC");
 
-  // Try to connect and validate
   try {
     const { wallet } = getBlockchainClient();
     const signerAddress = await wallet.getAddress();
@@ -397,19 +370,13 @@ async function validateBlockchainConfiguration() {
     }
 
     if (contractOwner.toLowerCase() !== signerAddress.toLowerCase()) {
-      errors.push(
-        `Signer mismatch: Wallet ${signerAddress} does not own contract (owner: ${contractOwner})`
-      );
+      errors.push(`Signer mismatch: Wallet ${signerAddress} does not own contract (owner: ${contractOwner})`);
     }
 
     const balance = await provider.getBalance(signerAddress);
-    if (balance === 0n) {
-      errors.push(`Signer wallet has 0 balance. Need MATIC for gas fees.`);
-    } else if (balance < ethers.parseEther("0.01")) {
-      warnings.push(`Low balance: ${ethers.formatEther(balance)} MATIC (recommend >= 0.01)`);
-    }
+    if (balance === 0n) errors.push("Signer wallet has 0 balance. Need MATIC for gas fees.");
+    else if (balance < ethers.parseEther("0.01")) warnings.push(`Low balance: ${ethers.formatEther(balance)} MATIC`);
 
-    // Try to call a read-only contract method
     const totalSupply = await getReadOnlyContract().totalSupply();
     logBlockchainEvent("validation:contract-responsive", { totalSupply: totalSupply.toString() });
   } catch (err) {
@@ -419,9 +386,6 @@ async function validateBlockchainConfiguration() {
   return { errors, warnings, valid: errors.length === 0 };
 }
 
-/**
- * Get comprehensive blockchain diagnostics for admin debugging
- */
 async function getDetailedBlockchainDiagnostics() {
   const result = {
     timestamp: new Date().toISOString(),
@@ -429,7 +393,7 @@ async function getDetailedBlockchainDiagnostics() {
       hasContractAddress: !!process.env.CONTRACT_ADDRESS,
       hasPrivateKey: !!process.env.WALLET_PRIVATE_KEY,
       hasRpc: !!process.env.POLYGON_RPC_URL,
-      rpcUrl: process.env.POLYGON_RPC_URL || "default (https://rpc-amoy.polygon.technology)",
+      rpcUrl: process.env.POLYGON_RPC_URL || "default",
     },
     validation: null,
     connection: null,
@@ -453,13 +417,11 @@ async function getDetailedBlockchainDiagnostics() {
         network: `${network.name} (${network.chainId})`,
         rpcUrl: POLYGON_AMOY_RPC,
       };
-
       result.signer = {
         address: signerAddress,
         balance: ethers.formatEther(balance),
         ownsContract: contractOwner.toLowerCase() === signerAddress.toLowerCase(),
       };
-
       result.contract = {
         address: CONTRACT_ADDRESS,
         owner: contractOwner,
@@ -477,6 +439,14 @@ async function getDetailedBlockchainDiagnostics() {
   return result;
 }
 
+async function getTransactionHistory() {
+  const history = [];
+  for (const [txHash, state] of transactionHistory) {
+    history.push({ txHash, ...state });
+  }
+  return history.sort((a, b) => b.lastUpdated - a.lastUpdated);
+}
+
 module.exports = {
   mintCertificate,
   getWalletInfo,
@@ -486,4 +456,7 @@ module.exports = {
   getContractOwner,
   validateBlockchainConfiguration,
   getDetailedBlockchainDiagnostics,
+  waitForTransaction,
+  getTransactionState,
+  getTransactionHistory,
 };

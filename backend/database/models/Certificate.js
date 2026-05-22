@@ -1,8 +1,15 @@
 const mongoose = require("mongoose");
 
+const MintProgressStepSchema = new mongoose.Schema({
+  stage: String,
+  completedAt: Date,
+  error: String,
+}, { _id: false });
+
 const CertificateSchema = new mongoose.Schema(
   {
-    certificateId: { type: String, required: true, index: true },
+certificateId: { type: String, required: true, index: true },
+  issuanceId: { type: String, sparse: true },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -45,13 +52,21 @@ const CertificateSchema = new mongoose.Schema(
     gasUsed: { type: Number, default: null },
     failureReason: { type: String, trim: true, default: "" },
     retryCount: { type: Number, default: 0 },
+    mintProgress: [MintProgressStepSchema],
   },
   { timestamps: true }
 );
 
 CertificateSchema.index({ userId: 1, createdAt: -1 });
 CertificateSchema.index({ status: 1, claimed: 1 });
-CertificateSchema.index({ userId: 1, communityId: 1, taskId: 1 }, { unique: true, partialFilterExpression: { taskId: { $type: "objectId" } } });
-CertificateSchema.index({ userId: 1, communityId: 1 }, { unique: true, partialFilterExpression: { taskId: { $eq: null } } });
+CertificateSchema.index({ issuanceId: 1 }, { unique: true, sparse: true });
+CertificateSchema.index(
+  { userId: 1, communityId: 1, taskId: 1 },
+  { unique: true, partialFilterExpression: { taskId: { $type: "objectId" } } }
+);
+CertificateSchema.index(
+  { userId: 1, communityId: 1 },
+  { unique: true, partialFilterExpression: { taskId: { $eq: null } } }
+);
 
 module.exports = mongoose.model("Certificate", CertificateSchema);

@@ -3,24 +3,25 @@ const router = express.Router();
 const { authMiddleware } = require("../middleware/auth.middleware");
 const {
   getUserCertificates,
+  getUserCertificatesArray,
   verifyCertificate,
   saveCertificateAfterMint,
   syncCertificateStatus,
   debugGetUserCertificatesRaw,
   debugCheckCertificateCollection,
   refreshCertificateMetadata,
+  getMintProgress,
 } = require("../controllers/certificateController");
 
 router.get("/my", authMiddleware, getUserCertificates);
-
 router.post("/sync", authMiddleware, syncCertificateStatus);
 
-router.get("/debug/raw", authMiddleware, debugGetUserCertificatesRaw);
+router.get("/progress", authMiddleware, getMintProgress);
 
+router.get("/debug/raw", authMiddleware, debugGetUserCertificatesRaw);
 router.get("/debug/collection", authMiddleware, debugCheckCertificateCollection);
 
 router.post("/save", authMiddleware, saveCertificateAfterMint);
-
 router.post("/refresh-metadata/:certificateId", authMiddleware, refreshCertificateMetadata);
 
 router.get("/:certificateId", verifyCertificate);

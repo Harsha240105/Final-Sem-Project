@@ -5,6 +5,8 @@ import { useAuth } from "../../shared/hooks/useAuth";
 import { useToast } from "../../shared/hooks/useToast";
 import { getUserCertificates, syncCertificateStatus } from "../../shared/services/api";
 import { convertIPFSToHTTPS, getImageUrl } from "../../shared/utils/ipfs";
+import { useMintProgress } from "./hooks/useMintProgress";
+import MintProgress from "./components/MintProgress";
 import propTypes from "prop-types";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, "") || "http://localhost:5000";
@@ -655,6 +657,7 @@ export default function MyCertificates() {
   const [sortBy, setSortBy] = useState("newest");
   const [filterBy, setFilterBy] = useState("all");
   const [selectedCert, setSelectedCert] = useState(null);
+  const { activeJobs, lastCompleted, lastFailed, clearCompleted, clearFailed, isMinting } = useMintProgress();
 
   const fetchCertificates = useCallback(async () => {
     try {
@@ -725,6 +728,13 @@ export default function MyCertificates() {
   useEffect(() => {
     syncAndFetch();
   }, [syncAndFetch]);
+
+  // Refetch certificates when a mint completes
+  useEffect(() => {
+    if (lastCompleted) {
+      syncAndFetch();
+    }
+  }, [lastCompleted, syncAndFetch]);
 
   useEffect(() => {
     const onCertificatesUpdated = () => {
@@ -831,6 +841,14 @@ export default function MyCertificates() {
           </>
         )}
       </div>
+
+      <MintProgress
+        activeJobs={activeJobs}
+        lastCompleted={lastCompleted}
+        lastFailed={lastFailed}
+        onDismissComplete={clearCompleted}
+        onDismissFailed={clearFailed}
+      />
 
       <AnimatePresence>
         {selectedCert && (

@@ -3,6 +3,7 @@ const Student = require("../../database/models/Student");
 const Teacher = require("../../database/models/Teacher");
 const Community = require("../../database/models/Community");
 const Certificate = require("../../database/models/Certificate");
+const NFTJobQueue = require("../../database/models/NFTJobQueue");
 const { findUserByRoleAndId, findUserByAnyId } = require("../utils/userSync");
 const { verifyCertificateOnChain } = require("../../blockchain/nftService");
 const { CONTRACT_ADDRESS } = require("../../blockchain/contractAddress");
@@ -424,6 +425,30 @@ async function syncCertificateStatus(req, res) {
   }
 }
 
+async function getMintProgress(req, res) {
+  try {
+    const userId = req.user.id;
+    const jobs = await NFTJobQueue.find({ userId })
+      .sort({ queuedAt: -1 })
+      .limit(10)
+      .lean();
+
+    const active = jobs.filter(j => ["pending", "generating_metadata", "uploading_ipfs", "minting", "confirming", "retrying"].includes(j.status));
+    const completed = jobs.filter(j => j.status === "completed");
+    const failed = jobs.filter(j => j.status === "failed");
+
+    res.json({
+      active,
+      completed,
+      failed,
+      totalJobs: jobs.length,
+    });
+  } catch (err) {
+    console.error("[getMintProgress] Error:", err);
+    res.status(500).json({ error: "Failed to fetch mint progress" });
+  }
+}
+
 module.exports = {
   getUserCertificates,
   getUserCertificatesArray,
@@ -524,6 +549,8 @@ module.exports = {
       });
     }
   },
+
+  getMintProgress,
 
   refreshCertificateMetadata: async (req, res) => {
     try {

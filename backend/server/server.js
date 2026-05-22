@@ -57,6 +57,11 @@ const io = new SocketIOServer(server, {
 app.set("io", io);
 setupSocket(io);
 
+// Start NFT mint queue processor
+const { setSocketIO, startQueueProcessor } = require("../blockchain/nftQueueProcessor");
+setSocketIO(io);
+startQueueProcessor();
+
 const PORT = Number(process.env.PORT) || 5000;
 const PORT_RETRIES = Number(process.env.PORT_RETRIES) || 20;
 const ALLOW_START_WITHOUT_DB = process.env.ALLOW_START_WITHOUT_DB !== "false";
