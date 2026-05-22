@@ -7,7 +7,7 @@ import { Toolbar } from "../Toolbar";
 import { useCanvasStore, getCanvasStore } from "../../store/canvasStore";
 import { useCanvasSocket } from "../../hooks/useCanvasSocket";
 import { useCanvasDrag } from "../../hooks/useCanvasDrag";
-import { calculateZoomLevel, screenToCanvas, createDefaultNode, generateEdgeId, generateNodeId } from "../../utils/canvasUtils";
+import { calculateZoomLevel, screenToCanvas, createDefaultNode } from "../../utils/canvasUtils";
 import * as api from "../../../../shared/services/api";
 
 const GRID_SIZE = 20;
@@ -17,7 +17,6 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
   const socketActions = useCanvasSocket(canvasId);
   const { nodes, edges, viewport, selectedNodes, presences } = store.getState();
   const containerRef = useRef(null);
-  const canvasContentRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -31,6 +30,7 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
+        if (!token) { setError("Not authenticated"); setLoading(false); return; }
         const { canvas } = await api.getCanvas(canvasId, token);
         if (mounted) {
           store.loadState(canvas.nodes, canvas.edges, canvas.viewport);
@@ -38,7 +38,7 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
         }
       } catch (err) {
         if (mounted) {
-          setError(err.message);
+          setError(err.message || "Failed to load canvas");
           setLoading(false);
         }
       }
@@ -50,16 +50,14 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
   const handleWheel = useCallback(
     (e) => {
       e.preventDefault();
+      if (!containerRef.current) return;
       const newZoom = calculateZoomLevel(e.deltaY, viewport.zoom);
-
       const rect = containerRef.current.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-
       const scale = newZoom / viewport.zoom;
       const newPanX = mouseX - scale * (mouseX - viewport.panX);
       const newPanY = mouseY - scale * (mouseY - viewport.panY);
-
       store.setViewport({ zoom: newZoom, panX: newPanX, panY: newPanY });
       socketActions?.emitViewport({ zoom: newZoom, panX: newPanX, panY: newPanY });
     },
@@ -102,18 +100,14 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
 
   const handleCanvasMouseMove = useCallback(
     (e) => {
-      if (store.getState().isDragging) {
-        handleDragMove(e);
-      }
+      if (store.getState().isDragging) handleDragMove(e);
     },
     [handleDragMove, store]
   );
 
   const handleCanvasMouseUp = useCallback(
     (e) => {
-      if (store.getState().isDragging) {
-        handleDragEnd(e);
-      }
+      if (store.getState().isDragging) handleDragEnd(e);
     },
     [handleDragEnd, store]
   );
@@ -122,42 +116,28 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
     (e) => {
       e.preventDefault();
       const type = e.dataTransfer.getData("nodeType");
-      if (!type) return;
-
+      if (!type || !containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const sp = screenToCanvas(
-        e.clientX - rect.left,
-        e.clientY - rect.top,
-        viewport.panX,
-        viewport.panY,
-        viewport.zoom
-      );
+      const sp = screenToCanvas(e.clientX - rect.left, e.clientY - rect.top, viewport.panX, viewport.panY, viewport.zoom);
       const node = createDefaultNode(type, sp);
       store.addNode(node);
       socketActions?.emitNodeAdd(node);
-
-      api.addCanvasNode(canvasId, node, localStorage.getItem("token")).catch(() => {});
+      api.addCanvasNode(canvasId, node, localStorage.getItem("token")).catch((err) => console.error("[Canvas] Failed to persist node:", err));
     },
     [viewport, store, socketActions, canvasId]
   );
 
-  const handleCanvasDragOver = useCallback((e) => {
-    e.preventDefault();
-  }, []);
+  const handleCanvasDragOver = useCallback((e) => { e.preventDefault(); }, []);
 
   const handleAddNode = useCallback(
     (type) => {
-      const center = screenToCanvas(
-        containerRef.current.clientWidth / 2,
-        containerRef.current.clientHeight / 2,
-        viewport.panX,
-        viewport.panY,
-        viewport.zoom
-      );
+      const el = containerRef.current;
+      if (!el) return;
+      const center = screenToCanvas(el.clientWidth / 2, el.clientHeight / 2, viewport.panX, viewport.panY, viewport.zoom);
       const node = createDefaultNode(type, center);
       store.addNode(node);
       socketActions?.emitNodeAdd(node);
-      api.addCanvasNode(canvasId, node, localStorage.getItem("token")).catch(() => {});
+      api.addCanvasNode(canvasId, node, localStorage.getItem("token")).catch((err) => console.error("[Canvas] Failed to persist node:", err));
     },
     [viewport, store, socketActions, canvasId]
   );
@@ -192,7 +172,6 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
         style={{ backgroundImage: `radial-gradient(circle, rgba(34,211,238,0.06) 1px, transparent 1px)`, backgroundSize: `${GRID_SIZE * viewport.zoom}px ${GRID_SIZE * viewport.zoom}px` }}
       >
         <div
-          ref={canvasContentRef}
           className="absolute top-0 left-0 origin-top-left"
           style={{
             transform: `scale(${viewport.zoom}) translate(${viewport.panX / viewport.zoom}px, ${viewport.panY / viewport.zoom}px)`,
@@ -200,11 +179,7 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
           }}
         >
           <svg className="absolute inset-0 pointer-events-none" style={{ width: 10000, height: 10000, left: -5000, top: -5000 }}>
-            <NodeConnections
-              nodes={nodes}
-              edges={edges}
-              selectedNodes={selectedNodes}
-            />
+            <NodeConnections nodes={nodes} edges={edges} selectedNodes={selectedNodes} />
           </svg>
 
           {nodes.map((node) => (

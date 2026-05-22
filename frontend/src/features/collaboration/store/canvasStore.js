@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 
 export function createCanvasStore() {
   const state = {
@@ -80,7 +80,7 @@ export function createCanvasStore() {
       state.viewport = viewport;
       notify();
     },
-    addNode: (node) => {
+    addNode(node) {
       pushHistory();
       state.nodes.push(node);
       notify();
@@ -95,9 +95,7 @@ export function createCanvasStore() {
     removeNode: (nodeId) => {
       pushHistory();
       state.nodes = state.nodes.filter((n) => n.nodeId !== nodeId);
-      state.edges = state.edges.filter(
-        (e) => e.source !== nodeId && e.target !== nodeId
-      );
+      state.edges = state.edges.filter((e) => e.source !== nodeId && e.target !== nodeId);
       state.selectedNodes.delete(nodeId);
       notify();
     },
@@ -188,12 +186,15 @@ export function getCanvasStore() {
 export function useCanvasStore(store = null) {
   const s = store || getCanvasStore();
   const [, setTick] = useState(0);
-  const forceUpdate = useCallback(() => setTick((t) => t + 1), []);
+  const storeRef = useRef(s);
+  storeRef.current = s;
 
-  useState(() => {
-    const unsub = s.subscribe(forceUpdate);
+  useEffect(() => {
+    const unsub = storeRef.current.subscribe(() => {
+      setTick((t) => t + 1);
+    });
     return unsub;
-  });
+  }, []);
 
   return s;
 }

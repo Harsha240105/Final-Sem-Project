@@ -1,6 +1,6 @@
 import { memo, useState, useCallback } from "react";
 import { getCanvasStore } from "../../store/canvasStore";
-import { MessageSquare, Headphones, FolderOpen, ExternalLink, Layout, Undo2, Redo2, ZoomIn, ZoomOut, Plus, Hand } from "lucide-react";
+import { MessageSquare, Headphones, FolderOpen, ExternalLink, Layout, Undo2, Redo2, ZoomIn, ZoomOut, Plus } from "lucide-react";
 
 const NODE_ACTIONS = [
   { type: "text_room", icon: MessageSquare, label: "Text Room", color: "text-cyan-400" },

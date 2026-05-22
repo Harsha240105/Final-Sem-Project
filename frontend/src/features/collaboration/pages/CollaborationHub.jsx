@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { CollaborationCanvas } from "../components/CollaborationCanvas";
 import { NODE_TYPE_CONFIG } from "../utils/canvasUtils";
 import * as api from "../../../shared/services/api";
-import { Plus, Layout, ArrowLeft, Grid3X3, Trash2, Settings, Users, MoreHorizontal } from "lucide-react";
+import { Plus, Layout, ArrowLeft, Grid3X3, Trash2 } from "lucide-react";
 
 function CanvasList({ onSelect }) {
   const [canvases, setCanvases] = useState([]);
