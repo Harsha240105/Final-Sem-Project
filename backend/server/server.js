@@ -50,7 +50,7 @@ const io = new SocketIOServer(server, {
     methods: ["GET", "POST"],
     credentials: true,
   },
-  maxHttpBufferSize: 1e6,
+  maxHttpBufferSize: 5e6,
   pingInterval: 25000,
   pingTimeout: 20000,
 });

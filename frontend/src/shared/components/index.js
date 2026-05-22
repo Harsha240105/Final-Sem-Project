@@ -14,6 +14,6 @@ export { default as UserHoverCard } from "./UserHoverCard";
 export { default as VerifiedBadge } from "./VerifiedBadge";
 export { default as FollowButton } from "./FollowButton";
 export { default as ProfileLink } from "./ProfileLink";
-export { default as MediaBanner } from "./MediaBanner";
+export { MediaBanner } from "./MediaBanner";
 export { default as NotificationBell } from "./NotificationBell";
 export { default as PageTransition } from "./PageTransition";

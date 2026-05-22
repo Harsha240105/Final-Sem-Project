@@ -83,4 +83,46 @@ const uploadVerification = multer({
   fileFilter: COMBINED_FILTER,
 });
 
-module.exports = { uploadId, uploadSignature, uploadVerification };
+const CHAT_STORAGE = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, path.join(__dirname, "..", "uploads", "chat"));
+  },
+  filename: (req, file, cb) => {
+    const userId = sanitizeFilename(req.user?.id || "anon");
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `chat-${userId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}${ext}`);
+  },
+});
+
+const CHAT_ALLOWED_MIMES = [
+  "image/jpeg", "image/png", "image/gif", "image/webp",
+  "video/mp4", "video/webm", "video/quicktime",
+  "audio/webm", "audio/mp3", "audio/ogg", "audio/wav", "audio/mp4",
+  "application/pdf", "application/zip", "application/x-zip-compressed",
+  "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain", "text/csv", "application/json",
+];
+
+const IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"]);
+const VIDEO_MIMES = new Set(["video/mp4", "video/webm", "video/quicktime"]);
+const AUDIO_MIMES = new Set(["audio/webm", "audio/mp3", "audio/ogg", "audio/wav", "audio/mp4"]);
+
+function classifyMime(mime) {
+  if (IMAGE_MIMES.has(mime)) return "image";
+  if (VIDEO_MIMES.has(mime)) return "video";
+  if (AUDIO_MIMES.has(mime)) return "audio";
+  return "file";
+}
+
+function chatFileFilter(_req, file, cb) {
+  if (CHAT_ALLOWED_MIMES.includes(file.mimetype)) return cb(null, true);
+  cb(new Error(`File type ${file.mimetype} is not allowed`));
+}
+
+const uploadChat = multer({
+  storage: CHAT_STORAGE,
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: chatFileFilter,
+});
+
+module.exports = { uploadId, uploadSignature, uploadVerification, uploadChat, classifyMime };

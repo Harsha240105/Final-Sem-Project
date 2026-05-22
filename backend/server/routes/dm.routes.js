@@ -7,6 +7,7 @@ const Conversation = require("../../database/models/Conversation");
 const Follow = require("../../database/models/Follow");
 const User = require("../../database/models/User");
 const { authMiddleware } = require("../middleware/auth.middleware");
+const { uploadChat, classifyMime } = require("../middleware/upload");
 
 const router = express.Router();
 
@@ -65,7 +66,6 @@ router.get("/conversations", authMiddleware, async (req, res) => {
       { $sort: { "lastMessage.createdAt": -1 } },
     ]);
 
-    // Also get followed users who have no messages yet
     const followedRecords = await Follow.find({ follower: userId })
       .populate("following", "name avatar role collegeName institutionName")
       .sort({ createdAt: -1 })
@@ -110,6 +110,7 @@ router.get("/:userId", authMiddleware, async (req, res) => {
       .limit(limit)
       .populate("sender", "name avatar role")
       .populate("receiver", "name avatar role")
+      .populate("replyTo")
       .lean();
     await Message.updateMany(
       { sender: userId, receiver: viewerId, read: false },
@@ -122,6 +123,43 @@ router.get("/:userId", authMiddleware, async (req, res) => {
   }
 });
 
+async function autoCreateConversation(userId, otherId) {
+  try {
+    const existing = await Conversation.findOne({ participants: { $all: [userId, otherId] } });
+    if (!existing) {
+      await Conversation.create({ participants: [userId, otherId] });
+    }
+    return true;
+  } catch { return false; }
+}
+
+async function updateConversationLastMessage(userId, otherId, msg) {
+  try {
+    await Conversation.findOneAndUpdate(
+      { participants: { $all: [userId, otherId] } },
+      {
+        $set: {
+          lastMessage: {
+            text: msg.text || (msg.attachments?.length ? `[${msg.messageType}]` : ""),
+            sender: msg.sender,
+            createdAt: msg.createdAt,
+            messageType: msg.messageType || "text",
+            hasAttachments: (msg.attachments?.length || 0) > 0,
+          },
+          updatedAt: new Date(),
+        },
+      }
+    );
+  } catch { /* silent */ }
+}
+
+function emitToBoth(io, userId, otherId, event, data) {
+  if (io) {
+    io.to(otherId).emit(event, data);
+    io.to(userId).emit(event, data);
+  }
+}
+
 router.post(
   "/send",
   authMiddleware,
@@ -131,29 +169,29 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) return res.status(400).json({ error: "Validation failed", details: errors.array() });
-      const { text, receiver, image, gif, replyTo } = req.body;
+      const { text, receiver, image, gif, replyTo, messageType, attachments } = req.body;
       if (!mongoose.Types.ObjectId.isValid(receiver)) return res.status(400).json({ error: "Invalid receiver id" });
       if (receiver === req.user.id) return res.status(400).json({ error: "Cannot message yourself" });
-      // Auto-create conversation if it doesn't exist
-      try {
-        const existingConv = await Conversation.findOne({
-          participants: { $all: [req.user.id, receiver] }
-        });
-        if (!existingConv) {
-          await Conversation.create({
-            participants: [req.user.id, receiver],
-          });
-        }
-      } catch (convErr) {
-        console.error("Auto-create conversation on message error:", convErr);
-      }
-      const msg = await Message.create({ sender: req.user.id, receiver, text, image, gif, replyTo });
-      const populated = await Message.findById(msg._id).populate("sender", "name avatar role").populate("receiver", "name avatar role").lean();
+      await autoCreateConversation(req.user.id, receiver);
+      const msgData = {
+        sender: req.user.id,
+        receiver,
+        text,
+        messageType: messageType || "text",
+        image: image || null,
+        gif: gif || null,
+        replyTo: replyTo || null,
+        attachments: attachments || [],
+      };
+      const msg = await Message.create(msgData);
+      const populated = await Message.findById(msg._id)
+        .populate("sender", "name avatar role")
+        .populate("receiver", "name avatar role")
+        .populate("replyTo")
+        .lean();
       const io = req.app.get("io");
-      if (io) {
-        io.to(receiver).emit("new_message", populated);
-        io.to(req.user.id).emit("new_message", populated);
-      }
+      emitToBoth(io, req.user.id, receiver, "new_message", populated);
+      await updateConversationLastMessage(req.user.id, receiver, populated);
       res.status(201).json({ message: populated });
     } catch (err) {
       console.error("sendMessage error:", err);
@@ -162,6 +200,256 @@ router.post(
   }
 );
 
+// ── Upload file to chat ──
+router.post(
+  "/upload",
+  authMiddleware,
+  uploadChat.single("file"),
+  async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: "No file provided" });
+      const { receiver, replyTo } = req.body;
+      if (!receiver) return res.status(400).json({ error: "Receiver id is required" });
+      if (!mongoose.Types.ObjectId.isValid(receiver)) return res.status(400).json({ error: "Invalid receiver id" });
+      const url = `/uploads/chat/${req.file.filename}`;
+      const mediaType = classifyMime(req.file.mimetype);
+      const attachment = {
+        url,
+        type: mediaType,
+        name: req.file.originalname,
+        size: req.file.size,
+        mime: req.file.mimetype,
+      };
+      await autoCreateConversation(req.user.id, receiver);
+      const msgData = {
+        sender: req.user.id,
+        receiver,
+        text: req.body.text || "",
+        messageType: mediaType === "image" ? "image" : mediaType === "audio" ? "voice" : "file",
+        attachments: [attachment],
+        replyTo: replyTo || null,
+      };
+      if (mediaType === "image") msgData.image = url;
+      if (mediaType === "audio") msgData.audioUrl = url;
+      const msg = await Message.create(msgData);
+      const populated = await Message.findById(msg._id)
+        .populate("sender", "name avatar role")
+        .populate("receiver", "name avatar role")
+        .populate("replyTo")
+        .lean();
+      const io = req.app.get("io");
+      emitToBoth(io, req.user.id, receiver, "new_message", populated);
+      await updateConversationLastMessage(req.user.id, receiver, populated);
+      res.status(201).json({ message: populated, file: { url, type: mediaType, name: req.file.originalname } });
+    } catch (err) {
+      console.error("uploadMessageFile error:", err);
+      res.status(500).json({ error: "Failed to upload file" });
+    }
+  }
+);
+
+// ── Send voice note ──
+router.post(
+  "/send/voice",
+  authMiddleware,
+  uploadChat.single("audio"),
+  async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: "No audio provided" });
+      const { receiver, duration } = req.body;
+      if (!receiver) return res.status(400).json({ error: "Receiver id is required" });
+      if (!mongoose.Types.ObjectId.isValid(receiver)) return res.status(400).json({ error: "Invalid receiver id" });
+      const url = `/uploads/chat/${req.file.filename}`;
+      await autoCreateConversation(req.user.id, receiver);
+      const msg = await Message.create({
+        sender: req.user.id,
+        receiver,
+        text: "",
+        messageType: "voice",
+        audioUrl: url,
+        audioDuration: parseInt(duration) || 0,
+        attachments: [{ url, type: "audio", name: "Voice note", size: req.file.size, mime: req.file.mimetype }],
+      });
+      const populated = await Message.findById(msg._id)
+        .populate("sender", "name avatar role")
+        .populate("receiver", "name avatar role")
+        .lean();
+      const io = req.app.get("io");
+      emitToBoth(io, req.user.id, receiver, "new_message", populated);
+      await updateConversationLastMessage(req.user.id, receiver, populated);
+      res.status(201).json({ message: populated });
+    } catch (err) {
+      console.error("sendVoiceMessage error:", err);
+      res.status(500).json({ error: "Failed to send voice message" });
+    }
+  }
+);
+
+// ── Edit message ──
+router.put("/:messageId/edit", authMiddleware, async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { text } = req.body;
+    if (!text || !text.trim()) return res.status(400).json({ error: "Text is required" });
+    if (!mongoose.Types.ObjectId.isValid(messageId)) return res.status(400).json({ error: "Invalid message id" });
+    const msg = await Message.findOne({ _id: messageId, sender: req.user.id, deleted: false });
+    if (!msg) return res.status(404).json({ error: "Message not found or not yours" });
+    msg.editHistory.push({ text: msg.text, editedAt: new Date() });
+    msg.text = text.trim();
+    msg.edited = true;
+    await msg.save();
+    const populated = await Message.findById(msg._id)
+      .populate("sender", "name avatar role")
+      .populate("receiver", "name avatar role")
+      .lean();
+    const io = req.app.get("io");
+    emitToBoth(io, req.user.id, msg.receiver.toString(), "message_edited", populated);
+    res.json({ message: populated });
+  } catch (err) {
+    console.error("editMessage error:", err);
+    res.status(500).json({ error: "Failed to edit message" });
+  }
+});
+
+// ── Toggle pin ──
+router.put("/:messageId/pin", authMiddleware, async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(messageId)) return res.status(400).json({ error: "Invalid message id" });
+    const msg = await Message.findOne({
+      _id: messageId,
+      $or: [{ sender: req.user.id }, { receiver: req.user.id }],
+      deleted: false,
+    });
+    if (!msg) return res.status(404).json({ error: "Message not found" });
+    msg.pinned = !msg.pinned;
+    msg.pinnedAt = msg.pinned ? new Date() : null;
+    msg.pinnedBy = msg.pinned ? req.user.id : null;
+    await msg.save();
+    // Also update conversation pinned list
+    const otherId = msg.sender.toString() === req.user.id ? msg.receiver : msg.sender;
+    if (msg.pinned) {
+      await Conversation.findOneAndUpdate(
+        { participants: { $all: [req.user.id, otherId] } },
+        { $addToSet: { pinnedMessages: msg._id } }
+      );
+    } else {
+      await Conversation.findOneAndUpdate(
+        { participants: { $all: [req.user.id, otherId] } },
+        { $pull: { pinnedMessages: msg._id } }
+      );
+    }
+    const io = req.app.get("io");
+    emitToBoth(io, req.user.id, otherId, "pin_toggled", {
+      messageId: msg._id,
+      pinned: msg.pinned,
+      pinnedBy: req.user.id,
+      message: msg,
+    });
+    res.json({ pinned: msg.pinned, messageId: msg._id });
+  } catch (err) {
+    console.error("pinMessage error:", err);
+    res.status(500).json({ error: "Failed to toggle pin" });
+  }
+});
+
+// ── Toggle reaction ──
+router.post("/:messageId/react", authMiddleware, async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { emoji } = req.body;
+    if (!emoji) return res.status(400).json({ error: "Emoji is required" });
+    if (!mongoose.Types.ObjectId.isValid(messageId)) return res.status(400).json({ error: "Invalid message id" });
+    const msg = await Message.findOne({ _id: messageId, deleted: false });
+    if (!msg) return res.status(404).json({ error: "Message not found" });
+    const existingReaction = msg.reactions.find((r) => r.emoji === emoji);
+    const userId = req.user.id;
+    if (existingReaction) {
+      const userIndex = existingReaction.users.indexOf(userId);
+      if (userIndex > -1) {
+        existingReaction.users.splice(userIndex, 1);
+        if (existingReaction.users.length === 0) {
+          msg.reactions.pull({ _id: existingReaction._id });
+        }
+      } else {
+        existingReaction.users.push(userId);
+      }
+    } else {
+      msg.reactions.push({ emoji, users: [userId] });
+    }
+    await msg.save();
+    const otherId = msg.sender.toString() === userId ? msg.receiver : msg.sender;
+    const io = req.app.get("io");
+    emitToBoth(io, userId, otherId, "reaction_updated", {
+      messageId: msg._id,
+      reactions: msg.reactions,
+    });
+    res.json({ reactions: msg.reactions });
+  } catch (err) {
+    console.error("reactToMessage error:", err);
+    res.status(500).json({ error: "Failed to react" });
+  }
+});
+
+// ── Search messages ──
+router.get("/search/messages", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const q = (req.query.q || "").trim();
+    const withUserId = req.query.with;
+    if (!q) return res.json({ messages: [] });
+    const query = {
+      $or: [
+        { sender: userId, receiver: withUserId || { $exists: true } },
+        { receiver: userId, sender: withUserId || { $exists: true } },
+      ],
+      deleted: false,
+      text: { $regex: escapeRegex(q), $options: "i" },
+    };
+    if (withUserId && mongoose.Types.ObjectId.isValid(withUserId)) {
+      query.$or = [
+        { sender: userId, receiver: withUserId },
+        { sender: withUserId, receiver: userId },
+      ];
+    }
+    const messages = await Message.find(query)
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .populate("sender", "name avatar role")
+      .populate("receiver", "name avatar role")
+      .lean();
+    res.json({ messages: messages.reverse() });
+  } catch (err) {
+    console.error("searchMessages error:", err);
+    res.status(500).json({ error: "Failed to search messages" });
+  }
+});
+
+// ── Get pinned messages ──
+router.get("/pinned/:userId", authMiddleware, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const viewerId = req.user.id;
+    if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ error: "Invalid user id" });
+    const messages = await Message.find({
+      $or: [
+        { sender: viewerId, receiver: userId },
+        { sender: userId, receiver: viewerId },
+      ],
+      pinned: true,
+      deleted: false,
+    })
+      .sort({ pinnedAt: -1 })
+      .populate("sender", "name avatar role")
+      .lean();
+    res.json({ messages });
+  } catch (err) {
+    console.error("getPinnedMessages error:", err);
+    res.status(500).json({ error: "Failed to load pinned messages" });
+  }
+});
+
+// ── Delete message (with socket emit) ──
 router.delete("/:messageId", authMiddleware, async (req, res) => {
   try {
     const { messageId } = req.params;
@@ -172,6 +460,12 @@ router.delete("/:messageId", authMiddleware, async (req, res) => {
       { new: true }
     );
     if (!msg) return res.status(404).json({ error: "Message not found or not yours" });
+    const otherId = msg.receiver.toString() === req.user.id ? msg.sender : msg.receiver;
+    const io = req.app.get("io");
+    emitToBoth(io, req.user.id, otherId, "message_deleted", {
+      messageId: msg._id,
+      deleted: true,
+    });
     res.json({ message: "Message deleted" });
   } catch (err) {
     console.error("deleteMessage error:", err);
@@ -179,10 +473,10 @@ router.delete("/:messageId", authMiddleware, async (req, res) => {
   }
 });
 
+// ── Existing friend/follow routes (unchanged) ──
 router.get("/followed", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const Follow = require("../../database/models/Follow");
     const follows = await Follow.find({ follower: userId })
       .populate("following", "name avatar role collegeName institutionName")
       .sort({ createdAt: -1 })

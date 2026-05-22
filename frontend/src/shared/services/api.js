@@ -425,6 +425,51 @@ export async function deleteMessage(messageId, token) {
   return request(apiClient.delete(`/dm/${messageId}`, withAuth(token)));
 }
 
+export async function editMessage(messageId, text, token) {
+  return request(apiClient.put(`/dm/${messageId}/edit`, { text }, withAuth(token)));
+}
+
+export async function togglePinMessage(messageId, token) {
+  return request(apiClient.put(`/dm/${messageId}/pin`, {}, withAuth(token)));
+}
+
+export async function toggleReaction(messageId, emoji, token) {
+  return request(apiClient.post(`/dm/${messageId}/react`, { emoji }, withAuth(token)));
+}
+
+export async function uploadMessageFile(file, receiver, token, text = "", replyTo = null) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("receiver", receiver);
+  if (text) formData.append("text", text);
+  if (replyTo) formData.append("replyTo", replyTo);
+  const config = withAuth(token, { timeout: 120000 });
+  config.headers = config.headers || {};
+  delete config.headers["Content-Type"];
+  return request(apiClient.post("/dm/upload", formData, config));
+}
+
+export async function sendVoiceMessage(audioBlob, receiver, duration, token) {
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "voice.webm");
+  formData.append("receiver", receiver);
+  formData.append("duration", String(duration));
+  const config = withAuth(token, { timeout: 120000 });
+  config.headers = config.headers || {};
+  delete config.headers["Content-Type"];
+  return request(apiClient.post("/dm/send/voice", formData, config));
+}
+
+export async function searchMessages(query, token, withUserId = null) {
+  let url = `/dm/search/messages?q=${encodeURIComponent(query)}`;
+  if (withUserId) url += `&with=${withUserId}`;
+  return request(apiClient.get(url, withAuth(token)));
+}
+
+export async function getPinnedMessages(userId, token) {
+  return request(apiClient.get(`/dm/pinned/${userId}`, withAuth(token)));
+}
+
 export async function getFriendRequests(token) {
   return request(apiClient.get("/dm/friends/requests", withAuth(token)));
 }
