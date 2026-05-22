@@ -727,6 +727,154 @@ const deleteCollabMessage = async (req, res) => {
 
 
 
+// ─── Phase 4: Activity Log Helper ───
+async function addActivityLog(communityId, actorId, action, description = "", target = "") {
+  try {
+    await Community.findByIdAndUpdate(communityId, {
+      $push: {
+        activityLog: {
+          $each: [{ action, actor: actorId, description, target }],
+          $slice: -200,
+        },
+      },
+    });
+  } catch { /* silent */ }
+}
+
+// ─── Phase 4: POST /api/communities/:id/complete-task ───
+const completeCommunityTask = async (req, res) => {
+  try {
+    const community = await Community.findById(req.params.id);
+    if (!community) return res.status(404).json({ error: "Community not found" });
+    if (community.status === "archived") return res.status(400).json({ error: "Community is archived" });
+    if (!canManageCommunity(req.user, community)) return res.status(403).json({ error: "Not authorized" });
+    community.completionType = "task_only";
+    community.completedAt = new Date();
+    community.completedBy = req.user._id || req.user.id;
+    await community.save();
+    await addActivityLog(community._id, req.user._id || req.user.id, "complete_task", "Completed tasks", "task");
+    const io = req.app.get("io");
+    if (io) io.to(`community:${community._id}`).emit("community_updated", { communityId: community._id, status: community.status, completionType: community.completionType });
+    res.json({ message: "Tasks marked complete", community });
+  } catch (err) {
+    console.error("completeCommunityTask error:", err);
+    res.status(500).json({ error: "Failed to complete tasks" });
+  }
+};
+
+// ─── Phase 4: POST /api/communities/:id/archive ───
+const archiveCommunity = async (req, res) => {
+  try {
+    const community = await Community.findById(req.params.id);
+    if (!community) return res.status(404).json({ error: "Community not found" });
+    if (community.status === "archived") return res.status(400).json({ error: "Already archived" });
+    if (!canManageCommunity(req.user, community)) return res.status(403).json({ error: "Not authorized" });
+    community.status = "archived";
+    community.completionType = "full";
+    community.archivedAt = new Date();
+    community.archivedBy = req.user._id || req.user.id;
+    community.completedAt = new Date();
+    community.completedBy = req.user._id || req.user.id;
+    await community.save();
+    await addActivityLog(community._id, req.user._id || req.user.id, "archive", "Community archived", "community");
+    const io = req.app.get("io");
+    if (io) io.to(`community:${community._id}`).emit("community_archived", { communityId: community._id });
+    res.json({ message: "Community archived", community });
+  } catch (err) {
+    console.error("archiveCommunity error:", err);
+    res.status(500).json({ error: "Failed to archive community" });
+  }
+};
+
+// ─── Phase 4: POST /api/communities/:id/resources ───
+const addResource = async (req, res) => {
+  try {
+    const community = await Community.findById(req.params.id);
+    if (!community) return res.status(404).json({ error: "Community not found" });
+    if (community.status === "archived") return res.status(400).json({ error: "Community is archived" });
+    if (!canManageCommunity(req.user, community) && !community.members.some(m => (m._id || m).toString() === (req.user._id || req.user.id).toString())) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+    const { title, description, url, type } = req.body;
+    if (!title?.trim()) return res.status(400).json({ error: "Title is required" });
+    let resourceUrl = url || null;
+    if (req.file) resourceUrl = `/uploads/communities/${req.file.filename}`;
+    community.resources.push({
+      title: title.trim(),
+      description: description?.trim() || "",
+      url: resourceUrl,
+      type: type || "file",
+      uploadedBy: req.user._id || req.user.id,
+    });
+    await community.save();
+    await addActivityLog(community._id, req.user._id || req.user.id, "add_resource", `Added resource: ${title}`, "resource");
+    res.json(community);
+  } catch (err) {
+    console.error("addResource error:", err);
+    res.status(500).json({ error: "Failed to add resource" });
+  }
+};
+
+// ─── Phase 4: DELETE /api/communities/:id/resources/:resourceId ───
+const deleteResource = async (req, res) => {
+  try {
+    const community = await Community.findById(req.params.id);
+    if (!community) return res.status(404).json({ error: "Community not found" });
+    if (!canManageCommunity(req.user, community)) return res.status(403).json({ error: "Not authorized" });
+    community.resources.pull({ _id: req.params.resourceId });
+    await community.save();
+    res.json({ message: "Resource deleted" });
+  } catch (err) {
+    console.error("deleteResource error:", err);
+    res.status(500).json({ error: "Failed to delete resource" });
+  }
+};
+
+// ─── Phase 4: GET /api/communities/:id/timeline ───
+const getTimeline = async (req, res) => {
+  try {
+    const community = await Community.findById(req.params.id).select("activityLog").lean();
+    if (!community) return res.status(404).json({ error: "Community not found" });
+    const logs = (community.activityLog || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 50);
+    await Community.populate(logs, { path: "actor", select: "name avatar role" });
+    res.json({ timeline: logs });
+  } catch (err) {
+    console.error("getTimeline error:", err);
+    res.status(500).json({ error: "Failed to get timeline" });
+  }
+};
+
+// ─── Phase 4: GET /api/communities/:id/stats ───
+const getCommunityStats = async (req, res) => {
+  try {
+    const community = await Community.findById(req.params.id)
+      .select("members collaborations resources activityLog status completionType archivedAt createdAt")
+      .lean();
+    if (!community) return res.status(404).json({ error: "Community not found" });
+    const Task = require("../../database/models/task.model");
+    const totalTasks = await Task.countDocuments({ community_id: req.params.id });
+    const completedTasks = await Task.countDocuments({ community_id: req.params.id, completed_status: true });
+    const Submission = require("../../database/models/Submission");
+    const totalSubmissions = await Submission.countDocuments({ community: req.params.id });
+    const approvedSubmissions = await Submission.countDocuments({ community: req.params.id, status: "approved" });
+    res.json({
+      totalMembers: community.members?.length || 0,
+      totalCollaborations: community.collaborations?.length || 0,
+      totalResources: community.resources?.length || 0,
+      totalTasks,
+      completedTasks,
+      totalSubmissions,
+      approvedSubmissions,
+      status: community.status,
+      completionType: community.completionType,
+      archivedAt: community.archivedAt,
+    });
+  } catch (err) {
+    console.error("getCommunityStats error:", err);
+    res.status(500).json({ error: "Failed to get stats" });
+  }
+};
+
 module.exports = {
   getCommunities,
   getCommunity,
@@ -750,4 +898,10 @@ module.exports = {
   sendCommunityMessage,
   deleteCommunityMessage,
   deleteCollabMessage,
+  completeCommunityTask,
+  archiveCommunity,
+  addResource,
+  deleteResource,
+  getTimeline,
+  getCommunityStats,
 };

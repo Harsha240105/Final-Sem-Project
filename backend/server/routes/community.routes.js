@@ -29,6 +29,12 @@ const {
   sendCommunityMessage,
   deleteCommunityMessage,
   deleteCollabMessage,
+  completeCommunityTask,
+  archiveCommunity,
+  addResource,
+  deleteResource,
+  getTimeline,
+  getCommunityStats,
 } = require("../controllers/communityController");
 // ── Multer config for community uploads ──
 const uploadDir = path.join(__dirname, "..", "uploads", "communities");
@@ -99,5 +105,18 @@ router.delete("/:id/collab/:collabId/message/:messageId", authMiddleware, delete
 // ─── Community Public Chat ───
 router.post("/:id/messages", authMiddleware, sendCommunityMessage);
 router.delete("/:id/messages/:messageId", authMiddleware, deleteCommunityMessage);
+
+// ─── Phase 4: Completion & Archive ───
+router.post("/:id/complete-task", authMiddleware, completeCommunityTask);
+router.post("/:id/archive", authMiddleware, archiveCommunity);
+
+// ─── Phase 4: Resources ───
+const singleUpload = upload.single("file");
+router.post("/:id/resources", authMiddleware, singleUpload, addResource);
+router.delete("/:id/resources/:resourceId", authMiddleware, deleteResource);
+
+// ─── Phase 4: Timeline & Stats ───
+router.get("/:id/timeline", authMiddleware, getTimeline);
+router.get("/:id/stats", authMiddleware, getCommunityStats);
 
 module.exports = router;

@@ -255,6 +255,70 @@ export async function deleteCollabMessage(communityId, collabId, messageId, toke
   );
 }
 
+export async function completeCommunityTask(communityId, token) {
+  return request(apiClient.post(`/communities/${communityId}/complete-task`, {}, withAuth(token)));
+}
+
+export async function archiveCommunity(communityId, token) {
+  return request(apiClient.post(`/communities/${communityId}/archive`, {}, withAuth(token)));
+}
+
+export async function addCommunityResource(communityId, data, token) {
+  const config = withAuth(token);
+  if (data instanceof FormData) {
+    config.headers = config.headers || {};
+    delete config.headers["Content-Type"];
+  }
+  return request(apiClient.post(`/communities/${communityId}/resources`, data, config));
+}
+
+export async function deleteCommunityResource(communityId, resourceId, token) {
+  return request(apiClient.delete(`/communities/${communityId}/resources/${resourceId}`, withAuth(token)));
+}
+
+export async function getCommunityTimeline(communityId, token) {
+  return request(apiClient.get(`/communities/${communityId}/timeline`, withAuth(token)));
+}
+
+export async function getCommunityStats(communityId, token) {
+  return request(apiClient.get(`/communities/${communityId}/stats`, withAuth(token)));
+}
+
+export async function getCommunity(communityId, token) {
+  return request(apiClient.get(`/communities/${communityId}`, withAuth(token)));
+}
+
+export async function joinCommunity(communityId, token) {
+  return request(apiClient.post(`/communities/${communityId}/join`, {}, withAuth(token)));
+}
+
+export async function leaveCommunity(communityId, token) {
+  return request(apiClient.post(`/communities/${communityId}/leave`, {}, withAuth(token)));
+}
+
+export async function deleteCommunity(communityId, token) {
+  return request(apiClient.delete(`/communities/${communityId}`, withAuth(token)));
+}
+
+export async function submitTaskWork(taskId, formData, token) {
+  const config = withAuth(token, { timeout: 120000 });
+  config.headers = config.headers || {};
+  delete config.headers["Content-Type"];
+  return request(apiClient.post(`/tasks/${taskId}/submit`, formData, config));
+}
+
+export async function getTaskSubmissions(taskId, token) {
+  return request(apiClient.get(`/tasks/${taskId}/submissions`, withAuth(token)));
+}
+
+export async function getMyTaskSubmission(taskId, token) {
+  return request(apiClient.get(`/tasks/${taskId}/my-submission`, withAuth(token)));
+}
+
+export async function reviewSubmission(taskId, submissionId, status, feedback, token) {
+  return request(apiClient.put(`/tasks/${taskId}/submissions/${submissionId}/review`, { status, feedback }, withAuth(token)));
+}
+
 export async function saveWalletAddress(walletAddress, token) {
   return request(apiClient.put("/user/wallet", { walletAddress }, withAuth(token)));
 }

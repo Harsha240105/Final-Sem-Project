@@ -1,6 +1,23 @@
 const mongoose = require("mongoose");
 const { nanoid } = require("nanoid");
 
+const resourceSchema = new mongoose.Schema({
+  title: { type: String, required: true, trim: true, maxlength: 200 },
+  description: { type: String, trim: true, default: "", maxlength: 500 },
+  url: { type: String, default: null },
+  type: { type: String, enum: ["file", "link", "video", "document"], default: "file" },
+  uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  createdAt: { type: Date, default: Date.now },
+}, { _id: true });
+
+const activityLogSchema = new mongoose.Schema({
+  action: { type: String, required: true },
+  actor: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  description: { type: String, default: "" },
+  target: { type: String, default: "" },
+  createdAt: { type: Date, default: Date.now },
+}, { _id: true });
+
 const commentSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   text: { type: String, required: true, trim: true, maxlength: 1000 },
@@ -110,6 +127,25 @@ const communitySchema = new mongoose.Schema(
     contributions: [contributionSchema],
     collaborations: [collaborationSchema],
     communityMessages: [communityMessageSchema],
+    // ── Phase 4: Archive & Completion ──
+    status: {
+      type: String,
+      enum: ["active", "completing", "archived"],
+      default: "active",
+    },
+    archivedAt: { type: Date, default: null },
+    archivedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    completionType: {
+      type: String,
+      enum: [null, "task_only", "full"],
+      default: null,
+    },
+    completedAt: { type: Date, default: null },
+    completedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    submissionDeadline: { type: Date, default: null },
+    // ── Phase 4: Resources & Activity ──
+    resources: [resourceSchema],
+    activityLog: [activityLogSchema],
   },
   { timestamps: true }
 );
