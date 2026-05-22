@@ -201,6 +201,10 @@ export async function getTaskChatMessages(taskId, token) {
   return request(apiClient.get(`/tasks/chat/${taskId}`, withAuth(token)));
 }
 
+export async function getMarketplacePosts(token) {
+  return request(apiClient.get("/marketplace", withAuth(token)));
+}
+
 export async function deleteMarketplacePost(postId, token) {
   return request(apiClient.delete(`/marketplace/${postId}/delete`, withAuth(token)));
 }
@@ -213,6 +217,10 @@ export async function rewardNFTAndClose(postId, token) {
 
 export async function getMyNFTs(token) {
   return request(apiClient.get("/marketplace/me/nfts", withAuth(token)));
+}
+
+export async function getCommunities(token) {
+  return request(apiClient.get("/communities", withAuth(token)));
 }
 
 export async function getCommunitiesMap(token) {
