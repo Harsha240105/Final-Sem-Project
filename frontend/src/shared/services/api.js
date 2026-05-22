@@ -684,6 +684,31 @@ export async function getUserMutuals(userId, token, page = 1, limit = 20) {
   return request(apiClient.get(`/social/${userId}/mutuals?page=${page}&limit=${limit}`, withAuth(token)));
 }
 
+// ── Collaboration Workspace API ──
+export async function createWorkspace(postId, data, token) {
+  return request(apiClient.post(`/marketplace/${postId}/workspace`, data, withAuth(token)));
+}
+
+export async function getWorkspace(postId, token) {
+  return request(apiClient.get(`/marketplace/${postId}/workspace`, withAuth(token)));
+}
+
+export async function sendWorkspaceMessage(postId, channelName, text, token) {
+  return request(apiClient.post(`/marketplace/${postId}/workspace/message/${channelName}`, { text }, withAuth(token)));
+}
+
+export async function addWorkspaceTask(postId, data, token) {
+  return request(apiClient.post(`/marketplace/${postId}/workspace/task`, data, withAuth(token)));
+}
+
+export async function updateWorkspaceTask(postId, taskId, status, token) {
+  return request(apiClient.put(`/marketplace/${postId}/workspace/task/${taskId}`, { status }, withAuth(token)));
+}
+
+export async function inviteToWorkspace(postId, userId, token) {
+  return request(apiClient.post(`/marketplace/${postId}/workspace/invite`, { userId }, withAuth(token)));
+}
+
 // ── Canvas API ──
 export async function getMyCanvases(token) {
   return request(apiClient.get("/canvas", withAuth(token)));

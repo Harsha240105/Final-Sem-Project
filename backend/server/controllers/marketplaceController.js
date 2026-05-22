@@ -1,6 +1,11 @@
 const Marketplace = require("../../database/models/Marketplace");
-const NFTCertificate = require("../../database/models/NFTCertificate");
+const CollaborationRoom = require("../../database/models/CollaborationRoom");
 const mongoose = require("mongoose");
+
+const POST_TYPES = [
+  "looking_for_dev", "looking_for_designer", "open_collaboration",
+  "research_project", "community_recruitment",
+];
 
 const POPULATE_FIELDS = [
   { path: "createdBy", select: "name gmail avatar" },
@@ -15,103 +20,86 @@ async function populatePost(post) {
   return Marketplace.findById(post._id).populate(POPULATE_FIELDS).lean();
 }
 
-async function createPost(req, res) {
+exports.createPost = async (req, res) => {
   try {
     const { title, description, goals, postType, requiredRoles, skills, community, tags } = req.body;
-
     if (!title?.trim()) return res.status(400).json({ error: "Title is required" });
     if (!description?.trim()) return res.status(400).json({ error: "Description is required" });
 
+    const sanitizedType = POST_TYPES.includes(postType) ? postType : "open_collaboration";
     const parsedTags = Array.isArray(tags)
       ? tags.map(t => t.trim()).filter(Boolean)
-      : typeof tags === "string"
-        ? tags.split(",").map(t => t.trim()).filter(Boolean)
-        : [];
-
-    const parsedRequiredRoles = Array.isArray(requiredRoles)
-      ? requiredRoles.filter(r => r.role?.trim())
-      : [];
+      : typeof tags === "string" ? tags.split(",").map(t => t.trim()).filter(Boolean) : [];
+    const parsedRequiredRoles = Array.isArray(requiredRoles) ? requiredRoles.filter(r => r.role?.trim()) : [];
 
     const post = await Marketplace.create({
-      title: title.trim(),
-      description: description.trim(),
-      goals: goals?.trim() || "",
-      postType: postType || "open_collaboration",
+      title: title.trim(), description: description.trim(),
+      goals: goals?.trim() || "", postType: sanitizedType,
       requiredRoles: parsedRequiredRoles,
       skills: Array.isArray(skills) ? skills.filter(Boolean) : [],
-      community: community || null,
-      tags: parsedTags,
-      createdBy: req.user.id,
+      community: community || null, tags: parsedTags, createdBy: req.user.id,
     });
-
     const populated = await populatePost(post);
     res.status(201).json(populated);
   } catch (err) {
     console.error("Create post error:", err);
     res.status(500).json({ error: "Failed to create post" });
   }
-}
+};
 
-async function getPosts(req, res) {
+exports.getPosts = async (req, res) => {
   try {
     const { status, postType, skill, my, community, limit: reqLimit } = req.query;
     const limit = Math.min(Number(reqLimit) || 60, 120);
     const filter = {};
 
-    if (status) filter.status = status;
-    if (postType) filter.postType = postType;
+    if (postType && POST_TYPES.includes(postType)) {
+      filter.postType = postType;
+    }
+    if (status && ["recruiting", "active", "reviewing", "completed", "archived"].includes(status)) {
+      filter.status = status;
+    }
     if (skill) filter.skills = { $in: [new RegExp(skill, "i")] };
     if (my === "true") filter.createdBy = req.user.id;
     if (community) filter.community = community;
 
     const posts = await Marketplace.find(filter)
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .populate(POPULATE_FIELDS)
-      .lean();
-
+      .sort({ createdAt: -1 }).limit(limit).populate(POPULATE_FIELDS).lean();
     res.json(posts);
   } catch (err) {
     console.error("Get posts error:", err);
     res.status(500).json({ error: "Failed to fetch posts" });
   }
-}
+};
 
-async function getPost(req, res) {
+exports.getPost = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "Invalid post ID" });
-    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid post ID" });
     const post = await Marketplace.findById(req.params.id).populate(POPULATE_FIELDS).lean();
     if (!post) return res.status(404).json({ error: "Post not found" });
     res.json(post);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch post" });
   }
-}
+};
 
-async function updatePost(req, res) {
+exports.updatePost = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "Invalid post ID" });
-    }
-
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid post ID" });
     const post = await Marketplace.findById(req.params.id);
     if (!post) return res.status(404).json({ error: "Post not found" });
-
-    if (post.createdBy.toString() !== req.user.id && !["admin", "teacher"].includes(req.user.role)) {
+    if (post.createdBy.toString() !== req.user.id && !["admin", "teacher"].includes(req.user.role))
       return res.status(403).json({ error: "Only the creator or admin can update this post" });
-    }
 
     const allowed = ["title", "description", "goals", "postType", "requiredRoles", "skills", "community", "tags"];
     for (const field of allowed) {
       if (req.body[field] !== undefined) {
         if (field === "title") post[field] = req.body[field].trim();
         else if (field === "community") post[field] = req.body[field] || null;
-        else post[field] = req.body[field];
+        else if (field === "postType" && POST_TYPES.includes(req.body[field])) post[field] = req.body[field];
+        else if (field !== "postType") post[field] = req.body[field];
       }
     }
-
     await post.save();
     const updated = await populatePost(post);
     res.json(updated);
@@ -119,207 +107,297 @@ async function updatePost(req, res) {
     console.error("Update post error:", err);
     res.status(500).json({ error: "Failed to update post" });
   }
-}
+};
 
-async function deletePost(req, res) {
+exports.deletePost = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "Invalid post ID" });
-    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid post ID" });
     const post = await Marketplace.findById(req.params.id);
     if (!post) return res.status(404).json({ error: "Post not found" });
-    if (post.createdBy.toString() !== req.user.id) {
-      return res.status(403).json({ error: "Only the creator can delete this post" });
-    }
+    if (post.createdBy.toString() !== req.user.id) return res.status(403).json({ error: "Only the creator can delete this post" });
+    await CollaborationRoom.deleteMany({ postId: req.params.id });
     await Marketplace.findByIdAndDelete(req.params.id);
     res.json({ message: "Post deleted", id: req.params.id });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete post" });
   }
-}
+};
 
-async function addComment(req, res) {
+exports.addComment = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "Invalid post ID" });
-    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid post ID" });
     const { text } = req.body;
     if (!text?.trim()) return res.status(400).json({ error: "Comment text is required" });
-
     const post = await Marketplace.findById(req.params.id);
     if (!post) return res.status(404).json({ error: "Post not found" });
-
     post.comments.push({ text: text.trim(), author: req.user.id });
     await post.save();
-
     const updated = await populatePost(post);
     res.status(201).json(updated);
   } catch (err) {
     res.status(500).json({ error: "Failed to add comment" });
   }
-}
+};
 
-async function requestCollaboration(req, res) {
+exports.requestCollaboration = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "Invalid post ID" });
-    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid post ID" });
     const { role } = req.body;
     const post = await Marketplace.findById(req.params.id);
     if (!post) return res.status(404).json({ error: "Post not found" });
-
-    if (post.status === "completed" || post.status === "archived") {
+    if (post.status === "completed" || post.status === "archived")
       return res.status(400).json({ error: "Cannot collaborate on a completed or archived project" });
-    }
-
-    if (post.createdBy.toString() === req.user.id) {
+    if (post.createdBy.toString() === req.user.id)
       return res.status(400).json({ error: "You cannot collaborate on your own post" });
-    }
-
-    const alreadyRequested = post.collaborators.some(c => c.user.toString() === req.user.id);
-    if (alreadyRequested) {
+    if (post.collaborators.some(c => c.user.toString() === req.user.id))
       return res.status(400).json({ error: "Already requested collaboration" });
-    }
 
     post.collaborators.push({ user: req.user.id, role: role?.trim() || "", status: "pending" });
     await post.save();
-
     const updated = await populatePost(post);
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: "Failed to request collaboration" });
   }
-}
+};
 
-async function updateCollaborationStatus(req, res) {
+exports.updateCollaborationStatus = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "Invalid post ID" });
-    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid post ID" });
     const { collaboratorId, status } = req.body;
-    if (!["accepted", "rejected"].includes(status)) {
-      return res.status(400).json({ error: "Status must be 'accepted' or 'rejected'" });
-    }
+    if (!["accepted", "rejected"].includes(status)) return res.status(400).json({ error: "Status must be 'accepted' or 'rejected'" });
 
     const post = await Marketplace.findById(req.params.id);
     if (!post) return res.status(404).json({ error: "Post not found" });
-    if (post.createdBy.toString() !== req.user.id) {
-      return res.status(403).json({ error: "Only the creator can manage collaborators" });
-    }
+    if (post.createdBy.toString() !== req.user.id) return res.status(403).json({ error: "Only the creator can manage collaborators" });
 
     const collab = post.collaborators.id(collaboratorId);
     if (!collab) return res.status(404).json({ error: "Collaborator not found" });
 
     collab.status = status;
-    if (status === "accepted") {
-      if (!post.participants.some(p => p.toString() === collab.user.toString())) {
-        post.participants.push(collab.user);
-      }
+    if (status === "accepted" && !post.participants.some(p => p.toString() === collab.user.toString())) {
+      post.participants.push(collab.user);
     }
     await post.save();
+
+    const io = req.app.get("io");
+    if (io) {
+      io.to(String(collab.user)).emit("collab_status_updated", {
+        postId: req.params.id, status,
+      });
+    }
 
     const updated = await populatePost(post);
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: "Failed to update collaboration status" });
   }
-}
+};
 
-async function updateProjectStatus(req, res) {
+exports.updateProjectStatus = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "Invalid post ID" });
-    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid post ID" });
     const { status } = req.body;
     const validStatuses = ["recruiting", "active", "reviewing", "completed", "archived"];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` });
-    }
+    if (!validStatuses.includes(status)) return res.status(400).json({ error: `Invalid status` });
 
     const post = await Marketplace.findById(req.params.id);
     if (!post) return res.status(404).json({ error: "Post not found" });
-
-    if (post.createdBy.toString() !== req.user.id && !["admin", "teacher"].includes(req.user.role)) {
+    if (post.createdBy.toString() !== req.user.id && !["admin", "teacher"].includes(req.user.role))
       return res.status(403).json({ error: "Only the creator or admin can update project status" });
-    }
 
     post.status = status;
     await post.save();
-
     const updated = await populatePost(post);
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: "Failed to update project status" });
   }
-}
+};
 
-async function publishShowcase(req, res) {
+exports.publishShowcase = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "Invalid post ID" });
-    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid post ID" });
     const { summary, media, certificateIds } = req.body;
-
     const post = await Marketplace.findById(req.params.id);
     if (!post) return res.status(404).json({ error: "Post not found" });
-    if (post.createdBy.toString() !== req.user.id) {
-      return res.status(403).json({ error: "Only the creator can publish showcase" });
-    }
+    if (post.createdBy.toString() !== req.user.id) return res.status(403).json({ error: "Only the creator can publish showcase" });
 
     post.showcase = {
-      summary: summary || "",
-      media: Array.isArray(media) ? media : [],
+      summary: summary || "", media: Array.isArray(media) ? media : [],
       certificateIds: Array.isArray(certificateIds) ? certificateIds : [],
-      contributorList: post.participants,
-      publishedAt: new Date(),
+      contributorList: post.participants, publishedAt: new Date(),
     };
     post.status = "completed";
     await post.save();
-
     const updated = await populatePost(post);
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: "Failed to publish showcase" });
   }
-}
+};
 
-async function getMyPosts(req, res) {
+exports.getMyPosts = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const posts = await Marketplace.find({ createdBy: userId })
-      .sort({ createdAt: -1 })
-      .populate(POPULATE_FIELDS)
-      .lean();
+    const posts = await Marketplace.find({ createdBy: req.user.id })
+      .sort({ createdAt: -1 }).populate(POPULATE_FIELDS).lean();
     res.json(posts);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch my posts" });
   }
-}
+};
 
-async function getMyCollaborations(req, res) {
+exports.getMyCollaborations = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const posts = await Marketplace.find({ "collaborators.user": userId })
-      .sort({ createdAt: -1 })
-      .populate(POPULATE_FIELDS)
-      .lean();
+    const posts = await Marketplace.find({ "collaborators.user": req.user.id })
+      .sort({ createdAt: -1 }).populate(POPULATE_FIELDS).lean();
     res.json(posts);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch collaborations" });
   }
-}
+};
 
-module.exports = {
-  createPost,
-  getPosts,
-  getPost,
-  updatePost,
-  deletePost,
-  addComment,
-  requestCollaboration,
-  updateCollaborationStatus,
-  updateProjectStatus,
-  publishShowcase,
-  getMyPosts,
-  getMyCollaborations,
+// ── Collaboration Workspace ──
+
+exports.createWorkspace = async (req, res) => {
+  try {
+    const post = await Marketplace.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+    if (post.createdBy.toString() !== req.user.id) return res.status(403).json({ error: "Only the owner can create a workspace" });
+
+    const existing = await CollaborationRoom.findOne({ postId: req.params.id });
+    if (existing) return res.status(400).json({ error: "Workspace already exists for this post" });
+
+    const { name } = req.body;
+    const room = await CollaborationRoom.create({
+      postId: req.params.id,
+      name: name || `${post.title} Workspace`,
+      createdBy: req.user.id,
+      members: [req.user.id, ...post.participants],
+      channels: [
+        { name: "general", type: "text", messages: [] },
+        { name: "files", type: "files", messages: [] },
+      ],
+    });
+    const populated = await CollaborationRoom.findById(room._id)
+      .populate("members channels.messages.author", "name avatar")
+      .lean();
+    res.status(201).json(populated);
+  } catch (err) {
+    console.error("Create workspace error:", err);
+    res.status(500).json({ error: "Failed to create workspace" });
+  }
+};
+
+exports.getWorkspace = async (req, res) => {
+  try {
+    const room = await CollaborationRoom.findOne({ postId: req.params.id })
+      .populate("members channels.messages.author files.uploadedBy tasks.assignedTo tasks.createdBy", "name avatar")
+      .lean();
+    if (!room) return res.status(404).json({ error: "No workspace found for this post" });
+    if (!room.members.some(m => m._id.toString() === req.user.id) && room.createdBy.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+    res.json(room);
+  } catch (err) {
+    console.error("Get workspace error:", err);
+    res.status(500).json({ error: "Failed to fetch workspace" });
+  }
+};
+
+exports.sendWorkspaceMessage = async (req, res) => {
+  try {
+    const { channelName } = req.params;
+    const { text } = req.body;
+    if (!text?.trim()) return res.status(400).json({ error: "Message text is required" });
+
+    const room = await CollaborationRoom.findOne({ postId: req.params.id });
+    if (!room) return res.status(404).json({ error: "Workspace not found" });
+    if (!room.members.some(m => m.toString() === req.user.id)) return res.status(403).json({ error: "Access denied" });
+
+    const channel = room.channels.find(c => c.name === channelName);
+    if (!channel) return res.status(404).json({ error: "Channel not found" });
+
+    channel.messages.push({ text: text.trim(), author: req.user.id });
+    room.updatedAt = new Date();
+    await room.save();
+
+    const populated = await CollaborationRoom.findById(room._id)
+      .populate("members channels.messages.author", "name avatar").lean();
+    res.status(201).json(populated);
+  } catch (err) {
+    console.error("Send workspace message error:", err);
+    res.status(500).json({ error: "Failed to send message" });
+  }
+};
+
+exports.addWorkspaceTask = async (req, res) => {
+  try {
+    const { title, description, assignedTo } = req.body;
+    if (!title?.trim()) return res.status(400).json({ error: "Task title is required" });
+
+    const room = await CollaborationRoom.findOne({ postId: req.params.id });
+    if (!room) return res.status(404).json({ error: "Workspace not found" });
+    if (!room.members.some(m => m.toString() === req.user.id)) return res.status(403).json({ error: "Access denied" });
+
+    room.tasks.push({
+      title: title.trim(), description: description || "",
+      assignedTo: Array.isArray(assignedTo) ? assignedTo : [],
+      createdBy: req.user.id,
+    });
+    room.updatedAt = new Date();
+    await room.save();
+
+    const populated = await CollaborationRoom.findById(room._id)
+      .populate("tasks.assignedTo tasks.createdBy", "name avatar").lean();
+    res.status(201).json(populated);
+  } catch (err) {
+    console.error("Add workspace task error:", err);
+    res.status(500).json({ error: "Failed to add task" });
+  }
+};
+
+exports.updateWorkspaceTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { status } = req.body;
+    if (!["todo", "in_progress", "done"].includes(status)) return res.status(400).json({ error: "Invalid status" });
+
+    const room = await CollaborationRoom.findOne({ postId: req.params.id });
+    if (!room) return res.status(404).json({ error: "Workspace not found" });
+
+    const task = room.tasks.id(taskId);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+
+    task.status = status;
+    room.updatedAt = new Date();
+    await room.save();
+    res.json({ message: "Task updated", status });
+  } catch (err) {
+    console.error("Update workspace task error:", err);
+    res.status(500).json({ error: "Failed to update task" });
+  }
+};
+
+exports.inviteToWorkspace = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) return res.status(400).json({ error: "User ID required" });
+
+    const room = await CollaborationRoom.findOne({ postId: req.params.id });
+    if (!room) return res.status(404).json({ error: "Workspace not found" });
+    if (room.createdBy.toString() !== req.user.id) return res.status(403).json({ error: "Only the creator can invite" });
+    if (room.members.some(m => m.toString() === userId)) return res.status(400).json({ error: "User is already a member" });
+
+    room.members.push(userId);
+    room.updatedAt = new Date();
+    await room.save();
+
+    const populated = await CollaborationRoom.findById(room._id)
+      .populate("members", "name avatar").lean();
+    res.json(populated);
+  } catch (err) {
+    console.error("Invite to workspace error:", err);
+    res.status(500).json({ error: "Failed to invite user" });
+  }
 };
