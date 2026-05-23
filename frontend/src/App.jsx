@@ -28,6 +28,7 @@ const ProfileSettings = lazy(() => import("./features/profiles/ProfileSettings")
 const Messages = lazy(() => import("./features/messaging/Messages"));
 const MyCertificates = lazy(() => import("./features/certificates/MyCertificates"));
 const VerifyCertificate = lazy(() => import("./features/certificates/VerifyCertificate"));
+const About = lazy(() => import("./features/about/About"));
 const NotFound = lazy(() => import("./features/NotFound"));
 
 function PageFallback({ children }) {
@@ -51,6 +52,7 @@ function AppRoutes() {
         <Route path="/org-setup" element={<Suspense fallback={<PageFallback />}><OrganisationSetup /></Suspense>} />
         <Route path="/admin/setup" element={<Suspense fallback={<PageFallback />}><AdminSetup /></Suspense>} />
         <Route path="/verify/:certificateId" element={<Suspense fallback={<PageFallback />}><VerifyCertificate /></Suspense>} />
+        <Route path="/about" element={<Suspense fallback={<PageFallback />}><About /></Suspense>} />
 
         {/* Admin route */}
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>

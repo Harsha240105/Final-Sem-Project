@@ -28,4 +28,4 @@ frontend/dist/
 backend/server/uploads/
 
 # Generated screenshots (dev server captures)
-screenshots/
+/screenshots/
