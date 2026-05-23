@@ -971,26 +971,8 @@ const markTaskCompletedByStudent = async (req, res) => {
     // Add task to user's completedTasks array
     await addCompletedTaskToUser(userId, task._id);
 
-    // ─── Auto-mint NFT certificate for this task completion ───
+    // Only teachers can issue certificates manually — no auto-minting here
     let nftResult = null;
-    try {
-      // Load user with wallet for minting
-      const user = await User.findById(userId).select("name walletAddress gmail").lean();
-      if (user?.walletAddress?.trim()) {
-        nftResult = await issueCertificateToMember({
-          memberId: userId,
-          member: { ...user, _id: userId },
-          community: {
-            _id: community._id,
-            name: community.name,
-            college_name: community.college_name,
-          },
-          taskId: task._id,
-        });
-      }
-    } catch (mintErr) {
-      console.error("[Task Controller] Per-task NFT minting failed (non-blocking):", mintErr.message);
-    }
 
     res.json({
       ...task.toObject(),
