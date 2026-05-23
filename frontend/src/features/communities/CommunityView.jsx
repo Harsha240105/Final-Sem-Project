@@ -394,7 +394,7 @@ function CommunityView() {
           )}
 
           {/* Submissions per task */}
-          {isAdmin && tasks.map(task => (
+          {tasks.map(task => (
             <SubmissionPanel key={task._id} task={task} communityId={id} isAdmin={isAdmin} isArchived={isArchived} />
           ))}
         </div>

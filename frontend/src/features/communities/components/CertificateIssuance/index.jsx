@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { completeTaskAndIssueCertificates } from "../../../../shared/services/api";
 
 function CertificateIssuance({ tasks, communityId, onRefresh }) {
@@ -10,7 +10,7 @@ function CertificateIssuance({ tasks, communityId, onRefresh }) {
 
   const toggleStudent = (taskId, studentId) => {
     setSelected(prev => {
-      const key = `${taskId}-${studentId}`;
+      const key = `${taskId}::${studentId}`;
       const next = { ...prev };
       if (next[key]) delete next[key];
       else next[key] = true;
@@ -22,7 +22,7 @@ function CertificateIssuance({ tasks, communityId, onRefresh }) {
     setSelected(prev => {
       const next = { ...prev };
       for (const sid of studentIds) {
-        const key = `${taskId}-${sid}`;
+        const key = `${taskId}::${sid}`;
         if (checked) next[key] = true;
         else delete next[key];
       }
@@ -32,11 +32,11 @@ function CertificateIssuance({ tasks, communityId, onRefresh }) {
 
   const getSelectedForTask = (taskId) => {
     return Object.keys(selected)
-      .filter(k => k.startsWith(`${taskId}-`))
-      .map(k => k.split("-").slice(1).join("-"));
+      .filter(k => k.startsWith(`${taskId}::`))
+      .map(k => k.slice(taskId.length + 2));
   };
 
-  const handleIssue = useCallback(async (taskId) => {
+  const handleIssue = async (taskId) => {
     const studentIds = getSelectedForTask(taskId);
     if (studentIds.length === 0) return;
     setIssuing(prev => ({ ...prev, [taskId]: true }));
@@ -47,12 +47,19 @@ function CertificateIssuance({ tasks, communityId, onRefresh }) {
       const data = await completeTaskAndIssueCertificates(taskId, token, { studentIds });
       setResults(data);
       onRefresh?.();
+      setSelected(prev => {
+        const next = { ...prev };
+        for (const k of Object.keys(next)) {
+          if (k.startsWith(`${taskId}::`)) delete next[k];
+        }
+        return next;
+      });
     } catch {} finally {
       setIssuing(prev => ({ ...prev, [taskId]: false }));
     }
-  }, [onRefresh]);
+  };
 
-  const handleIssueAll = useCallback(async (taskId) => {
+  const handleIssueAll = async (taskId) => {
     const task = tasks.find(t => t._id === taskId);
     const allIds = (task.completedBy || []).map(c => c.userId?._id || c.userId).filter(Boolean);
     if (allIds.length === 0) return;
@@ -67,7 +74,7 @@ function CertificateIssuance({ tasks, communityId, onRefresh }) {
     } catch {} finally {
       setIssuing(prev => ({ ...prev, [taskId]: false }));
     }
-  }, [tasks, onRefresh]);
+  };
 
   if (completedTasks.length === 0) return null;
 
@@ -116,7 +123,7 @@ function CertificateIssuance({ tasks, communityId, onRefresh }) {
                   </div>
                   {completions.map((c, i) => {
                     const studentId = c.userId?._id || c.userId;
-                    const checked = selected[`${task._id}-${studentId}`] || false;
+                    const checked = selected[`${task._id}::${studentId}`] || false;
                     return (
                       <label key={i} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[0.03] cursor-pointer transition">
                         <input
