@@ -272,9 +272,10 @@ function CommunityView() {
                   <div key={i} className="flex items-start gap-2 text-xs">
                     <span className="font-medium text-gray-300 shrink-0">{msg.sender?.name || "Unknown"}:</span>
                     {msg.messageType === "voice" && msg.audioUrl ? (
-                      <div className="flex items-center gap-2">
-                        <audio src={msg.audioUrl.startsWith("http") ? msg.audioUrl : `http://localhost:5001${msg.audioUrl}`} controls className="h-7 max-w-[150px]" preload="none" />
-                        {msg.audioDuration ? <span className="text-[9px] text-gray-500 font-mono">{Math.floor(msg.audioDuration / 60)}:{String(msg.audioDuration % 60).padStart(2, "0")}</span> : null}
+                      <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] px-2.5 py-1.5 border border-white/[0.06]">
+                        <span className="text-[10px]">🎤</span>
+                        <audio src={msg.audioUrl.startsWith("http") ? msg.audioUrl : `http://localhost:5001${msg.audioUrl}`} controls className="h-8 max-w-[180px]" preload="none" />
+                        {msg.audioDuration ? <span className="text-[10px] text-gray-500 font-mono shrink-0">{Math.floor(msg.audioDuration / 60)}:{String(msg.audioDuration % 60).padStart(2, "0")}</span> : null}
                       </div>
                     ) : (
                       <span className="text-gray-500">{msg.text}</span>
