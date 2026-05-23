@@ -4,16 +4,10 @@ import { useAuth } from "../../shared/hooks/useAuth";
 import { useSocket } from "../../shared/services/SocketContext";
 import { useToast } from "../../shared/hooks/useToast";
 import {
-  getConversations,
-  getMessages,
-  sendMessage,
-  deleteMessage,
-  editMessage,
-  togglePinMessage,
-  getFriendsList,
-  getFollowedUsers,
-  searchUsersForDM,
-  getPinnedMessages,
+  getConversations, getMessages, sendMessage, sendVoiceMessage, deleteMessage, editMessage,
+  togglePinMessage, toggleReaction, uploadMessageFile, searchMessages, getPinnedMessages,
+  getFriendRequests, sendFriendRequest, respondFriendRequest, getFriendsList, removeFriend,
+  getFollowedUsers, searchUsersForDM,
 } from "../../shared/services/api";
 import FollowButton from "../../shared/components/FollowButton";
 import MessageList from "./components/MessageList";
@@ -227,6 +221,21 @@ function Messages() {
     }
   };
 
+  const handleVoiceSend = useCallback(async (blob, duration) => {
+    if (!activeChat) return;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      const data = await sendVoiceMessage(blob, activeChat, duration, token);
+      if (data?.message) {
+        setMessages((prev) => prev.some((m) => m._id === data.message._id) ? prev : [...prev, data.message]);
+        loadConversations();
+      }
+    } catch (err) {
+      addToast(err?.response?.data?.error || "Failed to send voice message", "error");
+    }
+  }, [activeChat, addToast]);
+
   const handleDelete = async (messageId) => {
     try {
       const token = localStorage.getItem("token");
@@ -385,7 +394,11 @@ function Messages() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-white">{convUser.name || "Unknown"}</p>
-                        <p className="truncate text-xs text-gray-500">{conv.lastMessage?.text || ""}</p>
+                        <p className="truncate text-xs text-gray-500">
+                          {conv.lastMessage?.messageType === "voice"
+                            ? "🎤 Voice message"
+                            : conv.lastMessage?.text || ""}
+                        </p>
                       </div>
                       <div className="flex flex-col items-end gap-1 flex-shrink-0">
                         <span className="text-[10px] text-gray-600">{formatTime(conv.lastMessage?.createdAt)}</span>
@@ -506,6 +519,7 @@ function Messages() {
               activeChat={activeChat}
               activeUser={activeUser}
               onSend={handleSend}
+              onVoiceSend={handleVoiceSend}
               socket={socket}
               replyTo={replyTo}
               onCancelReply={() => setReplyTo(null)}

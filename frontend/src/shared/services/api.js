@@ -255,8 +255,12 @@ export async function getMyCollabRequests(token) {
   return request(apiClient.get("/marketplace/collaborations", withAuth(token)));
 }
 
-export async function getCommunities(token) {
-  return request(apiClient.get("/communities", withAuth(token)));
+export async function getCommunities(token, params = {}) {
+  const query = Object.entries(params)
+    .filter(([, v]) => v !== undefined && v !== null && v !== "")
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join("&");
+  return request(apiClient.get(`/communities${query ? `?${query}` : ""}`, withAuth(token)));
 }
 
 export async function createCommunityForm(data, token) {
@@ -609,59 +613,6 @@ export async function getFriendsList(token) {
 
 export async function removeFriend(friendId, token) {
   return request(apiClient.delete(`/dm/friends/${friendId}`, withAuth(token)));
-}
-
-// ── Server API ──
-export async function getServers(token) {
-  return request(apiClient.get("/servers", withAuth(token)));
-}
-
-export async function discoverServers(token) {
-  return request(apiClient.get("/servers/discover", withAuth(token)));
-}
-
-export async function getServer(serverId, token) {
-  return request(apiClient.get(`/servers/${serverId}`, withAuth(token)));
-}
-
-export async function createServer(data, token) {
-  return request(apiClient.post("/servers", data, withAuth(token)));
-}
-
-export async function joinServer(serverId, token) {
-  return request(apiClient.post(`/servers/${serverId}/join`, {}, withAuth(token)));
-}
-
-export async function joinServerByCode(code, token) {
-  return request(apiClient.post(`/servers/join/${code}`, {}, withAuth(token)));
-}
-
-export async function leaveServer(serverId, token) {
-  return request(apiClient.post(`/servers/${serverId}/leave`, {}, withAuth(token)));
-}
-
-export async function deleteServer(serverId, token) {
-  return request(apiClient.delete(`/servers/${serverId}`, withAuth(token)));
-}
-
-export async function addChannel(serverId, data, token) {
-  return request(apiClient.post(`/servers/${serverId}/channels`, data, withAuth(token)));
-}
-
-export async function removeChannel(serverId, channelId, token) {
-  return request(apiClient.delete(`/servers/${serverId}/channels/${channelId}`, withAuth(token)));
-}
-
-export async function getServerMessages(serverId, channel, token, page = 1, limit = 30) {
-  return request(apiClient.get(`/servers/${serverId}/messages/${channel}?page=${page}&limit=${limit}`, withAuth(token)));
-}
-
-export async function sendServerMessage(serverId, channel, data, token) {
-  return request(apiClient.post(`/servers/${serverId}/messages/${channel}`, data, withAuth(token)));
-}
-
-export async function deleteServerMessage(serverId, messageId, token) {
-  return request(apiClient.delete(`/servers/${serverId}/messages/${messageId}`, withAuth(token)));
 }
 
 export async function expandNetwork(userId, token, page = 1, limit = 20) {

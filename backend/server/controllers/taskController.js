@@ -847,11 +847,11 @@ const createTask = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // ROLE-BASED ACCESS: Only TEACHER can create tasks
-    const isTeacher = requester.role === "teacher";
-    if (!isTeacher) {
+    // ROLE-BASED ACCESS: Teachers, admins, and community managers can create tasks
+    const allowedRoles = ["teacher", "admin", "community_manager"];
+    if (!allowedRoles.includes(requester.role)) {
       return res.status(403).json({
-        error: "Only teachers can create tasks",
+        error: "Only teachers, admins, or community managers can create tasks",
       });
     }
 

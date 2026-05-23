@@ -48,7 +48,7 @@ function Marketplace() {
       setPosts(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch posts:", err);
-      addToast("Failed to load projects", "error");
+      addToast(err?.response?.data?.error || err?.message || "Failed to load projects", "error");
     } finally {
       setLoading(false);
     }

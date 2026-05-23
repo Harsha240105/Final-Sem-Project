@@ -49,10 +49,19 @@ exports.createPost = async (req, res) => {
 
 exports.getPosts = async (req, res) => {
   try {
-    const { status, postType, skill, my, community, limit: reqLimit } = req.query;
+    const { search, status, postType, skill, my, community, limit: reqLimit } = req.query;
     const limit = Math.min(Number(reqLimit) || 60, 120);
     const filter = {};
 
+    if (search) {
+      const regex = new RegExp(search.trim(), "i");
+      filter.$or = [
+        { title: regex },
+        { description: regex },
+        { skills: regex },
+        { tags: regex },
+      ];
+    }
     if (postType && POST_TYPES.includes(postType)) {
       filter.postType = postType;
     }

@@ -243,7 +243,7 @@ export default function Discover() {
             )}
           </div>
           <div className="flex gap-2">
-            {["all", "student", "teacher", "admin"].map((role) => (
+            {["all", "student", "teacher"].map((role) => (
               <motion.button
                 key={role}
                 whileHover={{ scale: 1.03 }}

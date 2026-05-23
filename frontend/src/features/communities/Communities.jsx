@@ -29,7 +29,8 @@ function Communities() {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      const data = await getCommunities(token);
+      const params = search ? { search } : {};
+      const data = await getCommunities(token, params);
       setCommunities(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch communities:", err);
@@ -37,7 +38,7 @@ function Communities() {
     } finally {
       setLoading(false);
     }
-  }, [addToast]);
+  }, [addToast, search]);
 
   useEffect(() => { fetchCommunities(); }, [fetchCommunities]);
   useEffect(() => {
@@ -49,11 +50,8 @@ function Communities() {
   const categories = ["all", ...new Set(communities.map(c => c.category).filter(Boolean))];
 
   const filtered = communities.filter(c => {
-    const matchSearch = !search || c.name?.toLowerCase().includes(search.toLowerCase()) ||
-      c.description?.toLowerCase().includes(search.toLowerCase()) ||
-      c.tags?.some(t => t.toLowerCase().includes(search.toLowerCase()));
     const matchCategory = activeCategory === "all" || c.category === activeCategory;
-    return matchSearch && matchCategory;
+    return matchCategory;
   });
 
   return (

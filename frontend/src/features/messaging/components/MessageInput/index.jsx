@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import VoiceRecorder from "../VoiceRecorder";
 import { useMessageUpload } from "../../hooks/useMessageUpload";
 
-function MessageInput({ activeChat, activeUser, onSend, socket, replyTo, onCancelReply }) {
+function MessageInput({ activeChat, activeUser, onSend, onVoiceSend, socket, replyTo, onCancelReply }) {
   const [text, setText] = useState("");
   const [showVoice, setShowVoice] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -69,13 +69,10 @@ function MessageInput({ activeChat, activeUser, onSend, socket, replyTo, onCance
   const handleVoiceSend = useCallback(async (blob, duration) => {
     if (!activeChat) return;
     try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      const { sendVoiceMessage } = await import("../../../../shared/services/api");
-      await sendVoiceMessage(blob, activeChat, duration, token);
+      await onVoiceSend?.(blob, duration);
     } catch { /* silent */ }
     setShowVoice(false);
-  }, [activeChat]);
+  }, [activeChat, onVoiceSend]);
 
   // Auto-resize textarea
   useEffect(() => {

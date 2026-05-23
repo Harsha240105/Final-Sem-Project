@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../hooks/useAuth";
 import {
-  LayoutDashboard, MessageSquare, Gamepad2, Monitor,
+  LayoutDashboard, MessageSquare, Gamepad2,
   ShoppingCart, Compass, Award, Link2, Settings, Grid3X3,
 } from "lucide-react";
 
@@ -11,7 +11,6 @@ const baseLinks = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, color: "from-cyan-500 to-blue-500", glow: "shadow-cyan-500/20" },
   { to: "/messages", label: "Messages", icon: MessageSquare, color: "from-pink-500 to-rose-500", glow: "shadow-pink-500/20" },
   { to: "/communities", label: "Communities", icon: Gamepad2, color: "from-purple-500 to-indigo-500", glow: "shadow-purple-500/20" },
-  { to: "/servers", label: "Servers", icon: Monitor, color: "from-green-500 to-teal-500", glow: "shadow-green-500/20" },
   { to: "/marketplace", label: "Marketplace", icon: ShoppingCart, color: "from-orange-500 to-red-500", glow: "shadow-orange-500/20" },
   { to: "/discover", label: "Discover", icon: Compass, color: "from-cyan-500 to-purple-500", glow: "shadow-cyan-500/20" },
   { to: "/connections", label: "Connections", icon: Link2, color: "from-cyan-500 to-green-500", glow: "shadow-cyan-500/20" },

@@ -99,7 +99,7 @@ function CommunityView() {
       const formData = new FormData();
       formData.append("title", taskTitle.trim());
       formData.append("description", taskDesc.trim());
-      formData.append("communityId", id);
+      formData.append("community_id", id);
       taskFiles.forEach(f => formData.append("attachments", f));
       await createTask(formData, token);
       addToast("Task created", "success");

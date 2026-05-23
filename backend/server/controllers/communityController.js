@@ -43,7 +43,19 @@ function isValidObjectId(id) {
 // ─── GET /api/communities ───
 const getCommunities = async (req, res) => {
   try {
-    const communities = await Community.find()
+    const { search } = req.query;
+    const filter = {};
+    if (search) {
+      const regex = new RegExp(search.trim(), "i");
+      filter.$or = [
+        { name: regex },
+        { description: regex },
+        { tags: regex },
+        { category: regex },
+        { college_name: regex },
+      ];
+    }
+    const communities = await Community.find(filter)
       .populate(listPopulateFields)
       .sort({ createdAt: -1 })
       .lean();
@@ -365,8 +377,6 @@ const updateCommunity = async (req, res) => {
     console.error("updateCommunity error:", err);
     res.status(500).json({ error: "Failed to update community" });
   }
-};
-
 };
 
 // ─── DELETE /api/communities/:id/members/:memberId (admin only) ───
@@ -816,6 +826,7 @@ const getCommunityStats = async (req, res) => {
 
 module.exports = {
   getCommunities,
+  getCommunity,
   createCommunity,
   joinCommunity,
   leaveCommunity,
