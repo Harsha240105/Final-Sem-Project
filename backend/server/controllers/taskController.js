@@ -605,7 +605,7 @@ async function issueCertificateToMember({ memberId, member: providedMember, comm
       log.info(`[ISSUE CERT] 🔄 Previous certificate found with status="${existingCert.status}" for member=${memberIdString}. Will retry minting.`);
     }
   } catch (checkErr) {
-    console.error(`[ISSUE CERT] Error checking existing certificate:`, checkErr.message);
+    console.error(`[ISSUE CERT] Error checking existing certificate:`, checkErr.message, checkErr.stack);
   }
 
   log.info(`[ISSUE CERT] Starting for member=${memberIdString}, name=${member.name}, community=${community?.name}`);
@@ -723,7 +723,7 @@ async function issueCertificateToMember({ memberId, member: providedMember, comm
         redirectUrl: "/my-certificates",
       });
     } catch (notifErr) {
-      console.error(`[ISSUE CERT] ⚠️ Notification failed (non-blocking): ${notifErr.message}`);
+      console.error(`[ISSUE CERT] ⚠️ Notification failed (non-blocking): ${notifErr.message}`, notifErr.stack);
     }
 
     logCertificatePipeline("issue:success", {
@@ -773,7 +773,7 @@ async function issueCertificateToMember({ memberId, member: providedMember, comm
     try {
       await persistCertificateForMember(member, failedNftRecord);
     } catch (persistErr) {
-      console.error(`[ISSUE CERT] ❌ Failed to persist error state for certificate ${certificateId}:`, persistErr.message);
+      console.error(`[ISSUE CERT] ❌ Failed to persist error state for certificate ${certificateId}:`, persistErr.message, persistErr.stack);
     }
 
     return {
@@ -1039,8 +1039,7 @@ const completeTask = async (req, res) => {
     try {
       nftResult = await checkAndMintCertificate(userId, task.community_id._id || task.community_id);
     } catch (mintErr) {
-      // Log the error but don't fail the task completion
-      console.error("[Task Controller] NFT minting check failed (non-blocking):", mintErr.message);
+      console.error("[Task Controller] NFT minting check failed (non-blocking):", mintErr.message, mintErr.stack);
     }
 
     res.json({
@@ -1334,7 +1333,7 @@ const completeTaskAndIssueCertificates = async (req, res) => {
         }
       } catch (error) {
         failedCount++;
-        console.error(`[MINT BATCH] ❌ ERROR minting for ${student.name}:`, error.message);
+        console.error(`[MINT BATCH] ❌ ERROR minting for ${student.name}:`, error.message, error.stack);
         logCertificatePipeline("batch:certificate-error", {
           taskId: task._id.toString(),
           studentId: student._id.toString(),
@@ -1573,7 +1572,7 @@ async function checkAndMintCertificate(userId, communityId) {
       network: "Polygon Amoy Testnet",
     };
   } catch (err) {
-    console.error(`[NFT] Minting failed:`, err.message);
+    console.error(`[NFT] Minting failed:`, err.message, err.stack);
     return { skipped: true, reason: `Minting error: ${err.message}` };
   }
 }

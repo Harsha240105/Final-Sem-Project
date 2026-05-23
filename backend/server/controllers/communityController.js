@@ -300,13 +300,8 @@ const deleteCommunity = async (req, res) => {
     const community = await Community.findById(req.params.id);
     if (!community) return res.status(404).json({ error: "Community not found" });
 
-    const userId = req.user?._id?.toString();
-    const creatorId = community.createdBy?._id?.toString() || community.createdBy?.toString();
-    const isAdmin = req.user?.role === "admin";
-    const isCreator = userId && creatorId && userId === creatorId;
-
-    if (!isAdmin && !isCreator) {
-      return res.status(403).json({ error: "Access denied. Only admins or the community creator can delete." });
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Access denied. Only admins can delete communities." });
     }
 
     await Community.findByIdAndDelete(req.params.id);
@@ -725,7 +720,9 @@ async function addActivityLog(communityId, actorId, action, description = "", ta
         },
       },
     });
-  } catch { /* silent */ }
+  } catch (logErr) {
+    console.error(`[Community] addActivityLog failed:`, logErr.message, logErr.stack);
+  }
 }
 
 // ─── Phase 4: POST /api/communities/:id/complete-task ───

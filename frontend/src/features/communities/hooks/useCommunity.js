@@ -32,10 +32,19 @@ export function useCommunity(communityId) {
       const token = localStorage.getItem("token");
       if (!token) return false;
       const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.role === "admin";
+    } catch { return false; }
+  })() : false;
+
+  const canManage = community ? (() => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return false;
+      const payload = JSON.parse(atob(token.split(".")[1]));
       const uid = payload.id;
       const isCreator = String(community.createdBy?._id || community.createdBy) === uid;
-      const isTeacher = payload.role === "teacher" || payload.role === "admin";
-      return isCreator || isTeacher;
+      const elevated = payload.role === "teacher" || payload.role === "admin" || payload.role === "community_manager";
+      return isCreator || elevated;
     } catch { return false; }
   })() : false;
 
@@ -51,5 +60,5 @@ export function useCommunity(communityId) {
 
   const isArchived = community?.status === "archived";
 
-  return { community, loading, error, fetch, isAdmin, isMember, isArchived, setCommunity };
+  return { community, loading, error, fetch, isAdmin, canManage, isMember, isArchived, setCommunity };
 }

@@ -1,7 +1,6 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import axios from "axios";
-import { API_BASE_URL } from "../services/api";
+import { getCurrentUser } from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -79,12 +78,10 @@ function AuthProvider({ children }) {
     const token = localStorage.getItem("token");
     if (!token) return null;
     try {
-      const res = await axios.get(`${API_BASE_URL}/user/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data) {
+      const data = await getCurrentUser(token);
+      if (data) {
         const decoded = decodeToken(token);
-        const merged = { ...decoded, ...res.data };
+        const merged = { ...decoded, ...data };
         setUser(merged);
         return merged;
       }

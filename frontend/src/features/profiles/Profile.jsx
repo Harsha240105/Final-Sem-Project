@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
 import { useAuth } from "../../shared/hooks/useAuth";
 import { useWallet } from "../../shared/hooks/useWallet";
 import { useToast } from "../../shared/hooks/useToast";
-import { API_BASE_URL as API_URL } from "../../shared/services/api";
+import { API_BASE_URL as API_URL, getCurrentUser, uploadAvatar, removeAvatar as apiRemoveAvatar, saveWalletAddress } from "../../shared/services/api";
 import VerifiedBadge from "../../shared/components/VerifiedBadge";
 import { useNavigate } from "react-router-dom";
 const BASE_URL = API_URL.replace("/api", "");
@@ -242,11 +241,9 @@ function Profile() {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      const res = await axios.get(`${API_URL}/user/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data?.avatar) {
-        setAvatarUrl(`${BASE_URL}${res.data.avatar}`);
+      const data = await getCurrentUser(token);
+      if (data?.avatar) {
+        setAvatarUrl(`${BASE_URL}${data.avatar}`);
       }
     } catch {
       // silent
@@ -264,7 +261,7 @@ function Profile() {
     }
   }, [user?.walletAddress]);
 
-  const uploadAvatar = async (file) => {
+  const handleUploadAvatar = async (file) => {
     const token = localStorage.getItem("token");
     if (!token) {
       addToast("You must be logged in", "error");
@@ -272,31 +269,25 @@ function Profile() {
     }
     try {
       setUploading(true);
-      const formData = new FormData();
-      formData.append("avatar", file);
-      const res = await axios.post(`${API_URL}/user/avatar`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const newAvatar = `${BASE_URL}${res.data.avatar}`;
+      const data = await uploadAvatar(file, token);
+      const newAvatar = `${BASE_URL}${data.avatar}`;
       setAvatarUrl(newAvatar);
       setShowUploadModal(false);
       addToast("Avatar updated!", "success");
-      window.dispatchEvent(new CustomEvent("avatar-updated", { detail: { avatar: res.data.avatar } }));
+      window.dispatchEvent(new CustomEvent("avatar-updated", { detail: { avatar: data.avatar } }));
     } catch (err) {
       console.error("Avatar upload error:", err);
-      addToast(err.response?.data?.error || "Failed to upload avatar", "error");
+      addToast(err?.response?.data?.error || "Failed to upload avatar", "error");
     } finally {
       setUploading(false);
     }
   };
 
-  const removeAvatar = async () => {
+  const handleRemoveAvatar = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      await axios.delete(`${API_URL}/user/avatar`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await apiRemoveAvatar(token);
       setAvatarUrl(null);
       addToast("Avatar removed", "success");
       window.dispatchEvent(new CustomEvent("avatar-updated", { detail: { avatar: null } }));
@@ -320,17 +311,13 @@ function Profile() {
     }
 
     try {
-      const res = await axios.put(
-        `${API_URL}/user/wallet`,
-        { walletAddress },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await saveWalletAddress(walletAddress, token);
       setWalletAddressStored(walletAddress);
       addToast("Wallet saved and connected!", "success");
       return true;
     } catch (err) {
       console.error("Wallet save error:", err);
-      addToast(err.response?.data?.message || "Failed to save wallet", "error");
+      addToast(err?.response?.data?.message || "Failed to save wallet", "error");
       return false;
     }
   };
@@ -345,11 +332,7 @@ function Profile() {
 
     try {
       setRemovingWallet(true);
-      await axios.put(
-        `${API_URL}/user/wallet`,
-        { walletAddress: null },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await saveWalletAddress(null, token);
       setWalletAddressStored(null);
       disconnectWallet(); // Disconnect from MetaMask locally
       addToast("Wallet disconnected and removed from account", "success");
@@ -419,7 +402,7 @@ function Profile() {
                 </div>
               </motion.div>
               {avatarUrl && (
-                <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} onClick={removeAvatar}
+                <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} onClick={handleRemoveAvatar}
                   className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white text-xs shadow-lg hover:bg-red-400 transition z-10"
                   whileTap={{ scale: 0.85 }}>✕</motion.button>
               )}
@@ -611,7 +594,7 @@ function Profile() {
         {showUploadModal && (
           <AvatarUploadModal
             onClose={() => setShowUploadModal(false)}
-            onUpload={uploadAvatar}
+            onUpload={handleUploadAvatar}
             uploading={uploading}
           />
         )}

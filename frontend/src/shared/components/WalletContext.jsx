@@ -1,9 +1,8 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
-import axios from "axios";
 import { useToast } from "../hooks/useToast";
-import { API_BASE_URL as API_URL } from "../services/api";
+import { saveWalletAddress } from "../services/api";
 
 const WalletContext = createContext(null);
 
@@ -58,11 +57,7 @@ function WalletProvider({ children }) {
         const token = localStorage.getItem("token");
         if (token) {
           try {
-            await axios.put(
-              `${API_URL}/user/wallet`,
-              { walletAddress: connectedAccount },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await saveWalletAddress(connectedAccount, token);
             window.dispatchEvent(new CustomEvent("wallet-updated"));
           } catch (saveErr) {
             console.error("Failed to save wallet to backend:", saveErr);

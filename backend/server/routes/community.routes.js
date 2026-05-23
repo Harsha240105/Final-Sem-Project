@@ -73,7 +73,7 @@ router.get("/", authMiddleware, getCommunities);
 router.get("/:id", authMiddleware, getCommunity);
 router.post("/", authMiddleware, teacherApprovedAuth, communityUpload, createCommunity);
 router.put("/:id", authMiddleware, communityUpload, updateCommunity);
-router.delete("/:id", elevatedAuth, deleteCommunity);
+router.delete("/:id", adminOnly, deleteCommunity);
 
 // ─── Membership ───
 router.post("/:id/join", authMiddleware, joinCommunity);

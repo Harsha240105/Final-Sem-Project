@@ -58,8 +58,23 @@ function normalizeApiError(error) {
     return error;
   }
 
+  if (error.response?.status === 401) {
+    error.message = error.response?.data?.error || "Session expired. Please login again.";
+    return error;
+  }
+
+  if (error.response?.status === 403) {
+    error.message = error.response?.data?.error || "You do not have permission to perform this action.";
+    return error;
+  }
+
   if (error.response?.status === 404) {
     error.message = error.response?.data?.error || "API route not found. Verify frontend path matches backend route.";
+    return error;
+  }
+
+  if (error.response?.status === 500) {
+    error.message = error.response?.data?.error || "Internal server error. Check backend logs for details.";
     return error;
   }
 
@@ -303,12 +318,23 @@ export async function deleteCommunityMessage(communityId, messageId, token) {
 }
 
 export async function deleteCollabMessage(communityId, collabId, messageId, token) {
-  return request(
-    apiClient.delete(
-      `/communities/${communityId}/collab/${collabId}/message/${messageId}`,
-      withAuth(token)
-    )
-  );
+  return request(apiClient.delete(`/communities/${communityId}/collab/${collabId}/message/${messageId}`, withAuth(token)));
+}
+
+export async function createCommunityCollab(communityId, data, token) {
+  return request(apiClient.post(`/communities/${communityId}/collab/create`, data, withAuth(token)));
+}
+
+export async function joinCommunityCollab(communityId, collabId, token) {
+  return request(apiClient.post(`/communities/${communityId}/collab/${collabId}/join`, {}, withAuth(token)));
+}
+
+export async function sendCollabMessage(communityId, collabId, text, token) {
+  return request(apiClient.post(`/communities/${communityId}/collab/${collabId}/message`, { text }, withAuth(token)));
+}
+
+export async function getCollabMessages(communityId, collabId, token) {
+  return request(apiClient.get(`/communities/${communityId}/collab/${collabId}/messages`, withAuth(token)));
 }
 
 export async function completeCommunityTask(communityId, token) {
@@ -727,6 +753,49 @@ export async function addCanvasEdge(canvasId, data, token) {
 
 export async function deleteCanvasEdge(canvasId, edgeId, token) {
   return request(apiClient.delete(`/canvas/${canvasId}/edges/${edgeId}`, withAuth(token)));
+}
+
+// ── Auth helpers (used by Login.jsx) ──
+export async function getAuthNonce() {
+  return request(apiClient.get("/auth/nonce"));
+}
+
+export async function registerWallet(data) {
+  return request(apiClient.post("/auth/register", data));
+}
+
+// ── Profile helpers ──
+export async function getCurrentUser(token) {
+  return request(apiClient.get("/user/me", withAuth(token)));
+}
+
+export async function uploadAvatar(file, token) {
+  const fd = new FormData();
+  fd.append("avatar", file);
+  return request(apiClient.post("/user/avatar", fd, withAuth(token)));
+}
+
+export async function removeAvatar(token) {
+  return request(apiClient.delete("/user/avatar", withAuth(token)));
+}
+
+export async function uploadBanner(file, token) {
+  const fd = new FormData();
+  fd.append("banner", file);
+  return request(apiClient.put("/user/banner", fd, withAuth(token)));
+}
+
+// ── Community helpers (used by CommunityView.jsx) ──
+export async function addCommunityComment(communityId, text, token) {
+  return request(apiClient.post(`/communities/${communityId}/comment`, { text }, withAuth(token)));
+}
+
+export async function updateCommunity(communityId, data, token) {
+  return request(apiClient.put(`/communities/${communityId}`, data, withAuth(token)));
+}
+
+export async function removeCommunityMember(communityId, memberId, token) {
+  return request(apiClient.delete(`/communities/${communityId}/members/${memberId}`, withAuth(token)));
 }
 
 

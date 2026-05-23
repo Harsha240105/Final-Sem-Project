@@ -36,8 +36,30 @@ const storage = multer.diskStorage({
   filename: (_req, file, cb) => cb(null, sanitizeFilename(file)),
 });
 
+const ALLOWED_MIMES = [
+  "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml",
+  "video/mp4", "video/webm", "video/ogg", "video/quicktime",
+  "audio/webm", "audio/mp3", "audio/ogg", "audio/wav", "audio/mp4",
+  "application/pdf", "application/zip", "application/x-zip-compressed",
+  "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "text/plain", "text/csv", "application/json", "application/rtf",
+  "application/x-rar-compressed", "application/x-7z-compressed", "application/gzip",
+  "text/markdown",
+];
+
+function fileFilter(_req, file, cb) {
+  if (ALLOWED_MIMES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error(`File type "${file.mimetype}" is not allowed for task uploads`), false);
+  }
+}
+
 const upload = multer({
   storage,
+  fileFilter,
   limits: { fileSize: 2 * 1024 * 1024 * 1024, files: 50 },
 });
 

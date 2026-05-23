@@ -9,7 +9,7 @@ const MintProgressStepSchema = new mongoose.Schema({
 const CertificateSchema = new mongoose.Schema(
   {
 certificateId: { type: String, required: true, index: true },
-  issuanceId: { type: String, sparse: true },
+  issuanceId: { type: String },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -109,7 +109,6 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-UserSchema.index({ walletAddress: 1 }, { unique: true });
 UserSchema.index({ did: 1 }, { sparse: true });
 UserSchema.index({ role: 1, verificationStatus: 1 });
 UserSchema.index({ role: 1, approved: 1 });

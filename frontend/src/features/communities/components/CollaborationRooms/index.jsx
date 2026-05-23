@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useToast } from "../../../../shared/hooks/useToast";
 import { formatTime } from "../../utils";
+import { createCommunityCollab, joinCommunityCollab, getCollabMessages } from "../../../../shared/services/api";
 
 function CollaborationRooms({ community, isMember, isArchived, onRefresh }) {
   const { addToast } = useToast();
@@ -17,8 +18,7 @@ function CollaborationRooms({ community, isMember, isArchived, onRefresh }) {
     try {
       const token = localStorage.getItem("token");
       if (!token || !community?._id) return;
-      const { default: api } = await import("../../../../shared/services/api");
-      const res = await api.getCollabMessages(community._id, collabId, token);
+      const res = await getCollabMessages(community._id, collabId, token);
       setCollabMessages(res?.messages || []);
     } catch { /* silent */ }
   }, [community?._id]);
@@ -32,21 +32,16 @@ function CollaborationRooms({ community, isMember, isArchived, onRefresh }) {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      const response = await fetch(
-        `${(window.__API_BASE_URL__ || "http://localhost:5001/api").replace(/\/api\/?$/, "")}/api/communities/${community._id}/collab/create`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ projectTitle: title.trim(), description: description.trim() }),
-        }
+      await createCommunityCollab(
+        community._id,
+        { projectTitle: title.trim(), description: description.trim() },
+        token
       );
-      if (response.ok) {
-        addToast("Collaboration created", "success");
-        setTitle("");
-        setDescription("");
-        setCreating(false);
-        onRefresh?.();
-      }
+      addToast("Collaboration created", "success");
+      setTitle("");
+      setDescription("");
+      setCreating(false);
+      onRefresh?.();
     } catch {
       addToast("Failed to create", "error");
     }
@@ -56,13 +51,7 @@ function CollaborationRooms({ community, isMember, isArchived, onRefresh }) {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      await fetch(
-        `${(window.__API_BASE_URL__ || "http://localhost:5001/api").replace(/\/api\/?$/, "")}/api/communities/${community._id}/collab/${collabId}/join`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        }
-      );
+      await joinCommunityCollab(community._id, collabId, token);
       addToast("Joined collaboration", "success");
       onRefresh?.();
     } catch {

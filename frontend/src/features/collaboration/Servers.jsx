@@ -1080,7 +1080,7 @@ function Servers() {
                 {activeServer?.inviteCode && (
                   <button onClick={() => {
                     const link = `${window.location.origin}/join-server?code=${activeServer.inviteCode}`;
-                    navigator.clipboard?.writeText(link);
+                    try { navigator.clipboard?.writeText(link); } catch {}
                     addToast("Invite link copied!", "success");
                   }} className="text-gray-500 hover:text-cyan-400 transition" title="Copy invite link">
                     <UserPlus className="w-3.5 h-3.5" />

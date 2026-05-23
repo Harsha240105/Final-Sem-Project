@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
 import { useAuth } from "../../shared/hooks/useAuth";
 import { useToast } from "../../shared/hooks/useToast";
-import { API_BASE_URL as API_URL, updateProfile, checkUsername, deleteAccount } from "../../shared/services/api";
+import { API_BASE_URL as API_URL, updateProfile, checkUsername, deleteAccount, uploadAvatar, uploadBanner } from "../../shared/services/api";
 
 const BASE_URL = API_URL.replace("/api", "");
 
@@ -86,11 +85,7 @@ function ProfileSettings() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const fd = new FormData();
-      fd.append("avatar", file);
-      const res = await axios.post(`${API_URL}/user/avatar`, fd, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await uploadAvatar(file, token);
       addToast("Avatar updated!", "success");
     } catch (err) {
       addToast(err?.response?.data?.error || "Failed to upload avatar", "error");
@@ -105,11 +100,7 @@ function ProfileSettings() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const fd = new FormData();
-      fd.append("banner", file);
-      const res = await axios.put(`${API_URL}/user/banner`, fd, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await uploadBanner(file, token);
       addToast("Banner updated!", "success");
     } catch (err) {
       addToast(err?.response?.data?.error || "Failed to upload banner", "error");

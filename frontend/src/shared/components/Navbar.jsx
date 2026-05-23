@@ -3,10 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
-import { API_BASE_URL as API_URL } from "../services/api";
+import { getCurrentUser } from "../services/api";
 import NotificationBell from "./NotificationBell";
-const BASE_URL = API_URL.replace("/api", "");
 
 function getInitials(name) {
   if (!name) return "?";
@@ -25,11 +23,9 @@ function Navbar({ onToggleSidebar }) {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      const res = await axios.get(`${API_URL}/user/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data?.avatar) {
-        setAvatarUrl(`${BASE_URL}${res.data.avatar}`);
+      const data = await getCurrentUser(token);
+      if (data?.avatar) {
+        setAvatarUrl(`${(import.meta.env.VITE_API_BASE_URL || "http://localhost:5001")}${data.avatar}`);
       }
     } catch {
       /* silent */

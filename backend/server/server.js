@@ -28,6 +28,7 @@ const dmRoutes = require("./routes/dm.routes");
 const verificationRoutes = require("./routes/verification.routes");
 const networkRoutes = require("./routes/network.routes");
 const canvasRoutes = require("./routes/canvas.routes");
+const serverRoutes = require("./routes/server.routes");
 const setupSocket = require("./socket");
 
 const app = express();
@@ -190,6 +191,7 @@ app.use("/api/verify", verificationRoutes);
 app.use("/api/network", networkRoutes);
 app.use("/api/canvas", canvasRoutes);
 app.use("/api/social", require("./routes/social.routes"));
+app.use("/api/servers", serverRoutes);
 app.use((req, res) => {
   console.warn(`[404] ${req.method} ${req.originalUrl}`);
   res.status(404).json({
@@ -325,9 +327,20 @@ mongoose.connection.on("connected", async () => {
   }
 
   // Ensure Follow collection unique index exists (prevents duplicate follows)
+  // Remove duplicates first then create index
   try {
     const db = mongoose.connection.db;
     if (db) {
+      const dupPipeline = [
+        { $group: { _id: { follower: "$follower", following: "$following" }, count: { $sum: 1 }, ids: { $push: "$_id" } } },
+        { $match: { count: { $gt: 1 } } },
+      ];
+      const dups = await db.collection("follows").aggregate(dupPipeline).toArray();
+      for (const dup of dups) {
+        const [_first, ...rest] = dup.ids;
+        await db.collection("follows").deleteMany({ _id: { $in: rest } });
+        console.log(`[SERVER] Cleaned ${rest.length} duplicate follow(s) for follower=${dup._id.follower} following=${dup._id.following}`);
+      }
       const followsIndexes = await db.collection("follows").indexes();
       const hasUniqueIndex = followsIndexes.some(
         (idx) => idx.key?.follower === 1 && idx.key?.following === 1 && idx.unique === true
@@ -342,7 +355,11 @@ mongoose.connection.on("connected", async () => {
       }
     }
   } catch (idxErr) {
-    console.error("[SERVER] Follow index sync error:", idxErr.message);
+    if (idxErr.message && (idxErr.message.includes("E11000") || idxErr.message.includes("duplicate key"))) {
+      console.warn("[SERVER] Follow index already exists (duplicates cleaned).");
+    } else {
+      console.error("[SERVER] Follow index sync error:", idxErr.message);
+    }
   }
 });
 

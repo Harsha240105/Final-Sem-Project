@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../shared/hooks/useAuth";
 import { useToast } from "../../shared/hooks/useToast";
@@ -11,6 +12,9 @@ import {
   sendCommunityMessage as apiSendMessage,
   sendCommunityVoiceMessage as apiSendVoiceMessage,
   deleteCommunity as apiDeleteCommunity,
+  addCommunityComment,
+  updateCommunity as apiUpdateCommunity,
+  removeCommunityMember as apiRemoveMember,
 } from "../../shared/services/api";
 import VoiceRecorder from "../messaging/components/VoiceRecorder";
 import { useCommunity } from "./hooks/useCommunity";
@@ -25,6 +29,7 @@ import CollaborationRooms from "./components/CollaborationRooms";
 import MemberManagement from "./components/MemberManagement";
 import ArchiveView from "./components/ArchiveView";
 import CommunityTimeline from "./components/CommunityTimeline";
+import EditCommunityModal from "./components/EditCommunityModal";
 import CompletionControls from "./components/CompletionControls";
 import ResourceLibrary from "./components/ResourceLibrary";
 
@@ -34,7 +39,10 @@ function CommunityView() {
   const { user } = useAuth();
   const { addToast } = useToast();
   const { socket } = useSocket();
-  const { community, loading, error, fetch, isAdmin, isMember, isArchived, setCommunity } = useCommunity(id);
+  const { community, loading, error, fetch, isAdmin, canManage, isMember, isArchived, setCommunity } = useCommunity(id);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [tasks, setTasks] = useState([]);
   const [activeSection, setActiveSection] = useState("overview");
@@ -117,15 +125,9 @@ function CommunityView() {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      const response = await fetch(
-        `${(window.__API_BASE_URL__ || "http://localhost:5001/api").replace(/\/api\/?$/, "")}/api/communities/${id}/comment`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ text: commentText.trim() }),
-        }
-      );
-      if (response.ok) { setCommentText(""); fetch(); }
+      await addCommunityComment(id, commentText.trim(), token);
+      setCommentText("");
+      fetch();
     } catch { /* silent */ }
   };
 
@@ -154,14 +156,7 @@ function CommunityView() {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      await fetch(
-        `${(window.__API_BASE_URL__ || "http://localhost:5001/api").replace(/\/api\/?$/, "")}/api/communities/${id}`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ rules }),
-        }
-      );
+      await apiUpdateCommunity(id, { rules }, token);
       addToast("Rules updated", "success");
       fetch();
     } catch { addToast("Failed to update", "error"); }
@@ -171,10 +166,7 @@ function CommunityView() {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      await fetch(
-        `${(window.__API_BASE_URL__ || "http://localhost:5001/api").replace(/\/api\/?$/, "")}/api/communities/${id}/members/${memberId}`,
-        { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }
-      );
+      await apiRemoveMember(id, memberId, token);
       addToast("Member removed", "success");
       fetch();
     } catch { addToast("Failed to remove", "error"); }
@@ -212,18 +204,18 @@ function CommunityView() {
     { id: "resources", label: `Resources (${community.resources?.length || 0})`, icon: "📚" },
     { id: "members", label: `Members (${community.members?.length || 0})`, icon: "👥" },
     { id: "activity", label: "Activity", icon: "📜" },
-    ...(isAdmin ? [{ id: "manage", label: "Manage", icon: "⚙️" }] : []),
+    ...(canManage ? [{ id: "manage", label: "Manage", icon: "⚙️" }] : []),
   ];
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 space-y-4">
       <CommunityHeader
         community={community}
-        isAdmin={isAdmin}
+        isAdmin={canManage}
         isMember={isMember}
         onJoin={handleJoin}
         onLeave={handleLeave}
-        onEdit={() => navigate(`/communities/${id}/edit`)}
+        onEdit={() => setShowEditModal(true)}
       />
 
       {/* Section Tabs */}
@@ -269,7 +261,7 @@ function CommunityView() {
             </div>
           </div>
 
-          <CommunityRules rules={community.rules} isAdmin={isAdmin} onSave={handleUpdateRules} />
+          <CommunityRules rules={community.rules} isAdmin={canManage} onSave={handleUpdateRules} />
 
           {/* Community Chat */}
           {!isArchived && (
@@ -363,7 +355,7 @@ function CommunityView() {
       {/* Tasks Section */}
       {activeSection === "tasks" && (
         <div className="space-y-4">
-          {isAdmin && !isArchived && (
+          {canManage && !isArchived && (
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowCreateTask(!showCreateTask)}
@@ -386,16 +378,16 @@ function CommunityView() {
             </div>
           )}
 
-          <TaskBoard tasks={tasks} communityId={id} isAdmin={isAdmin} isArchived={isArchived} onRefresh={loadTasks} />
+          <TaskBoard tasks={tasks} communityId={id} isAdmin={canManage} isArchived={isArchived} onRefresh={loadTasks} />
 
           {/* Teacher: Issue certificates per task */}
-          {isAdmin && !isArchived && tasks.length > 0 && (
+          {canManage && !isArchived && tasks.length > 0 && (
             <CertificateIssuance tasks={tasks} communityId={id} onRefresh={loadTasks} />
           )}
 
           {/* Submissions per task */}
           {tasks.map(task => (
-            <SubmissionPanel key={task._id} task={task} communityId={id} isAdmin={isAdmin} isArchived={isArchived} />
+            <SubmissionPanel key={task._id} task={task} communityId={id} isAdmin={canManage} isArchived={isArchived} />
           ))}
         </div>
       )}
@@ -412,12 +404,12 @@ function CommunityView() {
 
       {/* Resources Section */}
       {activeSection === "resources" && (
-        <ResourceLibrary resources={community.resources || []} communityId={id} isAdmin={isAdmin} isArchived={isArchived} onRefresh={fetch} />
+        <ResourceLibrary resources={community.resources || []} communityId={id} isAdmin={canManage} isArchived={isArchived} onRefresh={fetch} />
       )}
 
       {/* Members Section */}
       {activeSection === "members" && (
-        <MemberManagement members={community.members || []} isAdmin={isAdmin} isArchived={isArchived} onRemove={handleRemoveMember} />
+        <MemberManagement members={community.members || []} isAdmin={canManage} isArchived={isArchived} onRemove={handleRemoveMember} />
       )}
 
       {/* Activity Timeline */}
@@ -425,30 +417,96 @@ function CommunityView() {
         <CommunityTimeline communityId={id} />
       )}
 
-      {/* Manage Section (Admin only) */}
-      {activeSection === "manage" && isAdmin && (
+      {/* Manage Section */}
+      {activeSection === "manage" && canManage && (
         <div className="space-y-4">
           <CompletionControls community={community} onRefresh={fetch} />
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
             <h3 className="text-sm font-semibold text-white mb-3">🏛️ Community Settings</h3>
             <p className="text-[10px] text-gray-500 mb-3">Community ID: {community.publicId || community._id}</p>
-            <button
-              onClick={async () => {
-                try {
-                  const token = localStorage.getItem("token");
-                  if (!token) return;
-                  await apiDeleteCommunity(id, token);
-                  addToast("Community deleted", "success");
-                  navigate("/communities");
-                } catch { addToast("Failed to delete", "error"); }
-              }}
-              className="rounded-lg border border-red-500/20 px-4 py-2 text-xs text-red-400 hover:bg-red-500/10 transition"
-            >
-              Delete Community
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="rounded-lg border border-cyan-500/20 px-4 py-2 text-xs text-cyan-400 hover:bg-cyan-500/10 transition"
+              >
+                Edit Community
+              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="rounded-lg border border-red-500/20 px-4 py-2 text-xs text-red-400 hover:bg-red-500/10 transition"
+                >
+                  Delete Community
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDeleteConfirm(false)}
+          >
+            <motion.div
+              className="w-full max-w-sm rounded-xl border border-red-500/20 bg-gray-950 p-6 shadow-2xl"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-lg font-bold text-white">Delete Community?</h2>
+              <p className="mt-2 text-sm text-gray-400">
+                This action cannot be undone. All tasks, submissions, messages, and member data will be permanently removed.
+              </p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 rounded-lg border border-white/[0.08] px-4 py-2 text-sm text-gray-300 transition hover:bg-white/[0.04]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={deleting}
+                  onClick={async () => {
+                    try {
+                      setDeleting(true);
+                      const token = localStorage.getItem("token");
+                      if (!token) return;
+                      await apiDeleteCommunity(id, token);
+                      addToast("Community deleted", "success");
+                      navigate("/communities");
+                    } catch { addToast("Failed to delete", "error"); }
+                    finally { setDeleting(false); }
+                  }}
+                  className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-400 disabled:opacity-50"
+                >
+                  {deleting ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Community Modal */}
+      <AnimatePresence>
+        {showEditModal && (
+          <EditCommunityModal
+            community={community}
+            onClose={() => setShowEditModal(false)}
+            onSaved={() => { setShowEditModal(false); fetch(); }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

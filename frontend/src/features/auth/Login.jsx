@@ -2,10 +2,9 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useConnect, useAccount, useSignMessage, useDisconnect, useSwitchChain } from "wagmi";
-import axios from "axios";
 import { useAuth } from "../../shared/hooks/useAuth";
 import { useToast } from "../../shared/hooks/useToast";
-import { walletLogin, checkWallet, API_BASE_URL } from "../../shared/services/api";
+import { walletLogin, checkWallet, getAuthNonce, registerWallet } from "../../shared/services/api";
 
 
 function getInitials(name) {
@@ -159,8 +158,8 @@ function Login() {
     if (!walletAddress || !existingUser) return;
     setSigning(true);
     try {
-      const nonceRes = await axios.get(`${API_BASE_URL}/auth/nonce`);
-      const nonce = nonceRes.data.nonce;
+      const nonceRes = await getAuthNonce();
+      const nonce = nonceRes.nonce;
       const message = `Web3Connect Authentication\n\nWallet:\n${walletAddress.toLowerCase()}\n\nRole:\n${existingUser.role}\n\nNonce:\n${nonce}`;
       if (!activeConnector) {
         const target = metaMaskConnector || connectors[0];
@@ -190,8 +189,8 @@ function Login() {
     setSelectedRole(role);
     setSigning(true);
     try {
-      const nonceRes = await axios.get(`${API_BASE_URL}/auth/nonce`);
-      const nonce = nonceRes.data.nonce;
+      const nonceRes = await getAuthNonce();
+      const nonce = nonceRes.nonce;
       const message = `Web3Connect Authentication\n\nWallet:\n${walletAddress.toLowerCase()}\n\nRole:\n${role}\n\nNonce:\n${nonce}`;
       if (!activeConnector) {
         const target = metaMaskConnector || connectors[0];
@@ -203,7 +202,7 @@ function Login() {
         }
       }
       const signature = await signMessageAsync({ message });
-      const res = await axios.post(`${API_BASE_URL}/auth/register`, {
+      const res = await registerWallet({
         address: walletAddress.toLowerCase(),
         signature,
         message,
