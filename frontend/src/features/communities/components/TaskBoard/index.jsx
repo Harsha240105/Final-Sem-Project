@@ -1,11 +1,13 @@
 import { useState, memo } from "react";
 import { markTaskCompletedByStudent, uploadTaskFile } from "../../../../shared/services/api";
+import { useToast } from "../../../../shared/hooks/useToast";
 import TaskCard from "../TaskCard";
 import TaskDetailModal from "../TaskDetailModal";
 
 const TASK_FILTERS = ["all", "active", "submitted", "completed"];
 
 function TaskBoard({ tasks = [], communityId, isAdmin, isArchived, onRefresh }) {
+  const { addToast } = useToast();
   const [filter, setFilter] = useState("all");
   const [submitting, setSubmitting] = useState({});
   const [selectedTask, setSelectedTask] = useState(null);
@@ -22,10 +24,13 @@ function TaskBoard({ tasks = [], communityId, isAdmin, isArchived, onRefresh }) 
     try {
       setSubmitting(prev => ({ ...prev, [taskId]: true }));
       const token = localStorage.getItem("token");
-      if (!token) return;
+      if (!token) { addToast("Please log in first", "error"); return; }
       await markTaskCompletedByStudent(taskId, token);
+      addToast("Task marked as complete!", "success");
       onRefresh?.();
-    } catch { /* silent */ } finally {
+    } catch (err) {
+      addToast(err?.response?.data?.error || err?.message || "Failed to mark complete", "error");
+    } finally {
       setSubmitting(prev => ({ ...prev, [taskId]: false }));
     }
   };
