@@ -6,7 +6,6 @@ import { useSocket } from "../../shared/services/SocketContext";
 import {
   getTasksByCommunity,
   createTask,
-  completeTaskAndIssueCertificates,
   joinCommunity as apiJoin,
   leaveCommunity as apiLeave,
   sendCommunityMessage as apiSendMessage,
@@ -20,6 +19,7 @@ import CommunityHeader from "./components/CommunityHeader";
 import CommunityRules from "./components/CommunityRules";
 import TaskBoard from "./components/TaskBoard";
 import TaskStats from "./components/TaskStats";
+import CertificateIssuance from "./components/CertificateIssuance";
 import SubmissionPanel from "./components/SubmissionPanel";
 import CollaborationRooms from "./components/CollaborationRooms";
 import MemberManagement from "./components/MemberManagement";
@@ -42,7 +42,6 @@ function CommunityView() {
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
   const [taskFiles, setTaskFiles] = useState([]);
-  const [issuing, setIssuing] = useState({});
   const [commentText, setCommentText] = useState("");
   const [msgText, setMsgText] = useState("");
   const [showVoice, setShowVoice] = useState(false);
@@ -111,19 +110,6 @@ function CommunityView() {
       setShowCreateTask(false);
       loadTasks();
     } catch { addToast("Failed to create task", "error"); }
-  };
-
-  const handleIssueCertificates = async (taskId) => {
-    setIssuing(prev => ({ ...prev, [taskId]: true }));
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      await completeTaskAndIssueCertificates(taskId, token);
-      addToast("Certificates issued", "success");
-      loadTasks();
-    } catch { addToast("Failed to issue", "error"); } finally {
-      setIssuing(prev => ({ ...prev, [taskId]: false }));
-    }
   };
 
   const handleAddComment = async () => {
@@ -404,23 +390,7 @@ function CommunityView() {
 
           {/* Teacher: Issue certificates per task */}
           {isAdmin && !isArchived && tasks.length > 0 && (
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <h3 className="text-sm font-semibold text-white mb-3">🎓 Certificate Issuance</h3>
-              <div className="space-y-2">
-                {tasks.filter(t => t.completed_status).map(task => (
-                  <div key={task._id} className="flex items-center justify-between rounded-lg bg-white/[0.02] border border-white/[0.04] px-3 py-2">
-                    <p className="text-xs text-white truncate flex-1">{task.title}</p>
-                    <button
-                      onClick={() => handleIssueCertificates(task._id)}
-                      disabled={issuing[task._id]}
-                      className="rounded-lg bg-purple-500/20 px-3 py-1 text-[10px] font-semibold text-purple-400 hover:bg-purple-500/30 disabled:opacity-40 transition"
-                    >
-                      {issuing[task._id] ? "Issuing..." : "Issue NFTs"}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <CertificateIssuance tasks={tasks} communityId={id} onRefresh={loadTasks} />
           )}
 
           {/* Submissions per task */}
