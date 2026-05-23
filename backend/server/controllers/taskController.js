@@ -575,10 +575,11 @@ async function issueCertificateToMember({ memberId, member: providedMember, comm
     }
   }
 
-  // ── IDEMPOTENCY CHECK: Skip if certificate already completed for this user+community ──
+  // ── IDEMPOTENCY CHECK: Skip if certificate already completed for this user+task ──
   // Allow retrying failed certificates (status != "completed"/"claimed"/"confirmed")
   try {
     const existingQuery = { userId: member._id, communityId: community?._id };
+    if (taskId) existingQuery.taskId = taskId;
     const existingCert = await Certificate.findOne(existingQuery).lean();
     if (existingCert) {
       const completedStatuses = ["completed", "claimed", "confirmed"];
@@ -1237,11 +1238,12 @@ const completeTaskAndIssueCertificates = async (req, res) => {
       });
     }
 
-    // ─── FILTER: Skip students who already have a COMPLETED certificate for this community ───
+    // ─── FILTER: Skip students who already have a COMPLETED certificate for THIS task ───
     // Allow retrying failed certificates
     const existingCerts = await Certificate.find({
       userId: { $in: eligibleStudents.map((s) => s._id) },
       communityId: community._id,
+      taskId: task._id,
     }).select("userId status").lean();
     const completedStatuses = ["completed", "claimed", "confirmed"];
     const userIdsWithCompletedCert = new Set(
