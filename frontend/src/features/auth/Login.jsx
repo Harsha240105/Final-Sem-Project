@@ -95,71 +95,58 @@ function Login() {
     [connectors]
   );
 
+  const doCheckAfterConnect = useCallback(async (account) => {
+    if (!account) return;
+    setWalletAddress(account);
+    setChecking(true);
+    try {
+      const response = await checkWallet(account.toLowerCase());
+      if (response?.exists) {
+        setExistingUser(response.user);
+        setStep(tab === "login" ? "welcome-back" : "exists");
+      } else {
+        setStep(tab === "login" ? "not-found" : "register");
+      }
+    } catch {
+      setStep(tab === "login" ? "not-found" : "register");
+    } finally {
+      setChecking(false);
+    }
+  }, [tab]);
+
   const handleConnect = useCallback(async (connector) => {
     const target = connector || metaMaskConnector || connectors[0];
     if (!target) { addToast("No wallet connector available. Please install a wallet.", "error"); return; }
     try {
-      if (isConnected) await disconnectAsync();
+      // If already connected, skip disconnect/reconnect cycle and use existing connection.
+      // This avoids setting the shimDisconnect flag that defeats autoConnect on next page load.
+      if (isConnected && address) {
+        await doCheckAfterConnect(address);
+        return;
+      }
       const result = await connectAsync({ connector: target });
       const account = result?.accounts?.[0];
       if (!account) { addToast("No account found", "error"); return; }
-      setWalletAddress(account);
       const connectedChainId = result?.chainId || chainId;
       if (connectedChainId && connectedChainId !== 80002) {
         try { await switchChainAsync({ chainId: 80002 }); } catch { /* user may reject chain switch */ }
       }
-      setChecking(true);
-      try {
-        const response = await checkWallet(account.toLowerCase());
-        if (response?.exists) {
-          if (tab === "login") {
-            setExistingUser(response.user);
-            setStep("welcome-back");
-          } else {
-            setExistingUser(response.user);
-            setStep("exists");
-          }
-        } else {
-          setStep(tab === "login" ? "not-found" : "register");
-        }
-      } catch {
-        setStep(tab === "login" ? "not-found" : "register");
-      } finally {
-        setChecking(false);
-      }
+      await doCheckAfterConnect(account);
     } catch (err) {
       if (err?.code === 4001 || err?.name === "UserRejectedRequestError") {
         addToast("Connection cancelled", "info");
       } else if (err?.message?.includes("already connected")) {
-        try {
-          await disconnectAsync();
-          const result = await connectAsync({ connector: target });
-          const account = result?.accounts?.[0];
-          if (!account) return;
-          setWalletAddress(account);
-          setChecking(true);
-          const response = await checkWallet(account.toLowerCase());
-          if (response?.exists) {
-            if (tab === "login") {
-              setExistingUser(response.user);
-              setStep("welcome-back");
-            } else {
-              setExistingUser(response.user);
-              setStep("exists");
-            }
-          } else {
-            setStep(tab === "login" ? "not-found" : "register");
-          }
-        } catch {
-          addToast("Connection failed after retry", "error");
-        } finally {
-          setChecking(false);
+        // Wallet reports already connected — use the currently connected address directly
+        if (address) {
+          await doCheckAfterConnect(address);
+        } else {
+          addToast("Wallet is connected but no address found. Please reconnect.", "error");
         }
       } else {
         addToast(err?.message || "Failed to connect wallet", "error");
       }
     }
-  }, [connectAsync, connectors, metaMaskConnector, tab, addToast, isConnected, disconnectAsync, switchChainAsync]);
+  }, [connectAsync, connectors, metaMaskConnector, tab, addToast, isConnected, address, switchChainAsync, doCheckAfterConnect]);
 
   const handleExistingLogin = useCallback(async () => {
     if (!walletAddress || !existingUser) return;

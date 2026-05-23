@@ -12,7 +12,7 @@ export const config = createConfig({
     [polygon.id]: http("https://polygon-rpc.com"),
   },
   connectors: [
-    metaMask({ shimDisconnect: true }),
+    metaMask({ shimDisconnect: false }),
     coinbaseWallet({ appName: "Web3Connect" }),
     walletConnect({ projectId: WC_PROJECT_ID, showQrModal: false }),
   ],
