@@ -5,7 +5,7 @@ import { metaMask, walletConnect, coinbaseWallet } from "wagmi/connectors";
 const WC_PROJECT_ID = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || "YOUR_PROJECT_ID";
 
 export const config = createConfig({
-  autoConnect: false,
+  autoConnect: true,
   chains: [polygonAmoy, polygon],
   transports: {
     [polygonAmoy.id]: http("https://rpc-amoy.polygon.technology"),
