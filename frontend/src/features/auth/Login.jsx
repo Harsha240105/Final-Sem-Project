@@ -229,8 +229,6 @@ function Login() {
         {/* Animated galaxy background - subtle */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-transparent to-cyan-900/10" />
-        <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] rounded-full bg-neon-cyan/2 blur-[100px] animate-glow-breathe" style={{ animationDuration: "8s" }} />
-        <div className="absolute bottom-1/4 right-1/4 w-[250px] h-[250px] rounded-full bg-neon-purple/2 blur-[80px] animate-glow-breathe" style={{ animationDelay: "-2s", animationDuration: "10s" }} />
         {/* Subtle orbit rings */}
         <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[200px] h-[200px] border border-cyan-500/3 rounded-full animate-spin-slower" />
         <div className="absolute top-1/3 right-1/3 w-[150px] h-[150px] border border-purple-500/3 rounded-full animate-spin-slow" />
