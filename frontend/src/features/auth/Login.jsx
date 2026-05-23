@@ -124,15 +124,14 @@ function Login() {
     const target = connector || metaMaskConnector || connectors[0];
     if (!target) { addToast("No wallet connector available. Please install a wallet.", "error"); return; }
     try {
-      // If already connected, skip disconnect/reconnect cycle and use existing connection.
-      // This avoids setting the shimDisconnect flag that defeats autoConnect on next page load.
-      if (isConnected && address) {
-        await doCheckAfterConnect(address);
-        return;
-      }
+      // Disconnect first so MetaMask shows the account selection popup.
+      // With shimDisconnect:false in wagmi config, this does NOT set the stale
+      // localStorage flag that previously broke connections.
+      if (isConnected) await disconnectAsync();
       const result = await connectAsync({ connector: target });
       const account = result?.accounts?.[0];
       if (!account) { addToast("No account found", "error"); return; }
+      setWalletAddress(account);
       const connectedChainId = result?.chainId || chainId;
       if (connectedChainId && connectedChainId !== 80002) {
         try { await switchChainAsync({ chainId: 80002 }); } catch { /* user may reject chain switch */ }
@@ -142,17 +141,18 @@ function Login() {
       if (err?.code === 4001 || err?.name === "UserRejectedRequestError") {
         addToast("Connection cancelled", "info");
       } else if (err?.message?.includes("already connected")) {
-        // Wallet reports already connected — use the currently connected address directly
-        if (address) {
-          await doCheckAfterConnect(address);
+        // Wallet reports already connected — use the address wagmi already has
+        const fallbackAccount = address;
+        if (fallbackAccount) {
+          await doCheckAfterConnect(fallbackAccount);
         } else {
-          addToast("Wallet is connected but no address found. Please reconnect.", "error");
+          addToast("Wallet is already connected. Try again.", "error");
         }
       } else {
         addToast(err?.message || "Failed to connect wallet", "error");
       }
     }
-  }, [connectAsync, connectors, metaMaskConnector, tab, addToast, isConnected, address, switchChainAsync, doCheckAfterConnect]);
+  }, [connectAsync, connectors, metaMaskConnector, tab, addToast, isConnected, address, disconnectAsync, switchChainAsync, doCheckAfterConnect]);
 
   const handleExistingLogin = useCallback(async () => {
     if (!walletAddress || !existingUser) return;
