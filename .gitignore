@@ -23,3 +23,6 @@ Thumbs.db
 .idea/
 
 frontend/dist/
+
+# Uploaded files (generated at runtime)
+backend/server/uploads/
