@@ -113,12 +113,13 @@ function Login() {
       } else {
         setStep(tab === "login" ? "not-found" : "register");
       }
-    } catch {
+    } catch (err) {
+      addToast(err?.response?.data?.error || err?.message || "Failed to check wallet", "error");
       setStep(tab === "login" ? "not-found" : "register");
     } finally {
       setChecking(false);
     }
-  }, [tab]);
+  }, [tab, addToast]);
 
   const handleConnect = useCallback(async (connector) => {
     const target = connector || metaMaskConnector || connectors[0];
