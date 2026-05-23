@@ -40,10 +40,40 @@ function Login() {
   const [checking, setChecking] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
 
+  const initialCheckDone = useRef(false);
   const cardRef = useRef(null);
 
   useEffect(() => { setMounted(true); }, []);
-  useEffect(() => { if (isConnected && address) setWalletAddress(address); }, [isConnected, address]);
+
+  // Keep walletAddress in sync with wagmi account
+  useEffect(() => {
+    if (isConnected && address) setWalletAddress(address);
+  }, [isConnected, address]);
+
+  // Auto-check wallet when already connected on page load.
+  // Without this, a user with an already-connected wallet sees "Connect Wallet"
+  // and clicking it triggers a disconnect/reconnect cycle that can cause race conditions.
+  useEffect(() => {
+    if (!mounted || !isConnected || !address || initialCheckDone.current) return;
+    initialCheckDone.current = true;
+    const doCheck = async () => {
+      setChecking(true);
+      try {
+        const response = await checkWallet(address.toLowerCase());
+        if (response?.exists) {
+          setExistingUser(response.user);
+          setStep(tab === "login" ? "welcome-back" : "exists");
+        } else {
+          setStep(tab === "login" ? "not-found" : "register");
+        }
+      } catch {
+        setStep(tab === "login" ? "not-found" : "register");
+      } finally {
+        setChecking(false);
+      }
+    };
+    doCheck();
+  }, [mounted, isConnected, address]);
 
   const shortenAddress = (addr) => {
     if (!addr) return "";
