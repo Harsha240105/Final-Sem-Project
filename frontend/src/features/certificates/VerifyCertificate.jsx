@@ -186,7 +186,7 @@ function NftImportGuideModal({ certificate, onClose }) {
               <div className="flex items-center gap-2 rounded-lg bg-black/30 border border-white/[0.06] p-2.5">
                 <code className="flex-1 text-xs font-mono text-cyan-300 truncate">{item.copyText}</code>
                 <button
-                  onClick={() => navigator.clipboard.writeText(item.copyText)}
+                  onClick={() => { try { navigator.clipboard.writeText(item.copyText); } catch {} }}
                   className="flex-shrink-0 rounded-md bg-cyan-500/20 px-2.5 py-1 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-500/30 transition"
                 >
                   Copy
@@ -236,7 +236,7 @@ function NftImportGuideModal({ certificate, onClose }) {
           <div className="rounded-xl bg-black/30 border border-white/10 p-3 mb-2">
             <div className="flex items-center justify-between mb-1">
               <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Contract</p>
-              <button onClick={() => navigator.clipboard.writeText(contractAddr)} className="text-[10px] text-purple-400 hover:text-purple-300 font-semibold">Copy</button>
+              <button onClick={() => { try { navigator.clipboard.writeText(contractAddr); } catch {} }} className="text-[10px] text-purple-400 hover:text-purple-300 font-semibold">Copy</button>
             </div>
             <code className="text-xs font-mono text-purple-400 break-all">{contractAddr}</code>
           </div>
@@ -245,7 +245,7 @@ function NftImportGuideModal({ certificate, onClose }) {
           <div className="rounded-xl bg-black/30 border border-white/10 p-3 mb-2">
             <div className="flex items-center justify-between mb-1">
               <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Token ID</p>
-              <button onClick={() => navigator.clipboard.writeText(tokenId)} className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold">Copy</button>
+              <button onClick={() => { try { navigator.clipboard.writeText(tokenId); } catch {} }} className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold">Copy</button>
             </div>
             <code className="text-xs font-mono text-indigo-400">{tokenId}</code>
           </div>
@@ -422,7 +422,7 @@ export default function VerifyCertificate() {
                       <code className="break-all font-mono text-sm text-gray-300">{shortenHash(certificate.txHash)}</code>
                       <button
                         type="button"
-                        onClick={() => navigator.clipboard.writeText(certificate.txHash)}
+                        onClick={() => { try { navigator.clipboard.writeText(certificate.txHash); } catch {} }}
                         className="ml-2 rounded px-2 py-1 text-xs text-gray-400 transition hover:bg-white/[0.06]"
                         title="Copy to clipboard"
                       >
@@ -551,7 +551,7 @@ export default function VerifyCertificate() {
                   <button
                     type="button"
                     onClick={() => {
-                      navigator.clipboard.writeText(CONTRACT_ADDRESS);
+                      try { navigator.clipboard.writeText(CONTRACT_ADDRESS); } catch {}
                     }}
                     className="rounded-lg bg-purple-600/20 border border-purple-500/30 px-6 py-3 font-bold text-purple-300 transition hover:bg-purple-600/30"
                   >

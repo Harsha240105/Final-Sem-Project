@@ -248,7 +248,7 @@ function NftClaimGuide({ cert, onClose }) {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => navigator.clipboard.writeText(contractAddr)}
+                  onClick={() => { try { navigator.clipboard.writeText(contractAddr); } catch {} }}
                   className="text-[10px] text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1"
                 >
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -416,7 +416,7 @@ function NftClaimGuide({ cert, onClose }) {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => navigator.clipboard.writeText(item.copyText)}
+                        onClick={() => { try { navigator.clipboard.writeText(item.copyText); } catch {} }}
                         className="flex-shrink-0 rounded-lg bg-cyan-500/15 px-3 py-1.5 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-500/25 transition-all border border-cyan-500/10"
                       >
                         Copy
