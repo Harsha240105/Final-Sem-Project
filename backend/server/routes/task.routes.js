@@ -10,7 +10,6 @@ const Submission = require("../../database/models/Submission");
 const {
   createTask,
   getTasksByCommunity,
-  completeTask,
   markTaskCompletedByStudent,
   completeTaskAndIssueCertificates,
   getMyTasks,
@@ -79,9 +78,6 @@ router.get("/community/:communityId", authMiddleware, getTasksByCommunity);
 
 // PATCH /api/tasks/:taskId/mark-complete — Student marks their own task completion
 router.patch("/:taskId/mark-complete", authMiddleware, markTaskCompletedByStudent);
-
-// PATCH /api/tasks/:taskId/complete — Mark task as complete (legacy - for backward compatibility)
-router.patch("/:taskId/complete", authMiddleware, completeTask);
 
 // POST /api/tasks/:taskId/complete — Community creator completes task and issues certificates
 router.post("/:taskId/complete", authMiddleware, (req, res, next) => {

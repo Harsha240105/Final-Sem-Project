@@ -173,12 +173,6 @@ export async function getTasksByCommunity(communityId, token) {
   return request(apiClient.get(`/tasks/community/${communityId}`, withAuth(token)));
 }
 
-export async function completeTask(taskId, token) {
-  return request(
-    apiClient.patch(`/tasks/${taskId}/complete`, {}, withAuth(token, { timeout: 30000 }))
-  );
-}
-
 export async function markTaskCompletedByStudent(taskId, token) {
   return request(
     apiClient.patch(`/tasks/${taskId}/mark-complete`, {}, withAuth(token, { timeout: 30000 }))
