@@ -49,36 +49,7 @@ function Login() {
     setMounted(true);
   }, []);
 
-  // Fallback: if MetaMask is already authorized but wagmi autoConnect didn't detect it,
-  // directly check via eth_accounts and call checkWallet.
-  useEffect(() => {
-    if (!mounted || isConnected || initialCheckDone.current) return;
-    const checkViaEthereum = async () => {
-      try {
-        const ethereum = window.ethereum;
-        if (!ethereum?.isMetaMask) return;
-        const accounts = await ethereum.request({ method: 'eth_accounts' });
-        const account = accounts?.[0];
-        if (!account) return;
-        setWalletAddress(account);
-        setChecking(true);
-        try {
-          const response = await checkWallet(account.toLowerCase());
-          if (response?.exists) {
-            setExistingUser(response.user);
-            setStep(tab === "login" ? "welcome-back" : "exists");
-          } else {
-            setStep(tab === "login" ? "not-found" : "register");
-          }
-        } catch {
-          setStep(tab === "login" ? "not-found" : "register");
-        } finally {
-          setChecking(false);
-        }
-      } catch { /* silent */ }
-    };
-    checkViaEthereum();
-  }, [mounted, isConnected]);
+
 
   // Keep walletAddress in sync with wagmi account
   useEffect(() => {
