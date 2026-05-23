@@ -1,3 +1,4 @@
+const fs = require("fs");
 const multer = require("multer");
 const path = require("path");
 
@@ -85,7 +86,9 @@ const uploadVerification = multer({
 
 const CHAT_STORAGE = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, path.join(__dirname, "..", "uploads", "chat"));
+    const dir = path.join(__dirname, "..", "uploads", "chat");
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
   },
   filename: (req, file, cb) => {
     const userId = sanitizeFilename(req.user?.id || "anon");
