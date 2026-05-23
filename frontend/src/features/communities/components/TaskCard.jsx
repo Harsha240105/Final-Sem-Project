@@ -1,4 +1,7 @@
+import { useRef } from "react";
+
 function TaskCard({ task, isAdmin, isArchived, onMarkComplete, onUploadFile, submitting }) {
+  const fileRef = useRef(null);
   const currentUserId = (() => {
     try {
       const t = localStorage.getItem("token");
@@ -32,6 +35,9 @@ function TaskCard({ task, isAdmin, isArchived, onMarkComplete, onUploadFile, sub
           {task.title}
         </p>
         {task.description && <p className="text-[11px] text-gray-500 truncate mt-0.5">{task.description}</p>}
+        {task.attachments?.length > 0 && (
+          <p className="text-[10px] text-gray-600 mt-0.5">{task.attachments.length} file(s)</p>
+        )}
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
@@ -41,14 +47,37 @@ function TaskCard({ task, isAdmin, isArchived, onMarkComplete, onUploadFile, sub
         }`}>
           {task.completed_status ? "Completed" : "Pending"}
         </span>
-        {!task.completed_status && !isArchived && onMarkComplete && (
-          <button
-            onClick={() => onMarkComplete(task._id)}
-            disabled={submitting}
-            className="rounded-lg bg-emerald-500/20 px-3 py-1.5 text-[10px] font-semibold text-emerald-400 hover:bg-emerald-500/30 disabled:opacity-40 transition"
-          >
-            {submitting ? "..." : "Complete"}
-          </button>
+        {!task.completed_status && !isArchived && (
+          <>
+            {onUploadFile && (
+              <>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) onUploadFile(task._id, e.target.files[0]);
+                    e.target.value = "";
+                  }}
+                />
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  className="rounded-lg bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-medium text-gray-400 hover:text-white hover:bg-white/[0.08] transition"
+                >
+                  📎
+                </button>
+              </>
+            )}
+            {onMarkComplete && (
+              <button
+                onClick={() => onMarkComplete(task._id)}
+                disabled={submitting}
+                className="rounded-lg bg-emerald-500/20 px-3 py-1.5 text-[10px] font-semibold text-emerald-400 hover:bg-emerald-500/30 disabled:opacity-40 transition"
+              >
+                {submitting ? "..." : "Complete"}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

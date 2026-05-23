@@ -17,6 +17,7 @@ import { formatTime, getInitials } from "./utils";
 import CommunityHeader from "./components/CommunityHeader";
 import CommunityRules from "./components/CommunityRules";
 import TaskBoard from "./components/TaskBoard";
+import TaskStats from "./components/TaskStats";
 import SubmissionPanel from "./components/SubmissionPanel";
 import CollaborationRooms from "./components/CollaborationRooms";
 import MemberManagement from "./components/MemberManagement";
@@ -207,6 +208,7 @@ function CommunityView() {
   const SECTIONS = [
     { id: "overview", label: "Overview", icon: "📋" },
     { id: "tasks", label: `Tasks (${tasks.length})`, icon: "✅" },
+    { id: "stats", label: "Stats", icon: "📊" },
     { id: "collaborations", label: `Collab (${community.collaborations?.length || 0})`, icon: "🤝" },
     { id: "resources", label: `Resources (${community.resources?.length || 0})`, icon: "📚" },
     { id: "members", label: `Members (${community.members?.length || 0})`, icon: "👥" },
@@ -390,6 +392,11 @@ function CommunityView() {
             <SubmissionPanel key={task._id} task={task} communityId={id} isAdmin={isAdmin} isArchived={isArchived} />
           ))}
         </div>
+      )}
+
+      {/* Stats Section */}
+      {activeSection === "stats" && (
+        <TaskStats communityId={id} />
       )}
 
       {/* Collaborations Section */}
