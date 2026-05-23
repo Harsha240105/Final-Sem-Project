@@ -10,8 +10,10 @@ import {
   joinCommunity as apiJoin,
   leaveCommunity as apiLeave,
   sendCommunityMessage as apiSendMessage,
+  sendCommunityVoiceMessage as apiSendVoiceMessage,
   deleteCommunity as apiDeleteCommunity,
 } from "../../shared/services/api";
+import VoiceRecorder from "../messaging/components/VoiceRecorder";
 import { useCommunity } from "./hooks/useCommunity";
 import { formatTime, getInitials } from "./utils";
 import CommunityHeader from "./components/CommunityHeader";
@@ -43,6 +45,7 @@ function CommunityView() {
   const [issuing, setIssuing] = useState({});
   const [commentText, setCommentText] = useState("");
   const [msgText, setMsgText] = useState("");
+  const [showVoice, setShowVoice] = useState(false);
 
   const loadTasks = useCallback(async () => {
     try {
@@ -147,6 +150,16 @@ function CommunityView() {
       if (!token) return;
       await apiSendMessage(id, msgText.trim(), token);
       setMsgText("");
+      fetch();
+    } catch { /* silent */ }
+  };
+
+  const handleSendVoiceMessage = async (blob, duration) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      await apiSendVoiceMessage(id, blob, duration, token);
+      setShowVoice(false);
       fetch();
     } catch { /* silent */ }
   };
@@ -280,7 +293,14 @@ function CommunityView() {
                 {(community.communityMessages || []).slice(-20).map((msg, i) => (
                   <div key={i} className="flex items-start gap-2 text-xs">
                     <span className="font-medium text-gray-300 shrink-0">{msg.sender?.name || "Unknown"}:</span>
-                    <span className="text-gray-500">{msg.text}</span>
+                    {msg.messageType === "voice" && msg.audioUrl ? (
+                      <div className="flex items-center gap-2">
+                        <audio src={msg.audioUrl.startsWith("http") ? msg.audioUrl : `http://localhost:5001${msg.audioUrl}`} controls className="h-7 max-w-[150px]" preload="none" />
+                        {msg.audioDuration ? <span className="text-[9px] text-gray-500 font-mono">{Math.floor(msg.audioDuration / 60)}:{String(msg.audioDuration % 60).padStart(2, "0")}</span> : null}
+                      </div>
+                    ) : (
+                      <span className="text-gray-500">{msg.text}</span>
+                    )}
                     <span className="text-[9px] text-gray-700 shrink-0 ml-auto">{formatTime(msg.createdAt)}</span>
                   </div>
                 ))}
@@ -289,16 +309,32 @@ function CommunityView() {
                 )}
               </div>
               {isMember && (
-                <div className="flex gap-2">
-                  <input
-                    value={msgText}
-                    onChange={(e) => setMsgText(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
-                    placeholder="Type a message..."
-                    className="flex-1 rounded-lg border border-white/[0.08] bg-black/30 px-3 py-1.5 text-xs text-white outline-none focus:border-cyan-500/40"
-                  />
-                  <button onClick={handleSendMessage} className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-cyan-400 transition">Send</button>
-                </div>
+                <>
+                  {showVoice ? (
+                    <VoiceRecorder onSend={handleSendVoiceMessage} onCancel={() => setShowVoice(false)} />
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        value={msgText}
+                        onChange={(e) => setMsgText(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
+                        placeholder="Type a message..."
+                        className="flex-1 rounded-lg border border-white/[0.08] bg-black/30 px-3 py-1.5 text-xs text-white outline-none focus:border-cyan-500/40"
+                      />
+                      <button
+                        onClick={() => setShowVoice(true)}
+                        className="rounded-lg bg-white/[0.04] px-2.5 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-white/[0.08] transition"
+                        title="Voice message"
+                      >
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3z" />
+                          <path d="M17 11a1 1 0 0 0-2 0 3 3 0 0 1-6 0 1 1 0 0 0-2 0 5 5 0 0 0 4 4.9V18H8a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2h-3v-2.1a5 5 0 0 0 4-4.9z" />
+                        </svg>
+                      </button>
+                      <button onClick={handleSendMessage} disabled={!msgText.trim()} className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40 hover:bg-cyan-400 transition">Send</button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

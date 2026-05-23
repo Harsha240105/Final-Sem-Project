@@ -6,6 +6,7 @@ const router = express.Router();
 const { authMiddleware } = require("../middleware/auth.middleware");
 const { adminOnly, elevatedAuth } = require("../middleware/admin.middleware");
 const { teacherApprovedAuth } = require("../middleware/role.middleware");
+const { uploadChat } = require("../middleware/upload");
 const {
   getCommunities,
   getCommunity,
@@ -25,6 +26,7 @@ const {
   sendCollabMessage,
   getCollabMessages,
   sendCommunityMessage,
+  sendCommunityVoiceMessage,
   deleteCommunityMessage,
   deleteCollabMessage,
   completeCommunityTask,
@@ -100,6 +102,7 @@ router.delete("/:id/collab/:collabId/message/:messageId", authMiddleware, delete
 
 // ─── Community Public Chat ───
 router.post("/:id/messages", authMiddleware, sendCommunityMessage);
+router.post("/:id/voice", authMiddleware, uploadChat.single("audio"), sendCommunityVoiceMessage);
 router.delete("/:id/messages/:messageId", authMiddleware, deleteCommunityMessage);
 
 // ─── Phase 4: Completion & Archive ───

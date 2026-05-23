@@ -193,6 +193,16 @@ export async function uploadTaskFile(taskId, file, token) {
   );
 }
 
+export async function uploadMultipleTaskFiles(taskId, files, token, onProgress) {
+  const formData = new FormData();
+  for (const f of files) formData.append("files", f);
+  const config = withAuth(token, { timeout: 300000 });
+  config.headers = config.headers || {};
+  delete config.headers["Content-Type"];
+  config.onUploadProgress = (e) => { if (e.total && onProgress) onProgress(Math.round((e.loaded / e.total) * 100)); };
+  return request(apiClient.post(`/tasks/upload-multiple/${taskId}`, formData, config));
+}
+
 export async function sendTaskChatMessage(taskId, message, token) {
   return request(apiClient.post(`/tasks/chat/${taskId}`, { message }, withAuth(token)));
 }
@@ -274,6 +284,16 @@ export async function createCommunityForm(data, token) {
 
 export async function sendCommunityMessage(communityId, text, token) {
   return request(apiClient.post(`/communities/${communityId}/messages`, { text }, withAuth(token)));
+}
+
+export async function sendCommunityVoiceMessage(communityId, audioBlob, duration, token) {
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "voice.webm");
+  formData.append("duration", String(duration));
+  const config = withAuth(token, { timeout: 120000 });
+  config.headers = config.headers || {};
+  delete config.headers["Content-Type"];
+  return request(apiClient.post(`/communities/${communityId}/voice`, formData, config));
 }
 
 export async function deleteCommunityMessage(communityId, messageId, token) {

@@ -24,48 +24,21 @@ if (!fs.existsSync(tasksUploadDir)) {
   fs.mkdirSync(tasksUploadDir, { recursive: true });
 }
 
-const ALLOWED_MIME_TYPES = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-powerpoint",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "application/vnd.ms-excel",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml",
-  "video/mp4", "video/webm", "video/ogg",
-  "text/plain", "text/csv",
-  "application/zip", "application/x-zip-compressed", "application/x-rar-compressed", "application/x-7z-compressed",
-  "application/json", "text/javascript",
-];
-
-function fileFilter(_req, file, cb) {
-  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error(`File type "${file.mimetype}" is not allowed. Allowed types: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, images, videos, archives, plain text, CSV, JSON, JS`), false);
-  }
+function sanitizeFilename(file) {
+  const safeName = file.originalname.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9._-]/g, "");
+  const timestamp = Date.now();
+  const randomStr = Math.random().toString(36).substring(7);
+  return `${timestamp}-${randomStr}-${safeName}`;
 }
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, tasksUploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const safeName = file.originalname.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9._-]/g, "");
-    const timestamp = Date.now();
-    const randomStr = Math.random().toString(36).substring(7);
-    cb(null, `${timestamp}-${randomStr}-${safeName}`);
-  },
+  destination: (_req, _file, cb) => cb(null, tasksUploadDir),
+  filename: (_req, file, cb) => cb(null, sanitizeFilename(file)),
 });
 
 const upload = multer({
   storage,
-  fileFilter,
-  limits: {
-    fileSize: 1 * 1024 * 1024 * 1024, // 1GB per file
-    files: 20, // Allow up to 20 files per request
-  },
+  limits: { fileSize: 2 * 1024 * 1024 * 1024, files: 50 },
 });
 
 router.use((req, _res, next) => {
@@ -94,8 +67,31 @@ router.post("/:taskId/complete", authMiddleware, (req, res, next) => {
   next();
 }, completeTaskAndIssueCertificates);
 
-// POST /api/tasks/upload/:taskId — Upload task submission file
+// POST /api/tasks/upload/:taskId — Upload single task file
 router.post("/upload/:taskId", authMiddleware, upload.single("file"), uploadTaskFile);
+
+// POST /api/tasks/upload-multiple/:taskId — Upload multiple task files (no limit)
+router.post("/upload-multiple/:taskId", authMiddleware, upload.array("files", 50), async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const Task = require("../../database/models/task.model");
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    const userId = req.user._id || req.user.id;
+    const files = (req.files || []).map(f => ({
+      fileName: f.originalname,
+      fileUrl: `/uploads/tasks/${f.filename}`,
+      mimeType: f.mimetype,
+      uploadedBy: userId,
+    }));
+    task.attachments = [...(task.attachments || []), ...files];
+    await task.save();
+    res.json({ files, message: `${files.length} file(s) uploaded` });
+  } catch (err) {
+    console.error("batchUpload error:", err);
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
 
 // POST /api/tasks/chat/:taskId — Add task chat message
 router.post("/chat/:taskId", authMiddleware, addTaskChatMessage);

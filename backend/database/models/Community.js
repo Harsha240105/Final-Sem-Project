@@ -40,7 +40,10 @@ const collabMessageSchema = new mongoose.Schema({
 
 const communityMessageSchema = new mongoose.Schema({
   sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  text: { type: String, required: true, trim: true, maxlength: 2000 },
+  text: { type: String, trim: true, maxlength: 2000, default: "" },
+  messageType: { type: String, enum: ["text", "voice"], default: "text" },
+  audioUrl: { type: String, default: null },
+  audioDuration: { type: Number, default: null },
   createdAt: { type: Date, default: Date.now },
 });
 

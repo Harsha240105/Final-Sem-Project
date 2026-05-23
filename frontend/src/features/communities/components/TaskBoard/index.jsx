@@ -1,12 +1,14 @@
 import { useState, memo } from "react";
 import { markTaskCompletedByStudent, uploadTaskFile } from "../../../../shared/services/api";
 import TaskCard from "../TaskCard";
+import TaskDetailModal from "../TaskDetailModal";
 
 const TASK_FILTERS = ["all", "active", "submitted", "completed"];
 
 function TaskBoard({ tasks = [], communityId, isAdmin, isArchived, onRefresh }) {
   const [filter, setFilter] = useState("all");
   const [submitting, setSubmitting] = useState({});
+  const [selectedTask, setSelectedTask] = useState(null);
 
   const filtered = tasks.filter(t => {
     if (filter === "all") return true;
@@ -71,9 +73,19 @@ function TaskBoard({ tasks = [], communityId, isAdmin, isArchived, onRefresh }) 
             onMarkComplete={handleMarkComplete}
             onUploadFile={handleUploadFile}
             submitting={submitting[task._id]}
+            onClick={() => setSelectedTask(task)}
           />
         ))}
       </div>
+
+      {selectedTask && (
+        <TaskDetailModal
+          task={selectedTask}
+          communityId={communityId}
+          onClose={() => setSelectedTask(null)}
+          onRefresh={onRefresh}
+        />
+      )}
     </div>
   );
 }

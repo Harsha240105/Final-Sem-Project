@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-function TaskCard({ task, isAdmin, isArchived, onMarkComplete, onUploadFile, submitting }) {
+function TaskCard({ task, isAdmin, isArchived, onMarkComplete, onUploadFile, submitting, onClick }) {
   const fileRef = useRef(null);
   const currentUserId = (() => {
     try {
@@ -12,11 +12,11 @@ function TaskCard({ task, isAdmin, isArchived, onMarkComplete, onUploadFile, sub
   const isAssigned = (task.completedBy || []).some(c => String(c.userId?._id || c.userId) === currentUserId);
 
   return (
-    <div className={`flex items-center gap-3 rounded-xl px-4 py-3 border transition ${
+    <div className={`flex items-center gap-3 rounded-xl px-4 py-3 border transition cursor-pointer ${
       task.completed_status
-        ? "bg-emerald-500/5 border-emerald-500/10"
+        ? "bg-emerald-500/5 border-emerald-500/10 hover:bg-emerald-500/10"
         : "bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.05]"
-    }`}>
+    }`} onClick={onClick}>
       <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
         task.completed_status ? "bg-emerald-500/20 text-emerald-400" : "bg-purple-500/20 text-purple-400"
       }`}>
@@ -39,7 +39,7 @@ function TaskCard({ task, isAdmin, isArchived, onMarkComplete, onUploadFile, sub
           <p className="text-[10px] text-gray-600 mt-0.5">{task.attachments.length} file(s)</p>
         )}
       </div>
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
         <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
           task.completed_status
             ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-300"

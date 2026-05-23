@@ -576,6 +576,44 @@ const getCollabMessages = async (req, res) => {
 
 // ═══ COMMUNITY PUBLIC CHAT ══════════════════════════════════
 
+// ─── POST /api/communities/:id/voice — Send voice message ───
+const sendCommunityVoiceMessage = async (req, res) => {
+  try {
+    const community = await Community.findById(req.params.id);
+    if (!community) return res.status(404).json({ error: "Community not found" });
+
+    const userId = req.user.id || req.user._id?.toString();
+    if (!community.members.some((m) => m.toString() === userId)) {
+      return res.status(403).json({ error: "You must be a community member to send messages" });
+    }
+
+    if (!req.file) return res.status(400).json({ error: "Audio file is required" });
+
+    community.communityMessages.push({
+      sender: userId,
+      text: "",
+      messageType: "voice",
+      audioUrl: `/uploads/chat/${req.file.filename}`,
+      audioDuration: req.body.duration ? Number(req.body.duration) : 0,
+    });
+    await community.save();
+    await community.populate(populateFields);
+
+    const io = req.app.get("io");
+    if (io) {
+      io.to(`community:${community._id}`).emit("community_message", {
+        communityId: community._id,
+        communityMessages: community.communityMessages,
+      });
+    }
+
+    res.status(201).json(community);
+  } catch (err) {
+    console.error("sendCommunityVoiceMessage error:", err);
+    res.status(500).json({ error: "Failed to send voice message" });
+  }
+};
+
 // ─── POST /api/communities/:id/messages ───
 const sendCommunityMessage = async (req, res) => {
   try {
@@ -843,6 +881,7 @@ module.exports = {
   sendCollabMessage,
   getCollabMessages,
   sendCommunityMessage,
+  sendCommunityVoiceMessage,
   deleteCommunityMessage,
   deleteCollabMessage,
   completeCommunityTask,
