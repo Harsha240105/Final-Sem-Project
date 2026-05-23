@@ -3,678 +3,755 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Web3Connect - Complete Project Report</title>
+<title>Web3Connect — Blockchain Enabled Virtual Campus Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-primary:#050816;
+  --bg-secondary:#07111F;
+  --bg-card:rgba(11,16,35,0.7);
+  --neon-cyan:#00F5FF;
+  --neon-purple:#7B61FF;
+  --neon-pink:#FF4FD8;
+  --neon-green:#00FFA3;
+  --neon-yellow:#FFD166;
+  --neon-red:#FF4D6D;
+  --neon-blue:#3B82F6;
+  --text-primary:#F1F5F9;
+  --text-secondary:#94A3B8;
+  --text-muted:#64748B;
+  --glass-border:rgba(123,97,255,0.15);
+  --glass-bg:rgba(15,20,35,0.7);
+  --font-display:'Orbitron',monospace;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius:16px;
+  --radius-sm:8px;
+  --radius-lg:24px;
+  --shadow-glow:0 0 40px rgba(123,97,255,0.3);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-body);
+  background:var(--bg-primary);
+  color:var(--text-primary);
+  line-height:1.7;
+  overflow-x:hidden;
+  min-height:100vh;
+}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg-primary)}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--neon-purple),var(--neon-cyan));border-radius:4px}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* === THREE.JS BACKGROUND === */
+#three-bg{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  z-index:0;
+  pointer-events:none;
+}
 
-  :root {
-    --bg-primary: #050816;
-    --bg-secondary: #07111F;
-    --bg-card: #0B1023;
-    --bg-card-hover: #0F1429;
-    --bg-elevated: #1A1F35;
-    --neon-cyan: #00F5FF;
-    --neon-purple: #7B61FF;
-    --neon-pink: #FF4FD8;
-    --neon-green: #00FFA3;
-    --neon-yellow: #FFD166;
-    --neon-red: #FF4D6D;
-    --neon-blue: #3B82F6;
-    --text-primary: #F1F5F9;
-    --text-secondary: #94A3B8;
-    --text-muted: #64748B;
-    --glass-border: rgba(123, 97, 255, 0.15);
-    --glass-bg: rgba(15, 20, 35, 0.8);
-    --font-display: 'Orbitron', monospace;
-    --font-body: 'Inter', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-    --radius: 16px;
-    --radius-sm: 8px;
-    --radius-lg: 24px;
-    --shadow-glow: 0 0 30px rgba(139, 92, 246, 0.35);
-  }
+/* === GLASS OVERLAY === */
+body::before{
+  content:'';
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%,rgba(123,97,255,0.08) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 80%,rgba(0,245,255,0.06) 0%,transparent 50%);
+  pointer-events:none;
+  z-index:0;
+}
 
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: var(--font-body);
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    line-height: 1.7;
-    overflow-x: hidden;
-    min-height: 100vh;
-  }
+/* === SCROLL INDICATOR === */
+.scroll-indicator{
+  position:fixed;
+  right:24px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:100;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.scroll-dot{
+  width:10px;height:10px;
+  border-radius:50%;
+  border:1.5px solid rgba(123,97,255,0.3);
+  background:transparent;
+  transition:all 0.3s;
+  cursor:pointer;
+}
+.scroll-dot.active{
+  background:var(--neon-cyan);
+  border-color:var(--neon-cyan);
+  box-shadow:0 0 12px rgba(0,245,255,0.4);
+}
 
-  /* Animated Background */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 10% 20%, rgba(123,97,255,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 90% 80%, rgba(0,245,255,0.05) 0%, transparent 50%),
-      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(255,79,216,0.03) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-  }
+/* === NAVIGATION === */
+.nav{
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:200;
+  background:rgba(5,8,22,0.8);
+  backdrop-filter:blur(20px) saturate(1.5);
+  border-bottom:1px solid var(--glass-border);
+  padding:0 24px;
+  height:64px;
+  display:flex;
+  align-items:center;
+  gap:24px;
+}
+.nav-logo{
+  font-family:var(--font-display);
+  font-size:14px;
+  font-weight:700;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  white-space:nowrap;
+  text-decoration:none;
+  letter-spacing:1px;
+}
+.nav-links{display:flex;gap:4px;overflow-x:auto;flex:1;scrollbar-width:none;padding:4px 0}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-link{
+  color:var(--text-muted);
+  text-decoration:none;
+  font-size:11px;
+  font-weight:500;
+  padding:6px 10px;
+  border-radius:6px;
+  transition:all 0.3s;
+  white-space:nowrap;
+  font-family:var(--font-body);
+  letter-spacing:0.3px;
+}
+.nav-link:hover{color:var(--text-primary);background:rgba(123,97,255,0.1)}
+.nav-link.active{color:var(--neon-cyan);background:rgba(0,245,255,0.08)}
+.nav-badge{
+  font-family:var(--font-mono);
+  font-size:9px;
+  color:var(--neon-green);
+  background:rgba(0,255,163,0.1);
+  padding:3px 10px;
+  border-radius:20px;
+  border:1px solid rgba(0,255,163,0.2);
+  white-space:nowrap;
+  margin-left:auto;
+  letter-spacing:0.5px;
+}
 
-  /* Stars */
-  .stars {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-  }
-  .star {
-    position: absolute;
-    width: 2px; height: 2px;
-    background: white;
-    border-radius: 50%;
-    animation: twinkle var(--duration, 3s) ease-in-out infinite;
-    opacity: 0.4;
-  }
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.2; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.3); }
-  }
+/* === CONTAINER === */
+.container{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: var(--bg-primary); }
-  ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--neon-purple), var(--neon-cyan));
-    border-radius: 4px;
-  }
+/* === HERO === */
+.hero{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:120px 24px 80px;
+  position:relative;
+}
+.hero-badge{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--neon-cyan);
+  background:rgba(0,245,255,0.08);
+  border:1px solid rgba(0,245,255,0.2);
+  padding:6px 16px;
+  border-radius:20px;
+  margin-bottom:24px;
+  letter-spacing:2px;
+  animation:fadeInDown 0.8s ease;
+}
+.hero-title{
+  font-family:var(--font-display);
+  font-size:clamp(32px,6vw,72px);
+  font-weight:900;
+  line-height:1.1;
+  margin-bottom:16px;
+  animation:fadeInUp 0.8s ease 0.2s both;
+}
+.hero-title .gradient{
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple),var(--neon-pink));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-size:200% 200%;
+  animation:gradientShift 4s ease infinite;
+}
+@keyframes gradientShift{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+.hero-subtitle{
+  font-size:clamp(14px,2vw,20px);
+  color:var(--text-secondary);
+  max-width:700px;
+  margin-bottom:32px;
+  font-weight:300;
+  min-height:60px;
+  animation:fadeInUp 0.8s ease 0.4s both;
+}
+.hero-subtitle .typewriter{
+  border-right:2px solid var(--neon-cyan);
+  animation:blink 0.8s step-end infinite;
+}
+@keyframes blink{
+  50%{border-color:transparent}
+}
+.hero-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+  animation:fadeInUp 0.8s ease 0.6s both;
+}
+.hero-meta-item{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-muted);
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  padding:7px 14px;
+  border-radius:8px;
+  backdrop-filter:blur(10px);
+  transition:all 0.3s;
+  cursor:default;
+}
+.hero-meta-item:hover{
+  border-color:var(--neon-purple);
+  color:var(--text-primary);
+  transform:translateY(-2px);
+  box-shadow:0 4px 20px rgba(123,97,255,0.2);
+}
+.hero-cta{
+  margin-top:32px;
+  display:flex;
+  gap:16px;
+  animation:fadeInUp 0.8s ease 0.8s both;
+}
+.hero-cta a{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:14px 32px;
+  border-radius:12px;
+  font-family:var(--font-display);
+  font-size:13px;
+  font-weight:600;
+  text-decoration:none;
+  letter-spacing:1px;
+  transition:all 0.3s;
+}
+.hero-cta .primary{
+  background:linear-gradient(135deg,var(--neon-purple),var(--neon-cyan));
+  color:var(--bg-primary);
+  box-shadow:0 4px 30px rgba(123,97,255,0.3);
+}
+.hero-cta .primary:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 40px rgba(123,97,255,0.5);
+}
+.hero-cta .secondary{
+  border:1px solid var(--glass-border);
+  color:var(--text-primary);
+  background:var(--glass-bg);
+}
+.hero-cta .secondary:hover{
+  border-color:var(--neon-purple);
+  transform:translateY(-3px);
+}
+.hero-line{
+  width:1px;
+  height:60px;
+  background:linear-gradient(180deg,var(--neon-purple),transparent);
+  margin-top:48px;
+  animation:fadeIn 1s ease 1.2s both;
+}
+.scroll-hint{
+  position:absolute;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%);
+  color:var(--text-muted);
+  font-size:11px;
+  font-family:var(--font-mono);
+  animation:bounce 2s ease infinite;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+@keyframes bounce{
+  0%,100%{transform:translateX(-50%) translateY(0)}
+  50%{transform:translateX(-50%) translateY(8px)}
+}
 
-  /* Container */
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
-    position: relative;
-    z-index: 1;
-  }
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
-  /* ============================
-     NAVIGATION
-  ============================ */
-  .nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    background: rgba(5, 8, 22, 0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--glass-border);
-    padding: 0 24px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-  }
-  .nav-logo {
-    font-family: var(--font-display);
-    font-size: 16px;
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    white-space: nowrap;
-    text-decoration: none;
-  }
-  .nav-links {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    flex: 1;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding: 4px 0;
-  }
-  .nav-links::-webkit-scrollbar { display: none; }
-  .nav-link {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 6px 12px;
-    border-radius: 6px;
-    transition: all 0.3s;
-    white-space: nowrap;
-    font-family: var(--font-body);
-  }
-  .nav-link:hover {
-    color: var(--text-primary);
-    background: rgba(123,97,255,0.1);
-  }
-  .nav-link.active {
-    color: var(--neon-cyan);
-    background: rgba(0,245,255,0.08);
-  }
-  .nav-badge {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--neon-green);
-    background: rgba(0,255,163,0.1);
-    padding: 3px 10px;
-    border-radius: 20px;
-    border: 1px solid rgba(0,255,163,0.2);
-    white-space: nowrap;
-    margin-left: auto;
-  }
+/* === SECTIONS === */
+.section{
+  padding:100px 0;
+  border-bottom:1px solid rgba(123,97,255,0.06);
+}
+.section:last-child{border-bottom:none}
+.section-header{text-align:center;margin-bottom:56px}
+.section-number{
+  font-family:var(--font-display);
+  font-size:13px;
+  color:var(--neon-purple);
+  letter-spacing:3px;
+  margin-bottom:8px;
+}
+.section-title{
+  font-family:var(--font-display);
+  font-size:clamp(22px,3vw,38px);
+  font-weight:700;
+  margin-bottom:12px;
+}
+.section-desc{color:var(--text-secondary);max-width:600px;margin:0 auto;font-size:14px}
+.section-title .highlight{background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-  /* ============================
-     HERO / COVER
-  ============================ */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 120px 24px 80px;
-    position: relative;
-  }
-  .hero-badge {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--neon-cyan);
-    background: rgba(0,245,255,0.08);
-    border: 1px solid rgba(0,245,255,0.2);
-    padding: 6px 16px;
-    border-radius: 20px;
-    margin-bottom: 24px;
-    letter-spacing: 2px;
-  }
-  .hero-title {
-    font-family: var(--font-display);
-    font-size: clamp(32px, 6vw, 72px);
-    font-weight: 900;
-    line-height: 1.1;
-    margin-bottom: 16px;
-  }
-  .hero-title .gradient {
-    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .hero-subtitle {
-    font-size: clamp(16px, 2.5vw, 24px);
-    color: var(--text-secondary);
-    max-width: 700px;
-    margin-bottom: 32px;
-    font-weight: 300;
-  }
-  .hero-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-  }
-  .hero-meta-item {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-muted);
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    padding: 8px 16px;
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
-  }
-  .hero-line {
-    width: 1px;
-    height: 60px;
-    background: linear-gradient(180deg, var(--neon-purple), transparent);
-    margin-top: 48px;
-  }
+/* === ANIMATED REVEAL === */
+.reveal{opacity:0;transform:translateY(40px);transition:all 0.8s cubic-bezier(0.16,1,0.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+.reveal-delay-4{transition-delay:0.4s}
+.reveal-delay-5{transition-delay:0.5s}
 
-  /* ============================
-     SECTION
-  ============================ */
-  .section {
-    padding: 80px 0;
-    border-bottom: 1px solid rgba(123,97,255,0.06);
-  }
-  .section:last-child { border-bottom: none; }
+/* === CARDS === */
+.card{
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+  padding:28px;
+  backdrop-filter:blur(12px);
+  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:'';
+  position:absolute;
+  top:0;left:-100%;
+  width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(123,97,255,0.03),transparent);
+  transition:left 0.6s;
+}
+.card:hover::before{left:100%}
+.card:hover{
+  border-color:rgba(123,97,255,0.35);
+  transform:translateY(-4px);
+  box-shadow:0 12px 50px rgba(123,97,255,0.15);
+}
+.card-title{
+  font-family:var(--font-display);
+  font-size:15px;
+  font-weight:600;
+  margin-bottom:12px;
+  color:var(--neon-cyan);
+}
+.card-icon{font-size:28px;margin-bottom:12px;display:block}
 
-  .section-header {
-    text-align: center;
-    margin-bottom: 56px;
-  }
-  .section-number {
-    font-family: var(--font-display);
-    font-size: 14px;
-    color: var(--neon-purple);
-    letter-spacing: 3px;
-    margin-bottom: 8px;
-  }
-  .section-title {
-    font-family: var(--font-display);
-    font-size: clamp(24px, 3.5vw, 40px);
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-  .section-desc {
-    color: var(--text-secondary);
-    max-width: 600px;
-    margin: 0 auto;
-    font-size: 15px;
-  }
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:24px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.grid-5{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
 
-  .section-title .highlight {
-    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+@media(max-width:768px){
+  .grid-2,.grid-3,.grid-4,.grid-5{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .scroll-indicator{display:none}
+}
 
-  /* ============================
-     CARDS
-  ============================ */
-  .card {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius);
-    padding: 28px;
-    backdrop-filter: blur(12px);
-    transition: all 0.3s;
-  }
-  .card:hover {
-    border-color: rgba(123,97,255,0.3);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
-  }
-  .card-title {
-    font-family: var(--font-display);
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--neon-cyan);
-  }
-  .card-icon {
-    font-size: 28px;
-    margin-bottom: 12px;
-    display: block;
-  }
+/* === TECH BADGES === */
+.tech-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.tech-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:11px;
+  padding:5px 12px;border-radius:6px;
+  background:rgba(123,97,255,0.08);
+  border:1px solid rgba(123,97,255,0.15);
+  color:var(--text-secondary);
+  transition:all 0.3s;cursor:default;
+}
+.tech-badge:hover{
+  border-color:var(--neon-purple);color:var(--text-primary);
+  background:rgba(123,97,255,0.15);
+  transform:translateY(-2px);
+  box-shadow:0 4px 16px rgba(123,97,255,0.15);
+}
+.tech-badge.cyan{border-color:rgba(0,245,255,0.2);background:rgba(0,245,255,0.06)}
+.tech-badge.cyan:hover{border-color:var(--neon-cyan);background:rgba(0,245,255,0.12)}
+.tech-badge.green{border-color:rgba(0,255,163,0.2);background:rgba(0,255,163,0.06)}
+.tech-badge.green:hover{border-color:var(--neon-green);background:rgba(0,255,163,0.12)}
+.tech-badge.pink{border-color:rgba(255,79,216,0.2);background:rgba(255,79,216,0.06)}
+.tech-badge.pink:hover{border-color:var(--neon-pink);background:rgba(255,79,216,0.12)}
+.tech-badge.yellow{border-color:rgba(255,209,102,0.2);background:rgba(255,209,102,0.06)}
+.tech-badge.yellow:hover{border-color:var(--neon-yellow);background:rgba(255,209,102,0.12)}
+.tech-badge.red{border-color:rgba(255,77,109,0.2);background:rgba(255,77,109,0.06)}
+.tech-badge.red:hover{border-color:var(--neon-red);background:rgba(255,77,109,0.12)}
+.tech-badge.blue{border-color:rgba(59,130,246,0.2);background:rgba(59,130,246,0.06)}
+.tech-badge.blue:hover{border-color:var(--neon-blue);background:rgba(59,130,246,0.12)}
 
-  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
-  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+/* === TIMELINE === */
+.timeline{position:relative;padding-left:32px}
+.timeline::before{
+  content:'';position:absolute;left:11px;top:0;bottom:0;
+  width:2px;
+  background:linear-gradient(180deg,var(--neon-purple),var(--neon-cyan),transparent);
+}
+.timeline-item{position:relative;margin-bottom:28px;padding-left:24px}
+.timeline-item::before{
+  content:'';position:absolute;left:-25px;top:6px;
+  width:12px;height:12px;border-radius:50%;
+  background:var(--neon-purple);
+  border:3px solid var(--bg-primary);
+  box-shadow:0 0 12px rgba(123,97,255,0.4);
+}
+.timeline-item .title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--neon-cyan);margin-bottom:4px}
+.timeline-item .desc{font-size:13px;color:var(--text-secondary)}
 
-  @media (max-width: 768px) {
-    .grid-2 { grid-template-columns: 1fr; }
-    .grid-3 { grid-template-columns: 1fr; }
-    .grid-4 { grid-template-columns: 1fr 1fr; }
-    .nav-links { display: none; }
-  }
+/* === SCREENSHOT GALLERY === */
+.gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:20px;
+}
+.gallery-item{
+  position:relative;
+  border-radius:var(--radius-sm);
+  overflow:hidden;
+  border:1px solid var(--glass-border);
+  cursor:pointer;
+  aspect-ratio:16/10;
+  background:var(--bg-secondary);
+  transition:all 0.4s;
+}
+.gallery-item:hover{
+  transform:scale(1.02);
+  border-color:var(--neon-purple);
+  box-shadow:0 8px 40px rgba(123,97,255,0.25);
+  z-index:10;
+}
+.gallery-item img{
+  width:100%;height:100%;
+  object-fit:cover;
+  transition:transform 0.5s;
+}
+.gallery-item:hover img{transform:scale(1.05)}
+.gallery-overlay{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  padding:16px;
+  background:linear-gradient(transparent,rgba(5,8,22,0.95));
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.gallery-item:hover .gallery-overlay{opacity:1}
+.gallery-overlay span{
+  font-family:var(--font-display);
+  font-size:11px;
+  color:var(--text-primary);
+  letter-spacing:0.5px;
+}
 
-  /* ============================
-     TECH BADGES
-  ============================ */
-  .tech-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--font-mono);
-    font-size: 12px;
-    padding: 5px 12px;
-    border-radius: 6px;
-    background: rgba(123,97,255,0.08);
-    border: 1px solid rgba(123,97,255,0.15);
-    color: var(--text-secondary);
-    transition: all 0.2s;
-    cursor: default;
-  }
-  .tech-badge:hover {
-    border-color: var(--neon-purple);
-    color: var(--text-primary);
-    background: rgba(123,97,255,0.15);
-  }
-  .tech-badge.cyan { border-color: rgba(0,245,255,0.2); background: rgba(0,245,255,0.06); }
-  .tech-badge.cyan:hover { border-color: var(--neon-cyan); background: rgba(0,245,255,0.12); }
-  .tech-badge.green { border-color: rgba(0,255,163,0.2); background: rgba(0,255,163,0.06); }
-  .tech-badge.green:hover { border-color: var(--neon-green); background: rgba(0,255,163,0.12); }
-  .tech-badge.pink { border-color: rgba(255,79,216,0.2); background: rgba(255,79,216,0.06); }
-  .tech-badge.pink:hover { border-color: var(--neon-pink); background: rgba(255,79,216,0.12); }
-  .tech-badge.yellow { border-color: rgba(255,209,102,0.2); background: rgba(255,209,102,0.06); }
-  .tech-badge.yellow:hover { border-color: var(--neon-yellow); background: rgba(255,209,102,0.12); }
-  .tech-badge.red { border-color: rgba(255,77,109,0.2); background: rgba(255,77,109,0.06); }
-  .tech-badge.red:hover { border-color: var(--neon-red); background: rgba(255,77,109,0.12); }
-  .tech-badge.blue { border-color: rgba(59,130,246,0.2); background: rgba(59,130,246,0.06); }
-  .tech-badge.blue:hover { border-color: var(--neon-blue); background: rgba(59,130,246,0.12); }
+/* === LIGHTBOX === */
+.lightbox{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.92);
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.4s;
+}
+.lightbox.open{opacity:1;pointer-events:all}
+.lightbox img{
+  max-width:90vw;
+  max-height:85vh;
+  border-radius:var(--radius-sm);
+  box-shadow:0 20px 80px rgba(0,0,0,0.8);
+  transform:scale(0.9);
+  transition:transform 0.4s;
+}
+.lightbox.open img{transform:scale(1)}
+.lightbox-close{
+  position:absolute;
+  top:24px;right:24px;
+  color:var(--text-primary);
+  font-size:28px;
+  cursor:pointer;
+  width:48px;height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.1);
+  transition:all 0.3s;
+}
+.lightbox-close:hover{background:rgba(255,77,109,0.2);border-color:var(--neon-red)}
+.lightbox-nav{
+  position:absolute;
+  top:50%;transform:translateY(-50%);
+  color:var(--text-primary);
+  font-size:32px;
+  cursor:pointer;
+  width:56px;height:56px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  transition:all 0.3s;
+}
+.lightbox-nav:hover{background:rgba(123,97,255,0.2);border-color:var(--neon-purple)}
+.lightbox-nav.prev{left:24px}
+.lightbox-nav.next{right:24px}
 
-  .tech-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+/* === STATS === */
+.stat-row{display:flex;flex-wrap:wrap;gap:16px;margin:12px 0}
+.stat-item{flex:1;min-width:100px}
+.stat-value{
+  font-family:var(--font-display);
+  font-size:clamp(24px,3vw,36px);
+  font-weight:700;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.stat-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px}
 
-  /* ============================
-     CODE BLOCKS
-  ============================ */
-  .code-block {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(123,97,255,0.1);
-    border-radius: var(--radius-sm);
-    padding: 20px;
-    overflow-x: auto;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--text-secondary);
-    margin: 16px 0;
-  }
-  .code-block .kw { color: var(--neon-pink); }
-  .code-block .str { color: var(--neon-green); }
-  .code-block .cm { color: var(--text-muted); font-style: italic; }
-  .code-block .fn { color: var(--neon-cyan); }
-  .code-block .num { color: var(--neon-yellow); }
-  .code-block .tp { color: var(--neon-purple); }
-  .code-block .op { color: var(--neon-red); }
+/* === CODE BLOCK === */
+.code-block{
+  background:rgba(0,0,0,0.4);
+  border:1px solid rgba(123,97,255,0.1);
+  border-radius:var(--radius-sm);
+  padding:20px;
+  overflow-x:auto;
+  font-family:var(--font-mono);
+  font-size:12px;
+  line-height:1.7;
+  color:var(--text-secondary);
+  margin:16px 0;
+}
+.code-block .kw{color:var(--neon-pink)}
+.code-block .str{color:var(--neon-green)}
+.code-block .cm{color:var(--text-muted);font-style:italic}
+.code-block .fn{color:var(--neon-cyan)}
+.code-block .num{color:var(--neon-yellow)}
+.code-block .tp{color:var(--neon-purple)}
+.code-block .op{color:var(--neon-red)}
 
-  /* ============================
-     TIMELINE
-  ============================ */
-  .timeline {
-    position: relative;
-    padding-left: 32px;
-  }
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 11px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(180deg, var(--neon-purple), var(--neon-cyan), transparent);
-  }
-  .timeline-item {
-    position: relative;
-    margin-bottom: 32px;
-    padding-left: 24px;
-  }
-  .timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -25px;
-    top: 6px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--neon-purple);
-    border: 3px solid var(--bg-primary);
-    box-shadow: 0 0 12px rgba(123,97,255,0.4);
-  }
-  .timeline-item .title {
-    font-family: var(--font-display);
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--neon-cyan);
-    margin-bottom: 4px;
-  }
-  .timeline-item .desc {
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
+/* === TABLE === */
+.table-wrap{overflow-x:auto;margin:16px 0;border:1px solid var(--glass-border);border-radius:var(--radius-sm)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:rgba(123,97,255,0.06)}
+th{
+  font-family:var(--font-display);font-size:10px;font-weight:600;
+  text-transform:uppercase;letter-spacing:1px;
+  color:var(--neon-purple);padding:12px 16px;
+  text-align:left;border-bottom:1px solid var(--glass-border);
+}
+td{padding:10px 16px;border-bottom:1px solid rgba(123,97,255,0.05);color:var(--text-secondary)}
+tr:hover td{background:rgba(123,97,255,0.03)}
+td .mono{font-family:var(--font-mono);font-size:11px}
 
-  /* ============================
-     TABLE
-  ============================ */
-  .table-wrap {
-    overflow-x: auto;
-    margin: 16px 0;
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-sm);
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  thead {
-    background: rgba(123,97,255,0.06);
-  }
-  th {
-    font-family: var(--font-display);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--neon-purple);
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid var(--glass-border);
-  }
-  td {
-    padding: 10px 16px;
-    border-bottom: 1px solid rgba(123,97,255,0.05);
-    color: var(--text-secondary);
-  }
-  tr:hover td { background: rgba(123,97,255,0.03); }
-  td .mono { font-family: var(--font-mono); font-size: 12px; }
+/* === ARCHITECTURE DIAGRAM === */
+.arch-diagram{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 0}
+.arch-layer{
+  width:100%;max-width:700px;
+  padding:16px 24px;
+  border-radius:var(--radius-sm);
+  text-align:center;
+  font-size:12px;
+  border:1px solid;
+  transition:all 0.4s;
+}
+.arch-layer:hover{transform:scale(1.02);box-shadow:0 4px 30px rgba(123,97,255,0.1)}
+.arch-layer.l1{background:rgba(0,245,255,0.06);border-color:rgba(0,245,255,0.2)}
+.arch-layer.l2{background:rgba(123,97,255,0.06);border-color:rgba(123,97,255,0.2)}
+.arch-layer.l3{background:rgba(0,255,163,0.06);border-color:rgba(0,255,163,0.2)}
+.arch-layer.l4{background:rgba(255,79,216,0.06);border-color:rgba(255,79,216,0.2)}
+.arch-layer .layer-title{font-family:var(--font-display);font-size:11px;font-weight:600;letter-spacing:1px;margin-bottom:4px}
+.arch-layer.l1 .layer-title{color:var(--neon-cyan)}
+.arch-layer.l2 .layer-title{color:var(--neon-purple)}
+.arch-layer.l3 .layer-title{color:var(--neon-green)}
+.arch-layer.l4 .layer-title{color:var(--neon-pink)}
+.arch-layer .layer-desc{color:var(--text-muted);font-size:11px;font-family:var(--font-mono)}
+.arch-arrow{color:var(--text-muted);font-size:20px;animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:0.5}50%{opacity:1}}
 
-  /* ============================
-     EXPLAIN LIKE I'M FIVE
-  ============================ */
-  .eli5-box {
-    background: linear-gradient(135deg, rgba(123,97,255,0.08), rgba(0,245,255,0.05));
-    border: 1px solid rgba(123,97,255,0.15);
-    border-radius: var(--radius);
-    padding: 32px;
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto;
-  }
-  .eli5-box .emoji-big { font-size: 48px; margin-bottom: 16px; display: block; }
-  .eli5-box p {
-    font-size: 16px;
-    color: var(--text-secondary);
-    line-height: 1.8;
-  }
-  .eli5-box .highlight-text {
-    color: var(--neon-cyan);
-    font-weight: 500;
-  }
+/* === FLOW DIAGRAM === */
+.flow-diagram{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;padding:20px 0}
+.flow-step{
+  background:var(--glass-bg);border:1px solid var(--glass-border);
+  border-radius:var(--radius-sm);padding:8px 14px;
+  font-size:11px;font-family:var(--font-mono);
+  color:var(--text-secondary);text-align:center;min-width:70px;
+  transition:all 0.3s;
+}
+.flow-step:hover{border-color:var(--neon-purple);color:var(--text-primary);transform:translateY(-2px)}
+.flow-step.highlight{border-color:var(--neon-purple);color:var(--neon-cyan);background:rgba(123,97,255,0.08)}
+.flow-arrow{color:var(--text-muted);font-size:16px}
 
-  /* ============================
-     ARCHITECTURE DIAGRAM
-  ============================ */
-  .arch-diagram {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 24px 0;
-  }
-  .arch-layer {
-    width: 100%;
-    max-width: 700px;
-    padding: 16px 24px;
-    border-radius: var(--radius-sm);
-    text-align: center;
-    font-size: 13px;
-    border: 1px solid;
-  }
-  .arch-layer.l1 { background: rgba(0,245,255,0.06); border-color: rgba(0,245,255,0.2); }
-  .arch-layer.l2 { background: rgba(123,97,255,0.06); border-color: rgba(123,97,255,0.2); }
-  .arch-layer.l3 { background: rgba(0,255,163,0.06); border-color: rgba(0,255,163,0.2); }
-  .arch-layer.l4 { background: rgba(255,79,216,0.06); border-color: rgba(255,79,216,0.2); }
-  .arch-layer .layer-title {
-    font-family: var(--font-display);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-  }
-  .arch-layer.l1 .layer-title { color: var(--neon-cyan); }
-  .arch-layer.l2 .layer-title { color: var(--neon-purple); }
-  .arch-layer.l3 .layer-title { color: var(--neon-green); }
-  .arch-layer.l4 .layer-title { color: var(--neon-pink); }
-  .arch-layer .layer-desc {
-    color: var(--text-muted);
-    font-size: 12px;
-    font-family: var(--font-mono);
-  }
-  .arch-arrow {
-    color: var(--text-muted);
-    font-size: 20px;
-  }
+/* === ELI5 === */
+.eli5-box{
+  background:linear-gradient(135deg,rgba(123,97,255,0.08),rgba(0,245,255,0.05));
+  border:1px solid rgba(123,97,255,0.15);
+  border-radius:var(--radius);
+  padding:40px;
+  text-align:center;
+  max-width:700px;
+  margin:0 auto;
+}
+.eli5-box .emoji-big{font-size:52px;margin-bottom:16px;display:block;animation:float 3s ease infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.eli5-box p{font-size:15px;color:var(--text-secondary);line-height:1.8}
+.eli5-box .highlight-text{color:var(--neon-cyan);font-weight:500}
 
-  /* ============================
-     LIST
-  ============================ */
-  .feature-list {
-    list-style: none;
-    padding: 0;
-  }
-  .feature-list li {
-    padding: 8px 0;
-    padding-left: 24px;
-    position: relative;
-    color: var(--text-secondary);
-    font-size: 14px;
-    border-bottom: 1px solid rgba(123,97,255,0.04);
-  }
-  .feature-list li::before {
-    content: '>';
-    position: absolute;
-    left: 0;
-    color: var(--neon-cyan);
-    font-family: var(--font-mono);
-    font-weight: 700;
-  }
-  .feature-list li:last-child { border-bottom: none; }
+/* === FEATURE LIST === */
+.feature-list{list-style:none;padding:0}
+.feature-list li{
+  padding:7px 0;padding-left:24px;
+  position:relative;color:var(--text-secondary);
+  font-size:13px;border-bottom:1px solid rgba(123,97,255,0.04);
+}
+.feature-list li::before{
+  content:'▸';position:absolute;left:0;
+  color:var(--neon-cyan);font-weight:700;
+}
+.feature-list li:last-child{border-bottom:none}
 
-  /* ============================
-     FLOW DIAGRAM
-  ============================ */
-  .flow-diagram {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 20px 0;
-  }
-  .flow-step {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-sm);
-    padding: 10px 16px;
-    font-size: 12px;
-    font-family: var(--font-mono);
-    color: var(--text-secondary);
-    text-align: center;
-    min-width: 80px;
-  }
-  .flow-step.highlight {
-    border-color: var(--neon-purple);
-    color: var(--neon-cyan);
-    background: rgba(123,97,255,0.08);
-  }
-  .flow-arrow {
-    color: var(--text-muted);
-    font-size: 18px;
-  }
+/* === ROLE CARDS === */
+.role-card{position:relative;overflow:hidden}
+.role-card::before{
+  content:'';position:absolute;top:0;left:0;
+  width:100%;height:4px;
+}
+.role-card.student::before{background:linear-gradient(90deg,var(--neon-cyan),var(--neon-blue))}
+.role-card.teacher::before{background:linear-gradient(90deg,var(--neon-purple),var(--neon-pink))}
+.role-card.admin::before{background:linear-gradient(90deg,var(--neon-yellow),var(--neon-red))}
 
-  /* ============================
-     FOOTER
-  ============================ */
-  .footer {
-    text-align: center;
-    padding: 40px 24px;
-    border-top: 1px solid var(--glass-border);
-  }
-  .footer p { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+/* === TABS === */
+.tabs{display:flex;gap:4px;margin-bottom:24px;flex-wrap:wrap}
+.tab-btn{
+  padding:10px 20px;
+  border-radius:8px;
+  border:1px solid var(--glass-border);
+  background:var(--glass-bg);
+  color:var(--text-muted);
+  font-family:var(--font-body);
+  font-size:12px;
+  cursor:pointer;
+  transition:all 0.3s;
+}
+.tab-btn:hover{border-color:var(--neon-purple);color:var(--text-primary)}
+.tab-btn.active{background:rgba(123,97,255,0.15);border-color:var(--neon-purple);color:var(--neon-cyan)}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeIn 0.4s ease}
 
-  /* ============================
-     FOLDER TREE
-  ============================ */
-  .tree { font-family: var(--font-mono); font-size: 13px; line-height: 1.9; color: var(--text-secondary); }
-  .tree .dir { color: var(--neon-cyan); }
-  .tree .file { color: var(--text-secondary); }
-  .tree .indent { padding-left: 24px; }
+/* === INTERACTIVE DEMO === */
+.demo-area{
+  background:rgba(0,0,0,0.3);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+  padding:24px;
+  text-align:center;
+}
+.demo-btn{
+  padding:12px 28px;
+  border-radius:10px;
+  border:none;
+  font-family:var(--font-display);
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:1px;
+  cursor:pointer;
+  transition:all 0.3s;
+  background:linear-gradient(135deg,var(--neon-purple),var(--neon-cyan));
+  color:var(--bg-primary);
+}
+.demo-btn:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(123,97,255,0.4)}
+.demo-result{
+  margin-top:16px;
+  padding:16px;
+  border-radius:8px;
+  background:rgba(123,97,255,0.06);
+  border:1px solid rgba(123,97,255,0.1);
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--neon-green);
+  min-height:40px;
+}
 
-  /* ============================
-     ROLE CARDS
-  ============================ */
-  .role-card {
-    position: relative;
-    overflow: hidden;
-  }
-  .role-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 4px;
-  }
-  .role-card.student::before { background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue)); }
-  .role-card.teacher::before { background: linear-gradient(90deg, var(--neon-purple), var(--neon-pink)); }
-  .role-card.admin::before { background: linear-gradient(90deg, var(--neon-yellow), var(--neon-red)); }
+/* === TREE === */
+.tree{font-family:var(--font-mono);font-size:12px;line-height:1.8;color:var(--text-secondary)}
+.tree .dir{color:var(--neon-cyan)}
+.tree .file{color:var(--text-secondary)}
+.tree .indent{padding-left:20px}
 
-  .stat-row { display: flex; flex-wrap: wrap; gap: 16px; margin: 12px 0; }
-  .stat-item { flex: 1; min-width: 100px; }
-  .stat-value {
-    font-family: var(--font-display);
-    font-size: 28px;
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+/* === FOOTER === */
+.footer{text-align:center;padding:48px 24px;border-top:1px solid var(--glass-border)}
+.footer p{font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+.footer-links{display:flex;gap:16px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.footer-links a{color:var(--text-muted);text-decoration:none;font-size:11px;font-family:var(--font-mono);transition:color 0.3s}
+.footer-links a:hover{color:var(--neon-cyan)}
 
-  /* Collapsible */
-  .collapsible { cursor: pointer; user-select: none; }
-  .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
-  .collapsible-content.open { max-height: 5000px; }
-  .collapse-toggle {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--neon-purple);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    margin: 8px 0;
-    padding: 4px 12px;
-    border-radius: 4px;
-    background: rgba(123,97,255,0.06);
-    border: 1px solid rgba(123,97,255,0.1);
-    transition: all 0.2s;
-  }
-  .collapse-toggle:hover { background: rgba(123,97,255,0.12); }
+/* === COUNTER === */
+.counter{
+  display:inline-block;
+  font-variant-numeric:tabular-nums;
+}
 
-  /* Misc */
-  .mt-8 { margin-top: 32px; }
-  .mb-8 { margin-bottom: 32px; }
-  .text-center { text-align: center; }
-  .text-muted { color: var(--text-muted); font-size: 13px; }
-  .gap-4 { gap: 16px; }
+/* === MISC === */
+.mt-8{margin-top:32px}
+.mb-8{margin-bottom:32px}
+.text-center{text-align:center}
+.text-muted{color:var(--text-muted);font-size:12px}
+.gap-4{gap:16px}
 
-  /* Print */
-  @media print {
-    .nav, .stars { display: none; }
-    body { background: white; color: black; }
-    .card { border: 1px solid #ddd; break-inside: avoid; }
-    .section { break-inside: avoid; }
-  }
+@media print{
+  .nav,.scroll-indicator,#three-bg,.hero-cta,.lightbox{display:none}
+  body{background:white;color:black}
+  .card{border:1px solid #ddd;break-inside:avoid}
+  .section{break-inside:avoid}
+  .reveal{opacity:1;transform:none}
+}
 </style>
 </head>
 <body>
 
-<div class="stars" id="stars"></div>
+<div id="three-bg"></div>
 
 <!-- NAV -->
 <nav class="nav">
-  <a href="#" class="nav-logo">WEB3CONNECT</a>
+  <a href="#" class="nav-logo">◈ WEB3CONNECT</a>
   <div class="nav-links">
     <a href="#overview" class="nav-link">Overview</a>
-    <a href="#tech" class="nav-link">Tech Stack</a>
-    <a href="#languages" class="nav-link">Languages</a>
+    <a href="#tech" class="nav-link">Tech</a>
+    <a href="#gallery" class="nav-link">Gallery</a>
     <a href="#architecture" class="nav-link">Architecture</a>
-    <a href="#api" class="nav-link">APIs</a>
+    <a href="#features" class="nav-link">Features</a>
     <a href="#student" class="nav-link">Student</a>
     <a href="#teacher" class="nav-link">Teacher</a>
     <a href="#admin" class="nav-link">Admin</a>
-    <a href="#structure" class="nav-link">Structure</a>
     <a href="#blockchain" class="nav-link">Blockchain</a>
     <a href="#database" class="nav-link">Database</a>
     <a href="#security" class="nav-link">Security</a>
@@ -683,15 +760,18 @@
   <span class="nav-badge">v2.0.0</span>
 </nav>
 
+<!-- SCROLL INDICATOR -->
+<div class="scroll-indicator"></div>
+
 <!-- HERO -->
-<section class="hero">
-  <div class="hero-badge">FINAL YEAR PROJECT 2024-2025</div>
+<section class="hero" id="hero">
+  <div class="hero-badge">✦ FINAL YEAR PROJECT 2024-2025</div>
   <h1 class="hero-title">
     <span class="gradient">Web3Connect</span><br>
     Virtual Campus Platform
   </h1>
   <p class="hero-subtitle">
-    A decentralized platform for students, teachers, and communities to collaborate, complete tasks, and earn blockchain-backed NFT certificates on Polygon Amoy testnet.
+    <span class="typewriter"></span>
   </p>
   <div class="hero-meta">
     <span class="hero-meta-item">React 19</span>
@@ -703,32 +783,46 @@
     <span class="hero-meta-item">IPFS</span>
     <span class="hero-meta-item">ERC-721</span>
   </div>
+  <div class="hero-cta">
+    <a href="#gallery" class="primary">⟶ View Screenshots</a>
+    <a href="#eli5" class="secondary">How It Works</a>
+  </div>
   <div class="hero-line"></div>
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <span>↓</span>
+  </div>
 </section>
 
 <div class="container">
 
-<!-- ===================== SECTION: OVERVIEW ===================== -->
+<!-- SECTION: OVERVIEW -->
 <section class="section" id="overview">
-  <div class="section-header">
+  <div class="section-header reveal">
     <div class="section-number">01</div>
     <h2 class="section-title">Project <span class="highlight">Overview</span></h2>
     <p class="section-desc">A complete Web3-based educational ecosystem combining blockchain credentials with social learning.</p>
   </div>
 
   <div class="grid-2">
-    <div class="card">
+    <div class="card reveal reveal-delay-1">
       <span class="card-icon">🎯</span>
       <h3 class="card-title">What is Web3Connect?</h3>
       <p style="color:var(--text-secondary);font-size:14px;line-height:1.8;">
-        Web3Connect is a <strong style="color:var(--neon-cyan);">Blockchain-Enabled Virtual Campus Platform</strong> 
-        that lets teachers create communities, assign tasks, and issue 
-        <strong style="color:var(--neon-purple);">NFT certificates</strong> minted on the 
+        Web3Connect is a <strong style="color:var(--neon-cyan);">Blockchain-Enabled Virtual Campus Platform</strong>
+        that lets teachers create communities, assign tasks, and issue
+        <strong style="color:var(--neon-purple);">NFT certificates</strong> minted on the
         Polygon Amoy testnet. Students earn soulbound (non-transferable) ERC-721 tokens as proof of their achievements.
       </p>
+      <div class="stat-row" style="margin-top:16px">
+        <div class="stat-item"><div class="stat-value"><span class="counter" data-target="19">0</span></div><div class="stat-label">DB Models</div></div>
+        <div class="stat-item"><div class="stat-value"><span class="counter" data-target="50">0</span>+</div><div class="stat-label">API Endpoints</div></div>
+        <div class="stat-item"><div class="stat-value"><span class="counter" data-target="22">0</span></div><div class="stat-label">Pages</div></div>
+        <div class="stat-item"><div class="stat-value"><span class="counter" data-target="50">0</span>k+</div><div class="stat-label">Lines of Code</div></div>
+      </div>
     </div>
 
-    <div class="card">
+    <div class="card reveal reveal-delay-2">
       <span class="card-icon">❓</span>
       <h3 class="card-title">Problem It Solves</h3>
       <ul class="feature-list">
@@ -740,14 +834,14 @@
       </ul>
     </div>
 
-    <div class="card">
+    <div class="card reveal reveal-delay-3">
       <span class="card-icon">✅</span>
       <h3 class="card-title">Key Features</h3>
       <ul class="feature-list">
         <li>Wallet-based login (MetaMask + SIWE)</li>
         <li>Teacher verification with document upload &amp; admin approval</li>
         <li>Community management with tasks &amp; collaborations</li>
-        <li>Automated NFT certificate minting on task completion</li>
+        <li>Teacher-controlled NFT certificate minting</li>
         <li>Real-time messaging (DM, group chat, server channels)</li>
         <li>Social graph: follow/unfollow, discover, leaderboard</li>
         <li>Admin panel for platform governance</li>
@@ -755,35 +849,37 @@
       </ul>
     </div>
 
-    <div class="card">
-      <span class="card-icon">📊</span>
-      <h3 class="card-title">Platform Stats</h3>
-      <div class="stat-row">
-        <div class="stat-item"><div class="stat-value">19</div><div class="stat-label">DB Models</div></div>
-        <div class="stat-item"><div class="stat-value">50+</div><div class="stat-label">API Endpoints</div></div>
-        <div class="stat-item"><div class="stat-value">22</div><div class="stat-label">Pages</div></div>
-        <div class="stat-item"><div class="stat-value">20+</div><div class="stat-label">Components</div></div>
-      </div>
-      <div class="stat-row">
-        <div class="stat-item"><div class="stat-value">1</div><div class="stat-label">Smart Contract</div></div>
-        <div class="stat-item"><div class="stat-value">5</div><div class="stat-label">Contexts</div></div>
-        <div class="stat-item"><div class="stat-value">16</div><div class="stat-label">Route Files</div></div>
-        <div class="stat-item"><div class="stat-value">50k+</div><div class="stat-label">Lines of Code</div></div>
+    <div class="card reveal reveal-delay-4">
+      <span class="card-icon">🔗</span>
+      <h3 class="card-title">Blockchain-Powered</h3>
+      <p style="color:var(--text-secondary);font-size:14px;line-height:1.8;">
+        Built on <strong style="color:var(--neon-pink);">Polygon Amoy Testnet</strong> (Chain ID: 80002).
+        Certificates are <strong style="color:var(--neon-cyan);">soulbound ERC-721 NFTs</strong>
+        (non-transferable per ERC-5192). Metadata and certificate images are stored on
+        <strong style="color:var(--neon-purple);">IPFS via Pinata</strong>.
+        Smart contract written in Solidity ^0.8.20 using OpenZeppelin.
+      </p>
+      <div class="tech-wrap" style="margin-top:12px">
+        <span class="tech-badge pink">Solidity</span>
+        <span class="tech-badge pink">ERC-721</span>
+        <span class="tech-badge pink">Polygon Amoy</span>
+        <span class="tech-badge pink">IPFS</span>
+        <span class="tech-badge pink">Ethers.js</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===================== SECTION: TECH STACK ===================== -->
+<!-- SECTION: TECH STACK -->
 <section class="section" id="tech">
-  <div class="section-header">
+  <div class="section-header reveal">
     <div class="section-number">02</div>
     <h2 class="section-title">Technology <span class="highlight">Stack</span></h2>
     <p class="section-desc">Every technology, framework, and library used to build this platform.</p>
   </div>
 
   <div class="grid-3">
-    <div class="card">
+    <div class="card reveal reveal-delay-1">
       <span class="card-icon">🖥️</span>
       <h3 class="card-title">Frontend</h3>
       <div class="tech-wrap">
@@ -802,11 +898,11 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card reveal reveal-delay-2">
       <span class="card-icon">⚙️</span>
       <h3 class="card-title">Backend</h3>
       <div class="tech-wrap">
-        <span class="tech-badge green">Node.js 18+</span>
+        <span class="tech-badge green">Node.js 22</span>
         <span class="tech-badge green">Express 4.19</span>
         <span class="tech-badge green">Mongoose 8.23</span>
         <span class="tech-badge green">Socket.IO 4.8</span>
@@ -818,11 +914,10 @@
         <span class="tech-badge green">express-rate-limit</span>
         <span class="tech-badge green">express-validator</span>
         <span class="tech-badge green">Nodemailer 8</span>
-        <span class="tech-badge green">Twilio 6</span>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card reveal reveal-delay-3">
       <span class="card-icon">🔗</span>
       <h3 class="card-title">Blockchain &amp; Web3</h3>
       <div class="tech-wrap">
@@ -840,7 +935,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card reveal reveal-delay-4">
       <span class="card-icon">🗄️</span>
       <h3 class="card-title">Database &amp; Storage</h3>
       <div class="tech-wrap">
@@ -852,7 +947,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card reveal reveal-delay-5">
       <span class="card-icon">🔐</span>
       <h3 class="card-title">Authentication</h3>
       <div class="tech-wrap">
@@ -864,7 +959,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card reveal reveal-delay-5">
       <span class="card-icon">📡</span>
       <h3 class="card-title">Real-Time &amp; Verification</h3>
       <div class="tech-wrap">
@@ -879,77 +974,106 @@
   </div>
 </section>
 
-<!-- ===================== SECTION: LANGUAGES ===================== -->
-<section class="section" id="languages">
-  <div class="section-header">
+<!-- SECTION: SCREENSHOT GALLERY -->
+<section class="section" id="gallery">
+  <div class="section-header reveal">
     <div class="section-number">03</div>
-    <h2 class="section-title">Programming <span class="highlight">Languages</span></h2>
-    <p class="section-desc">Every language used across the entire platform.</p>
+    <h2 class="section-title">Live App <span class="highlight">Gallery</span></h2>
+    <p class="section-desc">Real screenshots of Web3Connect running on localhost:5173 with the backend at localhost:5001.</p>
   </div>
 
-  <div class="grid-4">
-    <div class="card text-center" style="border-color:rgba(255,217,0,0.2);">
-      <span class="card-icon" style="font-size:40px;">🟨</span>
-      <h3 class="card-title" style="color:#F7DF1E;">JavaScript</h3>
-      <p style="color:var(--text-muted);font-size:13px;">
-        Core language for both frontend (React) and backend (Node.js/Express).<br>
-        <strong style="color:var(--text-secondary);">~95% of all code</strong>
-      </p>
-      <div class="tech-wrap" style="justify-content:center;">
-        <span class="tech-badge yellow">ES Modules</span>
-        <span class="tech-badge yellow">JSX</span>
-        <span class="tech-badge yellow">Node.js API</span>
-      </div>
-    </div>
+  <div class="tabs reveal" id="gallery-tabs">
+    <button class="tab-btn active" data-tab="all">All</button>
+    <button class="tab-btn" data-tab="auth">Auth</button>
+    <button class="tab-btn" data-tab="social">Social</button>
+    <button class="tab-btn" data-tab="admin">Admin</button>
+  </div>
 
-    <div class="card text-center" style="border-color:rgba(204,204,204,0.2);">
-      <span class="card-icon" style="font-size:40px;">◇</span>
-      <h3 class="card-title" style="color:#CCCCCC;">Solidity</h3>
-      <p style="color:var(--text-muted);font-size:13px;">
-        Smart contract language for the ERC-721 CertificateNFT contract deployed on Polygon Amoy testnet.
-      </p>
-      <div class="tech-wrap" style="justify-content:center;">
-        <span class="tech-badge pink">^0.8.20</span>
-        <span class="tech-badge pink">ERC-721</span>
-      </div>
+  <div class="gallery-grid reveal" id="gallery-grid">
+    <div class="gallery-item" data-category="auth" onclick="openLightbox(0)">
+      <img src="screenshots/01-home.png" alt="Home / Landing Page" loading="lazy">
+      <div class="gallery-overlay"><span>🏠 Home / Landing Page</span></div>
     </div>
-
-    <div class="card text-center" style="border-color:rgba(0,245,255,0.2);">
-      <span class="card-icon" style="font-size:40px;">🎨</span>
-      <h3 class="card-title" style="color:var(--neon-cyan);">HTML &amp; CSS</h3>
-      <p style="color:var(--text-muted);font-size:13px;">
-        Markup and styling via JSX components and Tailwind CSS utility classes with custom animations.
-      </p>
-      <div class="tech-wrap" style="justify-content:center;">
-        <span class="tech-badge cyan">HTML5</span>
-        <span class="tech-badge cyan">CSS3</span>
-        <span class="tech-badge cyan">Tailwind</span>
-      </div>
+    <div class="gallery-item" data-category="auth" onclick="openLightbox(1)">
+      <img src="screenshots/16-connect-wallet.png" alt="Connect Wallet Page" loading="lazy">
+      <div class="gallery-overlay"><span>🔗 Connect Wallet</span></div>
     </div>
-
-    <div class="card text-center" style="border-color:rgba(0,168,130,0.2);">
-      <span class="card-icon" style="font-size:40px;">🍃</span>
-      <h3 class="card-title" style="color:#00A882;">MongoDB (BSON)</h3>
-      <p style="color:var(--text-muted);font-size:13px;">
-        Schema definitions via Mongoose. 19 models with indexes, validation, and embedded subdocuments.
-      </p>
-      <div class="tech-wrap" style="justify-content:center;">
-        <span class="tech-badge green">Mongoose</span>
-        <span class="tech-badge green">BSON</span>
-      </div>
+    <div class="gallery-item" data-category="auth" onclick="openLightbox(2)">
+      <img src="screenshots/13-admin-setup.png" alt="Admin Setup Page" loading="lazy">
+      <div class="gallery-overlay"><span>🛡️ Admin Setup</span></div>
+    </div>
+    <div class="gallery-item" data-category="social" onclick="openLightbox(3)">
+      <img src="screenshots/03-communities.png" alt="Communities Page" loading="lazy">
+      <div class="gallery-overlay"><span>🏫 Communities</span></div>
+    </div>
+    <div class="gallery-item" data-category="social" onclick="openLightbox(4)">
+      <img src="screenshots/04-community-view.png" alt="Community View" loading="lazy">
+      <div class="gallery-overlay"><span>👥 Community View</span></div>
+    </div>
+    <div class="gallery-item" data-category="social" onclick="openLightbox(5)">
+      <img src="screenshots/05-servers.png" alt="Servers Page" loading="lazy">
+      <div class="gallery-overlay"><span>💬 Servers / Chat</span></div>
+    </div>
+    <div class="gallery-item" data-category="social" onclick="openLightbox(6)">
+      <img src="screenshots/06-marketplace.png" alt="Marketplace Page" loading="lazy">
+      <div class="gallery-overlay"><span>🏪 Marketplace</span></div>
+    </div>
+    <div class="gallery-item" data-category="social" onclick="openLightbox(7)">
+      <img src="screenshots/07-discover.png" alt="Discover Page" loading="lazy">
+      <div class="gallery-overlay"><span>🔍 Discover</span></div>
+    </div>
+    <div class="gallery-item" data-category="social" onclick="openLightbox(8)">
+      <img src="screenshots/08-leaderboard.png" alt="Leaderboard" loading="lazy">
+      <div class="gallery-overlay"><span>🏆 Leaderboard</span></div>
+    </div>
+    <div class="gallery-item" data-category="social" onclick="openLightbox(9)">
+      <img src="screenshots/09-connections.png" alt="Connections Graph" loading="lazy">
+      <div class="gallery-overlay"><span>🕸️ Connections</span></div>
+    </div>
+    <div class="gallery-item" data-category="social" onclick="openLightbox(10)">
+      <img src="screenshots/10-messages.png" alt="Messages" loading="lazy">
+      <div class="gallery-overlay"><span>💌 Direct Messages</span></div>
+    </div>
+    <div class="gallery-item" data-category="auth" onclick="openLightbox(11)">
+      <img src="screenshots/02-dashboard.png" alt="Dashboard" loading="lazy">
+      <div class="gallery-overlay"><span>📊 Dashboard</span></div>
+    </div>
+    <div class="gallery-item" data-category="auth" onclick="openLightbox(12)">
+      <img src="screenshots/11-certificates.png" alt="My Certificates" loading="lazy">
+      <div class="gallery-overlay"><span>🎓 My Certificates</span></div>
+    </div>
+    <div class="gallery-item" data-category="auth" onclick="openLightbox(13)">
+      <img src="screenshots/12-admin.png" alt="Admin Panel" loading="lazy">
+      <div class="gallery-overlay"><span>🛡️ Admin Panel</span></div>
+    </div>
+    <div class="gallery-item" data-category="auth" onclick="openLightbox(14)">
+      <img src="screenshots/14-profile.png" alt="User Profile" loading="lazy">
+      <div class="gallery-overlay"><span>👤 User Profile</span></div>
+    </div>
+    <div class="gallery-item" data-category="auth" onclick="openLightbox(15)">
+      <img src="screenshots/15-verification.png" alt="Verification Page" loading="lazy">
+      <div class="gallery-overlay"><span>✅ Student Verification</span></div>
     </div>
   </div>
 </section>
 
-<!-- ===================== SECTION: ARCHITECTURE ===================== -->
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+  <span class="lightbox-nav prev" onclick="navigateLightbox(-1)">‹</span>
+  <img id="lightbox-img" alt="Screenshot">
+  <span class="lightbox-nav next" onclick="navigateLightbox(1)">›</span>
+</div>
+
+<!-- SECTION: ARCHITECTURE -->
 <section class="section" id="architecture">
-  <div class="section-header">
+  <div class="section-header reveal">
     <div class="section-number">04</div>
     <h2 class="section-title">System <span class="highlight">Architecture</span></h2>
-    <p class="section-desc">How all the pieces fit together.</p>
+    <p class="section-desc">How all the pieces fit together — from the user's browser to the blockchain.</p>
   </div>
 
-  <div class="arch-diagram">
+  <div class="arch-diagram reveal">
     <div class="arch-layer l1">
       <div class="layer-title">PRESENTATION LAYER</div>
       <div class="layer-desc">React 19 SPA · Tailwind CSS · Framer Motion · 22 Pages · 20+ Components</div>
@@ -971,53 +1095,250 @@
     </div>
   </div>
 
-  <div style="margin-top:40px;">
-    <h3 style="font-family:var(--font-display);font-size:16px;color:var(--neon-cyan);margin-bottom:16px;">Data Flow</h3>
+  <div class="reveal" style="margin-top:40px;">
+    <h3 style="font-family:var(--font-display);font-size:15px;color:var(--neon-cyan);margin-bottom:16px;">Data Flow</h3>
     <div class="flow-diagram">
       <span class="flow-step highlight">User Action</span>
       <span class="flow-arrow">→</span>
       <span class="flow-step">React Component</span>
       <span class="flow-arrow">→</span>
-      <span class="flow-step">API Service (Axios)</span>
+      <span class="flow-step">API Service</span>
       <span class="flow-arrow">→</span>
       <span class="flow-step">Express Controller</span>
       <span class="flow-arrow">→</span>
       <span class="flow-step highlight">Business Logic</span>
       <span class="flow-arrow">→</span>
-      <span class="flow-step">MongoDB / Blockchain</span>
+      <span class="flow-step">MongoDB / IPFS / Blockchain</span>
       <span class="flow-arrow">→</span>
       <span class="flow-step">Response</span>
     </div>
   </div>
 </section>
 
-<!-- ===================== SECTION: API ===================== -->
-<section class="section" id="api">
-  <div class="section-header">
+<!-- SECTION: FEATURES -->
+<section class="section" id="features">
+  <div class="section-header reveal">
     <div class="section-number">05</div>
+    <h2 class="section-title">Interactive <span class="highlight">Features</span></h2>
+    <p class="section-desc">Core platform features demonstrated with live demos.</p>
+  </div>
+
+  <div class="grid-3">
+    <div class="card reveal reveal-delay-1">
+      <span class="card-icon">🔑</span>
+      <h3 class="card-title">Wallet Authentication</h3>
+      <p style="color:var(--text-secondary);font-size:13px;line-height:1.7;">
+        Users connect their <strong style="color:var(--neon-cyan);">MetaMask</strong>, 
+        <strong style="color:var(--neon-purple);">Coinbase Wallet</strong>, or 
+        <strong style="color:var(--neon-pink);">WalletConnect</strong> wallet. 
+        The platform supports both SIWE (Sign-In With Ethereum) and direct wallet login. 
+        Wallet addresses are validated and stored in lowercase format.
+      </p>
+      <div class="demo-area" style="margin-top:12px;">
+        <button class="demo-btn" onclick="simulateWallet()">Simulate Wallet Connect</button>
+        <div class="demo-result" id="wallet-demo">0x0000...0000</div>
+      </div>
+    </div>
+
+    <div class="card reveal reveal-delay-2">
+      <span class="card-icon">🎓</span>
+      <h3 class="card-title">NFT Certificate Minting</h3>
+      <p style="color:var(--text-secondary);font-size:13px;line-height:1.7;">
+        The <strong style="color:var(--neon-green);">6-step pipeline</strong>: generate certificate
+        image (node-canvas, 3200×2200px) → upload to IPFS (Pinata) → create ERC-721 metadata →
+        upload metadata → mint soulbound NFT on Polygon Amoy → persist to database.
+      </p>
+      <div class="demo-area" style="margin-top:12px;">
+        <button class="demo-btn" onclick="simulateMint()">Simulate Mint Pipeline</button>
+        <div class="demo-result" id="mint-demo">Ready</div>
+      </div>
+    </div>
+
+    <div class="card reveal reveal-delay-3">
+      <span class="card-icon">💬</span>
+      <h3 class="card-title">Real-Time Communication</h3>
+      <p style="color:var(--text-secondary);font-size:13px;line-height:1.7;">
+        <strong style="color:var(--neon-cyan);">Socket.IO</strong> powers direct messaging,
+        community chat, server channels, and WebRTC voice/video calls. Features include
+        typing indicators, read receipts, message reactions, and file sharing.
+        Rate limited: 10 messages/sec per socket.
+      </p>
+      <div class="demo-area" style="margin-top:12px;">
+        <button class="demo-btn" onclick="simulateChat()">Simulate Live Message</button>
+        <div class="demo-result" id="chat-demo">Awaiting message...</div>
+      </div>
+    </div>
+
+    <div class="card reveal reveal-delay-4">
+      <span class="card-icon">🕸️</span>
+      <h3 class="card-title">Social Graph</h3>
+      <p style="color:var(--text-secondary);font-size:13px;line-height:1.7;">
+        Follow/unfollow users, discover new connections, view your network graph with 
+        <strong style="color:var(--neon-purple);">react-force-graph</strong>, and track
+        followers/following. Leaderboards show top-performing students and teachers.
+      </p>
+      <div class="demo-area" style="margin-top:12px;">
+        <button class="demo-btn" onclick="simulateFollow()">Simulate Follow</button>
+        <div class="demo-result" id="follow-demo">Not following anyone</div>
+      </div>
+    </div>
+
+    <div class="card reveal reveal-delay-5">
+      <span class="card-icon">🤖</span>
+      <h3 class="card-title">AI Verification</h3>
+      <p style="color:var(--text-secondary);font-size:13px;line-height:1.7;">
+        <strong style="color:var(--neon-yellow);">Tesseract.js</strong> performs OCR on student
+        ID cards, extracting name, college, and registration number. The 
+        <strong style="color:var(--neon-green);">matching engine</strong> compares extracted text
+        against user-submitted data with an 85% similarity threshold.
+      </p>
+      <div class="demo-area" style="margin-top:12px;">
+        <button class="demo-btn" onclick="simulateOCR()">Simulate OCR Check</button>
+        <div class="demo-result" id="ocr-demo">ID not scanned</div>
+      </div>
+    </div>
+
+    <div class="card reveal reveal-delay-5">
+      <span class="card-icon">🔍</span>
+      <h3 class="card-title">Certificate Verification</h3>
+      <p style="color:var(--text-secondary);font-size:13px;line-height:1.7;">
+        Each certificate is publicly verifiable on the Polygon Amoy testnet. QR codes on
+        certificate images link to the <strong style="color:var(--neon-cyan);">IPFS metadata</strong>.
+        Anyone can verify authenticity without needing a platform account.
+      </p>
+      <div class="demo-area" style="margin-top:12px;">
+        <button class="demo-btn" onclick="simulateVerify()">Simulate Verification</button>
+        <div class="demo-result" id="verify-demo">Check a certificate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: STUDENT -->
+<section class="section" id="student">
+  <div class="section-header reveal">
+    <div class="section-number">06</div>
+    <h2 class="section-title">Student <span class="highlight">Journey</span></h2>
+    <p class="section-desc">Everything a student can do on the platform, explained step by step.</p>
+  </div>
+
+  <div class="role-card student card reveal" style="padding:32px;border-color:rgba(0,245,255,0.2);">
+    <h3 style="font-family:var(--font-display);font-size:17px;color:var(--neon-cyan);margin-bottom:20px;">🎓 Student Journey — Step by Step</h3>
+    <div class="timeline">
+      <div class="timeline-item reveal"><div class="title">1. Connect Wallet</div><div class="desc">Student connects their MetaMask wallet. The platform detects Polygon Amoy network. A JWT token is issued after wallet signature verification.</div></div>
+      <div class="timeline-item reveal"><div class="title">2. Complete Onboarding / Verification</div><div class="desc">Student submits college ID for AI-powered OCR verification. Tesseract.js extracts name, college, registration number. Matching engine compares against form data (85% threshold). If approved, student gains full access.</div></div>
+      <div class="timeline-item reveal"><div class="title">3. Browse &amp; Join Communities</div><div class="desc">Student discovers communities on the Communities page. Can join any public community created by verified teachers. Each community has its own tasks, members, and chat.</div></div>
+      <div class="timeline-item reveal"><div class="title">4. View &amp; Complete Tasks</div><div class="desc">Teacher posts tasks within communities. Student views tasks assigned to them, submits solutions (text + file uploads), and marks tasks as complete.</div></div>
+      <div class="timeline-item reveal"><div class="title">5. Earn NFT Certificates</div><div class="desc">When all tasks in a community are completed, the teacher triggers certificate issuance. The system generates a styled PNG certificate, uploads it to IPFS via Pinata, mints an ERC-721 soulbound NFT on Polygon Amoy, and stores the record.</div></div>
+      <div class="timeline-item reveal"><div class="title">6. View Certificates &amp; Profile</div><div class="desc">Student views all earned NFTs in My Certificates page. Certificate details include IPFS metadata, transaction hash, and token ID. Profile shows follower/following stats, community memberships, and certificate gallery.</div></div>
+      <div class="timeline-item reveal"><div class="title">7. Social Features</div><div class="desc">Follow/unfollow other students and teachers. Discover users. View connections graph. Send direct messages. Join server channels. Participate in leaderboards.</div></div>
+    </div>
+    <h4 style="font-family:var(--font-display);font-size:12px;color:var(--neon-purple);margin:24px 0 12px;">Student Pages</h4>
+    <div class="tech-wrap">
+      <span class="tech-badge cyan">Dashboard</span>
+      <span class="tech-badge cyan">Communities</span>
+      <span class="tech-badge cyan">Community View</span>
+      <span class="tech-badge cyan">Servers</span>
+      <span class="tech-badge cyan">Marketplace</span>
+      <span class="tech-badge cyan">Discover</span>
+      <span class="tech-badge cyan">Leaderboard</span>
+      <span class="tech-badge cyan">Connections</span>
+      <span class="tech-badge cyan">My Certificates</span>
+      <span class="tech-badge cyan">Messages</span>
+      <span class="tech-badge cyan">Profile</span>
+      <span class="tech-badge cyan">Connect Wallet</span>
+      <span class="tech-badge cyan">Verification</span>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: TEACHER -->
+<section class="section" id="teacher">
+  <div class="section-header reveal">
+    <div class="section-number">07</div>
+    <h2 class="section-title">Teacher <span class="highlight">Journey</span></h2>
+    <p class="section-desc">How teachers join, get verified, create communities, and issue certificates.</p>
+  </div>
+
+  <div class="role-card teacher card reveal" style="padding:32px;border-color:rgba(123,97,255,0.2);">
+    <h3 style="font-family:var(--font-display);font-size:17px;color:var(--neon-purple);margin-bottom:20px;">👨‍🏫 Teacher Journey — Step by Step</h3>
+    <div class="timeline">
+      <div class="timeline-item reveal"><div class="title">1. Register as Teacher</div><div class="desc">Teacher connects wallet and registers with role "teacher". Profile stored in both User and Teacher collections.</div></div>
+      <div class="timeline-item reveal"><div class="title">2. Submit Verification Documents</div><div class="desc">Teacher submits: full name, employee ID, college email, college name, college ID image, signature image (via SignaturePad). Documents stored on server via Multer.</div></div>
+      <div class="timeline-item reveal"><div class="title">3. Wait for Admin Approval</div><div class="desc">Status set to <code style="color:var(--neon-yellow);">pending_approval</code>. Admin reviews documents in Admin Panel and approves/rejects. Teacher receives email/SMS notification.</div></div>
+      <div class="timeline-item reveal"><div class="title">4. Create Communities</div><div class="desc">Approved teachers create communities with name, description, image, and college name. They become the community creator with full management rights.</div></div>
+      <div class="timeline-item reveal"><div class="title">5. Create &amp; Manage Tasks</div><div class="desc">Teachers post tasks within communities: title, description, attachments. Tasks can require file submissions. Teachers track completion status per student.</div></div>
+      <div class="timeline-item reveal"><div class="title">6. Issue NFT Certificates</div><div class="desc">When students complete all tasks, teachers trigger certificate minting. The pipeline: generate certificate image (node-canvas) → upload to IPFS (Pinata) → mint NFT on Polygon Amoy (ethers.js) → save Certificate document → notify student.</div></div>
+      <div class="timeline-item reveal"><div class="title">7. Manage Community &amp; Collaborate</div><div class="desc">Teachers can assign Community Managers, remove members, moderate comments, manage collaborations, and use community chat.</div></div>
+    </div>
+    <h4 style="font-family:var(--font-display);font-size:12px;color:var(--neon-pink);margin:24px 0 12px;">Teacher Privileges</h4>
+    <div class="tech-wrap">
+      <span class="tech-badge pink">Create Communities</span>
+      <span class="tech-badge pink">Create Tasks</span>
+      <span class="tech-badge pink">Issue NFTs</span>
+      <span class="tech-badge pink">Manage Members</span>
+      <span class="tech-badge pink">Assign Managers</span>
+      <span class="tech-badge pink">Access Admin Panel</span>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: ADMIN -->
+<section class="section" id="admin">
+  <div class="section-header reveal">
+    <div class="section-number">08</div>
+    <h2 class="section-title">Admin <span class="highlight">Journey</span></h2>
+    <p class="section-desc">Platform governance and oversight capabilities.</p>
+  </div>
+
+  <div class="role-card admin card reveal" style="padding:32px;border-color:rgba(255,209,102,0.2);">
+    <h3 style="font-family:var(--font-display);font-size:17px;color:var(--neon-yellow);margin-bottom:20px;">🛡️ Admin Journey — Step by Step</h3>
+    <div class="timeline">
+      <div class="timeline-item reveal"><div class="title">1. Admin Setup</div><div class="desc">First admin created via <code style="color:var(--neon-cyan);">/admin/setup</code> page using ADMIN_SECRET env variable. Subsequent admins created by existing admins.</div></div>
+      <div class="timeline-item reveal"><div class="title">2. Dashboard Overview</div><div class="desc">Admin panel shows total counts: students, teachers (pending/approved/rejected), communities, tasks, certificates minted, platform stats.</div></div>
+      <div class="timeline-item reveal"><div class="title">3. Teacher Approval Queue</div><div class="desc">Admin reviews pending teacher applications. Views uploaded documents (college ID, signature). Can approve (enables community creation) or reject (soft reject, allows resubmit).</div></div>
+      <div class="timeline-item reveal"><div class="title">4. Platform Management</div><div class="desc">Admin can view/approve/reject students, manage users, view platform statistics, monitor blockchain configuration and wallet balance.</div></div>
+      <div class="timeline-item reveal"><div class="title">5. Blockchain Diagnostics</div><div class="desc">Admin can run blockchain diagnostics: check contract deployment, verify signer wallet balance, validate network configuration, retry failed certificate mints.</div></div>
+    </div>
+    <h4 style="font-family:var(--font-display);font-size:12px;color:var(--neon-yellow);margin:24px 0 12px;">Admin Capabilities</h4>
+    <div class="tech-wrap">
+      <span class="tech-badge yellow">Create Admins</span>
+      <span class="tech-badge yellow">Approve/Reject Teachers</span>
+      <span class="tech-badge yellow">Approve/Reject Students</span>
+      <span class="tech-badge yellow">Platform Dashboard</span>
+      <span class="tech-badge yellow">Blockchain Diagnostics</span>
+      <span class="tech-badge yellow">User Management</span>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: API -->
+<section class="section" id="api-section">
+  <div class="section-header reveal">
+    <div class="section-number">09</div>
     <h2 class="section-title">API <span class="highlight">Architecture</span></h2>
     <p class="section-desc">RESTful APIs and Socket.IO real-time communication — how they work.</p>
   </div>
 
   <div class="grid-2">
-    <div class="card">
+    <div class="card reveal reveal-delay-1">
       <h3 class="card-title">REST API</h3>
-      <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px;">
-        All API endpoints follow REST principles. They are prefixed with <code style="color:var(--neon-cyan);">/api</code> 
-        and use standard HTTP methods (GET, POST, PUT, PATCH, DELETE). Authentication is done via 
+      <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px;">
+        All API endpoints follow REST principles. They are prefixed with <code style="color:var(--neon-cyan);">/api</code>
+        and use standard HTTP methods (GET, POST, PUT, PATCH, DELETE). Authentication is done via
         <code style="color:var(--neon-cyan);">Bearer &lt;JWT&gt;</code> in the Authorization header.
       </p>
-      <p style="color:var(--text-secondary);font-size:14px;">
-        <strong style="color:var(--neon-purple);">How it works:</strong> The frontend Axios client 
-        (<code style="color:var(--neon-green);">services/api.js</code>) makes HTTP requests. 
-        The Express server routes them to controllers which execute business logic, interact with MongoDB 
+      <p style="color:var(--text-secondary);font-size:13px;">
+        <strong style="color:var(--neon-purple);">How it works:</strong> The frontend Axios client
+        (<code style="color:var(--neon-green);">services/api.js</code>) makes HTTP requests.
+        The Express server routes them to controllers which execute business logic, interact with MongoDB
         (via Mongoose), and return JSON responses. Middleware handles auth, CORS, rate limiting, and validation.
       </p>
     </div>
 
-    <div class="card">
+    <div class="card reveal reveal-delay-2">
       <h3 class="card-title">Socket.IO (Real-Time)</h3>
-      <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px;">
+      <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px;">
         Socket.IO enables bidirectional real-time communication. It's used for:
       </p>
       <ul class="feature-list">
@@ -1028,21 +1349,17 @@
         <li>Online/offline presence detection</li>
         <li>Notifications (new task, certificate issued, etc.)</li>
       </ul>
-      <p style="color:var(--text-muted);font-size:13px;margin-top:12px;">
+      <p style="color:var(--text-muted);font-size:12px;margin-top:12px;">
         Rate limited: 10 messages/sec per socket. JWT-authenticated connections.
       </p>
     </div>
   </div>
 
-  <h3 style="font-family:var(--font-display);font-size:16px;color:var(--neon-cyan);margin:32px 0 16px;">All API Route Groups</h3>
-  <div class="table-wrap">
+  <h3 style="font-family:var(--font-display);font-size:15px;color:var(--neon-cyan);margin:32px 0 16px;text-align:center;">All 16 API Route Groups</h3>
+  <div class="table-wrap reveal">
     <table>
       <thead>
-        <tr>
-          <th>Route File</th>
-          <th>Base Path</th>
-          <th>Key Endpoints</th>
-        </tr>
+        <tr><th>Route File</th><th>Base Path</th><th>Key Endpoints</th></tr>
       </thead>
       <tbody>
         <tr><td><span class="mono">auth.js</span></td><td><span class="mono">/api/auth</span></td><td>POST register, login, wallet-login, check-wallet, siwe/nonce, siwe/verify · GET profile, siwe/me</td></tr>
@@ -1066,252 +1383,19 @@
   </div>
 </section>
 
-<!-- ===================== SECTION: STUDENT ===================== -->
-<section class="section" id="student">
-  <div class="section-header">
-    <div class="section-number">06</div>
-    <h2 class="section-title">Student <span class="highlight">Structure</span></h2>
-    <p class="section-desc">Everything a student can do on the platform, explained step by step.</p>
-  </div>
-
-  <div class="role-card student card" style="padding:32px;border-color:rgba(0,245,255,0.2);">
-    <h3 style="font-family:var(--font-display);font-size:18px;color:var(--neon-cyan);margin-bottom:20px;">🎓 Student Journey — Step by Step</h3>
-
-    <div class="timeline">
-      <div class="timeline-item">
-        <div class="title">1. Connect Wallet</div>
-        <div class="desc">Student connects their MetaMask wallet. The platform detects Polygon Amoy network. A JWT token is issued after wallet signature verification.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">2. Complete Onboarding / Verification</div>
-        <div class="desc">Student submits college ID for AI-powered OCR verification. Tesseract.js extracts name, college, registration number. Matching engine compares against form data (85% threshold). If approved, student gains full access.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">3. Browse &amp; Join Communities</div>
-        <div class="desc">Student discovers communities on the Communities page. Can join any public community created by verified teachers. Each community has its own tasks, members, and chat.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">4. View &amp; Complete Tasks</div>
-        <div class="desc">Teacher posts tasks within communities. Student views tasks assigned to them, submits solutions (text + file uploads), and marks tasks as complete.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">5. Earn NFT Certificates</div>
-        <div class="desc">When all tasks in a community are completed, the teacher triggers certificate issuance. The system generates a styled PNG certificate, uploads it to IPFS via Pinata, mints an ERC-721 soulbound NFT on Polygon Amoy, and stores the record.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">6. View Certificates &amp; Profile</div>
-        <div class="desc">Student views all earned NFTs in My Certificates page. Certificate details include IPFS metadata, transaction hash, and token ID. Profile shows follower/following stats, community memberships, and certificate gallery.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">7. Social Features</div>
-        <div class="desc">Follow/unfollow other students and teachers. Discover users. View connections graph. Send direct messages. Join server channels. Participate in leaderboards.</div>
-      </div>
-    </div>
-
-    <h4 style="font-family:var(--font-display);font-size:13px;color:var(--neon-purple);margin:24px 0 12px;">Student Pages</h4>
-    <div class="tech-wrap">
-      <span class="tech-badge cyan">Dashboard</span>
-      <span class="tech-badge cyan">Communities</span>
-      <span class="tech-badge cyan">Community View</span>
-      <span class="tech-badge cyan">Servers</span>
-      <span class="tech-badge cyan">Marketplace</span>
-      <span class="tech-badge cyan">Discover</span>
-      <span class="tech-badge cyan">Leaderboard</span>
-      <span class="tech-badge cyan">Connections</span>
-      <span class="tech-badge cyan">My Certificates</span>
-      <span class="tech-badge cyan">Messages</span>
-      <span class="tech-badge cyan">Profile</span>
-      <span class="tech-badge cyan">Connect Wallet</span>
-      <span class="tech-badge cyan">Verification</span>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== SECTION: TEACHER ===================== -->
-<section class="section" id="teacher">
-  <div class="section-header">
-    <div class="section-number">07</div>
-    <h2 class="section-title">Teacher <span class="highlight">Structure</span></h2>
-    <p class="section-desc">How teachers join, get verified, create communities, and issue certificates.</p>
-  </div>
-
-  <div class="role-card teacher card" style="padding:32px;border-color:rgba(123,97,255,0.2);">
-    <h3 style="font-family:var(--font-display);font-size:18px;color:var(--neon-purple);margin-bottom:20px;">👨‍🏫 Teacher Journey — Step by Step</h3>
-
-    <div class="timeline">
-      <div class="timeline-item">
-        <div class="title">1. Register as Teacher</div>
-        <div class="desc">Teacher connects wallet and registers with role "teacher". Profile stored in both User and Teacher collections.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">2. Submit Verification Documents</div>
-        <div class="desc">Teacher submits: full name, employee ID, college email, college name, college ID image, signature image (via SignaturePad). Documents stored on server via Multer.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">3. Wait for Admin Approval</div>
-        <div class="desc">Status set to <code style="color:var(--neon-yellow);">pending_approval</code>. Admin reviews documents in Admin Panel and approves/rejects. Teacher receives email/SMS notification.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">4. Create Communities</div>
-        <div class="desc">Approved teachers create communities with name, description, image, and college name. They become the community creator with full management rights.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">5. Create &amp; Manage Tasks</div>
-        <div class="desc">Teachers post tasks within communities: title, description, attachments. Tasks can require file submissions. Teachers track completion status per student.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">6. Issue NFT Certificates</div>
-        <div class="desc">When students complete all tasks, teachers trigger certificate minting. The pipeline: generate certificate image (node-canvas) → upload to IPFS (Pinata) → mint NFT on Polygon Amoy (ethers.js) → save Certificate document → notify student.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">7. Manage Community &amp; Collaborate</div>
-        <div class="desc">Teachers can assign Community Managers, remove members, moderate comments, manage collaborations, and use community chat.</div>
-      </div>
-    </div>
-
-    <h4 style="font-family:var(--font-display);font-size:13px;color:var(--neon-pink);margin:24px 0 12px;">Teacher Privileges</h4>
-    <div class="tech-wrap">
-      <span class="tech-badge pink">Create Communities</span>
-      <span class="tech-badge pink">Create Tasks</span>
-      <span class="tech-badge pink">Issue NFTs</span>
-      <span class="tech-badge pink">Manage Members</span>
-      <span class="tech-badge pink">Assign Managers</span>
-      <span class="tech-badge pink">Access Admin Panel</span>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== SECTION: ADMIN ===================== -->
-<section class="section" id="admin">
-  <div class="section-header">
-    <div class="section-number">08</div>
-    <h2 class="section-title">Admin <span class="highlight">Structure</span></h2>
-    <p class="section-desc">Platform governance and oversight capabilities.</p>
-  </div>
-
-  <div class="role-card admin card" style="padding:32px;border-color:rgba(255,209,102,0.2);">
-    <h3 style="font-family:var(--font-display);font-size:18px;color:var(--neon-yellow);margin-bottom:20px;">🛡️ Admin Journey — Step by Step</h3>
-
-    <div class="timeline">
-      <div class="timeline-item">
-        <div class="title">1. Admin Setup</div>
-        <div class="desc">First admin created via <code style="color:var(--neon-cyan);">/admin/setup</code> page using ADMIN_SECRET env variable. Subsequent admins created by existing admins.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">2. Dashboard Overview</div>
-        <div class="desc">Admin panel shows total counts: students, teachers (pending/approved/rejected), communities, tasks, certificates minted, platform stats.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">3. Teacher Approval Queue</div>
-        <div class="desc">Admin reviews pending teacher applications. Views uploaded documents (college ID, signature). Can approve (enables community creation) or reject (soft reject, allows resubmit).</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">4. Platform Management</div>
-        <div class="desc">Admin can view/approve/reject students, manage users, view platform statistics, monitor blockchain configuration and wallet balance.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="title">5. Blockchain Diagnostics</div>
-        <div class="desc">Admin can run blockchain diagnostics: check contract deployment, verify signer wallet balance, validate network configuration, retry failed certificate mints.</div>
-      </div>
-    </div>
-
-    <h4 style="font-family:var(--font-display);font-size:13px;color:var(--neon-yellow);margin:24px 0 12px;">Admin Capabilities</h4>
-    <div class="tech-wrap">
-      <span class="tech-badge yellow">Create Admins</span>
-      <span class="tech-badge yellow">Approve/Reject Teachers</span>
-      <span class="tech-badge yellow">Approve/Reject Students</span>
-      <span class="tech-badge yellow">Platform Dashboard</span>
-      <span class="tech-badge yellow">Blockchain Diagnostics</span>
-      <span class="tech-badge yellow">User Management</span>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== SECTION: WEB SEARCH STRUCTURE ===================== -->
-<section class="section" id="structure">
-  <div class="section-header">
-    <div class="section-number">09</div>
-    <h2 class="section-title">Overall Web Search &amp; <span class="highlight">Project Structure</span></h2>
-    <p class="section-desc">Complete file tree and how users navigate the platform.</p>
-  </div>
-
-  <div class="grid-2">
-    <div class="card">
-      <h3 class="card-title">🔍 User Navigation Flow</h3>
-      <div class="flow-diagram" style="flex-direction:column;align-items:stretch;">
-        <span class="flow-step highlight">Landing Page (Login / Connect Wallet)</span>
-        <span class="flow-arrow" style="text-align:center;">↓</span>
-        <span class="flow-step highlight">Onboarding / Verification</span>
-        <span class="flow-arrow" style="text-align:center;">↓</span>
-        <span class="flow-step" style="border-color:var(--neon-cyan);">Dashboard (Home)</span>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:4px 0;">
-          <span class="flow-step" style="font-size:11px;">Communities</span>
-          <span class="flow-step" style="font-size:11px;">Servers</span>
-          <span class="flow-step" style="font-size:11px;">Messages</span>
-          <span class="flow-step" style="font-size:11px;">Discover</span>
-          <span class="flow-step" style="font-size:11px;">Connections</span>
-          <span class="flow-step" style="font-size:11px;">Marketplace</span>
-          <span class="flow-step" style="font-size:11px;">Leaderboard</span>
-          <span class="flow-step" style="font-size:11px;">My Certificates</span>
-          <span class="flow-step" style="font-size:11px;">Profile</span>
-          <span class="flow-step" style="font-size:11px;">Admin Panel</span>
-        </div>
-        <span class="flow-arrow" style="text-align:center;">↓</span>
-        <span class="flow-step highlight">NFT Certificate Verification (Public)</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3 class="card-title">📂 Complete Project Tree</h3>
-      <div class="tree">
-        <span class="dir">Web3Connect/</span><br>
-        <span class="indent"><span class="dir">├── backend/</span></span><br>
-        <span class="indent"><span class="indent"><span class="dir">├── blockchain/</span>  (nftService, ipfsService, contractABI)</span></span><br>
-        <span class="indent"><span class="indent"><span class="dir">├── certificates/</span>  (certificateGenerator)</span></span><br>
-        <span class="indent"><span class="indent"><span class="dir">├── database/</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── models/</span> (19 models)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="file">└── db.js</span></span></span></span><br>
-        <span class="indent"><span class="indent"><span class="dir">├── server/</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── controllers/</span> (12)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── routes/</span> (16)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── middleware/</span> (5)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── utils/</span> (didGenerator, userSync)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── verification/</span> (verificationEngine, ocrEngine, matchingEngine)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="file">├── server.js</span></span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="file">└── socket.js</span></span></span></span><br>
-        <span class="indent"><span class="dir">├── frontend/</span></span><br>
-        <span class="indent"><span class="indent"><span class="dir">├── src/</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── pages/</span> (22 pages)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── components/</span> (20+)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── context/</span> (5: Auth, Socket, Follow, Wallet, Toast)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── hooks/</span> (4: useAuth, useWallet, useToast, useWebRTC)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── services/</span> (api.js)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="dir">├── utils/</span> (ipfs, nftMinting, liveEvents)</span></span></span><br>
-        <span class="indent"><span class="indent"><span class="indent"><span class="file">├── App.jsx</span> <span class="file">main.jsx</span> <span class="file">wagmi.js</span> <span class="file">index.css</span></span></span></span><br>
-        <span class="indent"><span class="dir">├── smart-contract/</span></span><br>
-        <span class="indent"><span class="indent"><span class="file">└── CertificateNFT.sol</span></span></span><br>
-        <span class="indent"><span class="dir">├── config/</span></span><br>
-        <span class="indent"><span class="indent"><span class="dir">├── env/</span> <span class="dir">└── constants/</span></span></span><br>
-        <span class="indent"><span class="dir">├── docs/</span></span><br>
-        <span class="indent"><span class="dir">├── package.json</span> <span class="file">└── README.md</span></span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== SECTION: BLOCKCHAIN ===================== -->
+<!-- SECTION: BLOCKCHAIN -->
 <section class="section" id="blockchain">
-  <div class="section-header">
+  <div class="section-header reveal">
     <div class="section-number">10</div>
     <h2 class="section-title">Blockchain <span class="highlight">Integration</span></h2>
     <p class="section-desc">Smart contract, NFT minting pipeline, IPFS storage, and wallet integration explained.</p>
   </div>
 
   <div class="grid-2">
-    <div class="card" style="border-color:rgba(255,79,216,0.2);">
+    <div class="card reveal reveal-delay-1" style="border-color:rgba(255,79,216,0.2);">
       <span class="card-icon">📜</span>
       <h3 class="card-title" style="color:var(--neon-pink);">Smart Contract: CertificateNFT</h3>
-      <p style="color:var(--text-secondary);font-size:14px;margin-bottom:12px;">
+      <p style="color:var(--text-secondary);font-size:13px;margin-bottom:12px;">
         Deployed on <strong style="color:var(--neon-cyan);">Polygon Amoy Testnet</strong> (Chain ID: 80002).
         ERC-721URIStorage with OpenZeppelin's Ownable pattern. Soulbound per ERC-5192.
       </p>
@@ -1326,67 +1410,44 @@
       </div>
     </div>
 
-    <div class="card" style="border-color:rgba(0,255,163,0.2);">
+    <div class="card reveal reveal-delay-2" style="border-color:rgba(0,255,163,0.2);">
       <span class="card-icon">🔧</span>
       <h3 class="card-title" style="color:var(--neon-green);">NFT Minting Pipeline (6 Steps)</h3>
       <div class="timeline">
-        <div class="timeline-item">
-          <div class="title">1. Certificate Image Generation</div>
-          <div class="desc">node-canvas renders HD PNG (3200x2200) with student name, community, QR code</div>
-        </div>
-        <div class="timeline-item">
-          <div class="title">2. IPFS Upload (Image)</div>
-          <div class="desc">Pinata pinFileToIPFS uploads PNG → returns IPFS CID + HTTPS gateway URL</div>
-        </div>
-        <div class="timeline-item">
-          <div class="title">3. Metadata Creation</div>
-          <div class="desc">ERC-721 metadata JSON with name, description, image URI, attributes (student, community, college, date, network)</div>
-        </div>
-        <div class="timeline-item">
-          <div class="title">4. IPFS Upload (Metadata)</div>
-          <div class="desc">Pinata pinJSONToIPFS uploads metadata → returns metadata URI</div>
-        </div>
-        <div class="timeline-item">
-          <div class="title">5. Smart Contract Mint</div>
-          <div class="desc">ethers.js calls mintCertificate(studentWallet, metadataURI) with gas estimation + 20% buffer</div>
-        </div>
-        <div class="timeline-item">
-          <div class="title">6. Database Persist</div>
-          <div class="desc">Certificate document created with tokenId, txHash, IPFS URIs, status = confirmed</div>
-        </div>
+        <div class="timeline-item reveal"><div class="title">1. Certificate Image Generation</div><div class="desc">node-canvas renders HD PNG (3200×2200) with student name, community, QR code</div></div>
+        <div class="timeline-item reveal"><div class="title">2. IPFS Upload (Image)</div><div class="desc">Pinata pinFileToIPFS uploads PNG → returns IPFS CID + HTTPS gateway URL</div></div>
+        <div class="timeline-item reveal"><div class="title">3. Metadata Creation</div><div class="desc">ERC-721 metadata JSON with name, description, image URI, attributes</div></div>
+        <div class="timeline-item reveal"><div class="title">4. IPFS Upload (Metadata)</div><div class="desc">Pinata pinJSONToIPFS uploads metadata → returns metadata URI</div></div>
+        <div class="timeline-item reveal"><div class="title">5. Smart Contract Mint</div><div class="desc">ethers.js calls mintCertificate() with gas estimation + 20% buffer</div></div>
+        <div class="timeline-item reveal"><div class="title">6. Database Persist</div><div class="desc">Certificate document created with tokenId, txHash, IPFS URIs</div></div>
       </div>
     </div>
   </div>
 
-  <div class="card mt-8">
+  <div class="card mt-8 reveal">
     <h3 class="card-title">🔌 Wallet Integration</h3>
-    <p style="color:var(--text-secondary);font-size:14px;">
-      Users connect via MetaMask, Coinbase Wallet, or WalletConnect. The frontend uses 
-      <strong style="color:var(--neon-cyan);">Wagmi 3.6</strong> + <strong style="color:var(--neon-cyan);">Viem 2.48</strong> 
-      for React hooks. Multiple auth methods: direct wallet login, SIWE (Sign-In With Ethereum) with nonce, 
-      and traditional email/password fallback. Wallet addresses are validated with regex 
+    <p style="color:var(--text-secondary);font-size:13px;">
+      Users connect via MetaMask, Coinbase Wallet, or WalletConnect. The frontend uses
+      <strong style="color:var(--neon-cyan);">Wagmi 3.6</strong> + <strong style="color:var(--neon-cyan);">Viem 2.48</strong>
+      for React hooks. Multiple auth methods: direct wallet login, SIWE (Sign-In With Ethereum) with nonce,
+      and traditional email/password fallback. Wallet addresses are validated with regex
       <code style="color:var(--neon-green);">/^0x[a-fA-F0-9]{40}$/</code> and stored in lowercase.
     </p>
   </div>
 </section>
 
-<!-- ===================== SECTION: DATABASE ===================== -->
+<!-- SECTION: DATABASE -->
 <section class="section" id="database">
-  <div class="section-header">
+  <div class="section-header reveal">
     <div class="section-number">11</div>
     <h2 class="section-title">Database <span class="highlight">Models</span></h2>
     <p class="section-desc">All 19 MongoDB/Mongoose models with their purpose and relationships.</p>
   </div>
 
-  <div class="table-wrap">
+  <div class="table-wrap reveal">
     <table>
       <thead>
-        <tr>
-          <th>Model</th>
-          <th>Collection</th>
-          <th>Purpose</th>
-          <th>Key Fields</th>
-        </tr>
+        <tr><th>Model</th><th>Collection</th><th>Purpose</th><th>Key Fields</th></tr>
       </thead>
       <tbody>
         <tr><td><span class="mono">User</span></td><td>users</td><td>Core user — all roles</td><td>walletAddress, role, communities, nftCertificates[]</td></tr>
@@ -1412,35 +1473,71 @@
     </table>
   </div>
 
-  <div class="card mt-8">
-    <h3 class="card-title">Entity Relationships</h3>
-    <p style="color:var(--text-secondary);font-size:14px;">
-      <span style="color:var(--neon-cyan);">User</span> (core) has-many 
-      <span style="color:var(--neon-purple);">Communities</span>, 
-      <span style="color:var(--neon-green);">Tasks</span>, 
-      <span style="color:var(--neon-pink);">Certificates</span>, 
-      <span style="color:var(--neon-yellow);">Notifications</span>.<br>
-      <span style="color:var(--neon-purple);">Community</span> has-many 
-      <span style="color:var(--neon-green);">Tasks</span>, has-many 
-      <span style="color:var(--neon-cyan);">Members</span>.<br>
-      <span style="color:var(--neon-green);">Task</span> triggers 
-      <span style="color:var(--neon-pink);">Certificate</span> minting on completion.<br> 
-      <span style="color:var(--neon-pink);">Certificate</span> links to on-chain NFT via 
-      <span style="color:var(--neon-pink);">tokenId</span> + <span style=`"color:var(--neon-pink);">txHash</span>.         
-    </p>
+  <div style="margin-top:32px;">
+    <h3 style="font-family:var(--font-display);font-size:15px;color:var(--neon-cyan);margin-bottom:16px;">Entity Relationships</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">
+      <div class="card" style="text-align:center;flex:1;min-width:120px;padding:16px">
+        <div style="font-size:24px;margin-bottom:4px;">👤</div>
+        <div style="font-family:var(--font-display);font-size:11px;color:var(--neon-cyan);">User</div>
+        <div style="font-size:10px;color:var(--text-muted);">Core entity</div>
+      </div>
+      <div style="display:flex;align-items:center;color:var(--text-muted);font-size:20px;">⟷</div>
+      <div class="card" style="text-align:center;flex:1;min-width:120px;padding:16px">
+        <div style="font-size:24px;margin-bottom:4px;">🏫</div>
+        <div style="font-family:var(--font-display);font-size:11px;color:var(--neon-purple);">Community</div>
+        <div style="font-size:10px;color:var(--text-muted);">has-many Tasks</div>
+      </div>
+      <div style="display:flex;align-items:center;color:var(--text-muted);font-size:20px;">⟷</div>
+      <div class="card" style="text-align:center;flex:1;min-width:120px;padding:16px">
+        <div style="font-size:24px;margin-bottom:4px;">📋</div>
+        <div style="font-family:var(--font-display);font-size:11px;color:var(--neon-green);">Task</div>
+        <div style="font-size:10px;color:var(--text-muted);">triggers Certificate</div>
+      </div>
+      <div style="display:flex;align-items:center;color:var(--text-muted);font-size:20px;">⟷</div>
+      <div class="card" style="text-align:center;flex:1;min-width:120px;padding:16px">
+        <div style="font-size:24px;margin-bottom:4px;">🎓</div>
+        <div style="font-family:var(--font-display);font-size:11px;color:var(--neon-pink);">Certificate</div>
+        <div style="font-size:10px;color:var(--text-muted);">on-chain NFT</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-8 reveal">
+    <h3 class="card-title">📂 Project Structure</h3>
+    <div class="tree">
+      <span class="dir">Web3Connect/</span><br>
+      <span class="indent"><span class="dir">├── backend/</span></span><br>
+      <span class="indent"><span class="indent"><span class="dir">├── blockchain/</span> (nftService, ipfsService, contractABI)</span></span><br>
+      <span class="indent"><span class="indent"><span class="dir">├── certificates/</span> (certificateGenerator)</span></span><br>
+      <span class="indent"><span class="indent"><span class="dir">├── database/models/</span> (19 models) + db.js</span></span><br>
+      <span class="indent"><span class="indent"><span class="dir">├── server/</span> (controllers(12), routes(16), middleware(5), utils)</span></span><br>
+      <span class="indent"><span class="indent"><span class="dir">├── server/verification/</span> (verificationEngine, ocrEngine, matchingEngine)</span></span><br>
+      <span class="indent"><span class="indent"><span class="file">├── server.js</span> + <span class="file">socket.js</span></span></span><br>
+      <span class="indent"><span class="dir">├── frontend/</span></span><br>
+      <span class="indent"><span class="indent"><span class="dir">├── src/pages/</span> (22 pages)</span></span><br>
+      <span class="indent"><span class="indent"><span class="dir">├── src/components/</span> (20+)</span></span><br>
+      <span class="indent"><span class="indent"><span class="dir">├── src/context/</span> (5: Auth, Socket, Follow, Wallet, Toast)</span></span><br>
+      <span class="indent"><span class="indent"><span class="dir">├── src/hooks/</span> (4: useAuth, useWallet, useToast, useWebRTC)</span></span><br>
+      <span class="indent"><span class="indent"><span class="dir">├── src/services/</span> (api.js)</span></span><br>
+      <span class="indent"><span class="indent"><span class="dir">├── src/utils/</span> (ipfs, nftMinting, liveEvents)</span></span><br>
+      <span class="indent"><span class="indent"><span class="file">├── App.jsx</span> · <span class="file">main.jsx</span> · <span class="file">wagmi.js</span> · <span class="file">index.css</span></span></span><br>
+      <span class="indent"><span class="dir">├── smart-contract/</span> (CertificateNFT.sol)</span><br>
+      <span class="indent"><span class="dir">├── config/</span> (env, constants)</span><br>
+      <span class="indent"><span class="dir">├── docs/</span> · <span class="file">package.json</span> · <span class="file">README.md</span></span>
+    </div>
   </div>
 </section>
 
-<!-- ===================== SECTION: SECURITY ===================== -->
+<!-- SECTION: SECURITY -->
 <section class="section" id="security">
-  <div class="section-header">
+  <div class="section-header reveal">
     <div class="section-number">12</div>
     <h2 class="section-title">Security <span class="highlight">Layers</span></h2>
-    <p class="section-desc">How the platform keeps data safe.</p>
+    <p class="section-desc">How the platform keeps data safe — 3 layers of defense.</p>
   </div>
 
   <div class="grid-3">
-    <div class="card">
+    <div class="card reveal reveal-delay-1">
       <h3 class="card-title">Authentication</h3>
       <ul class="feature-list">
         <li>JWT tokens with 24h-7d expiry</li>
@@ -1451,7 +1548,7 @@
       </ul>
     </div>
 
-    <div class="card">
+    <div class="card reveal reveal-delay-2">
       <h3 class="card-title">API Security</h3>
       <ul class="feature-list">
         <li>Helmet.js HTTP security headers</li>
@@ -1462,7 +1559,7 @@
       </ul>
     </div>
 
-    <div class="card">
+    <div class="card reveal reveal-delay-3">
       <h3 class="card-title">Blockchain Security</h3>
       <ul class="feature-list">
         <li>Private key server-side only (never exposed)</li>
@@ -1475,38 +1572,38 @@
   </div>
 </section>
 
-<!-- ===================== SECTION: ELI5 ===================== -->
+<!-- SECTION: ELI5 -->
 <section class="section" id="eli5">
-  <div class="section-header">
+  <div class="section-header reveal">
     <div class="section-number">13</div>
     <h2 class="section-title">Explained Like I'm <span class="highlight">5</span></h2>
-    <p class="section-desc">A super simple way to understand this whole project.</p>
+    <p class="section-desc">A super simple way to understand this whole project — no jargon, just fun.</p>
   </div>
 
-  <div class="eli5-box">
+  <div class="eli5-box reveal">
     <span class="emoji-big">🧒</span>
     <p>
-      Imagine you're in a <span class="highlight-text">magic school</span>. When you finish your homework, 
-      your teacher gives you a <span class="highlight-text">shiny gold star sticker</span> that 
+      Imagine you're in a <span class="highlight-text">magic school</span>. When you finish your homework,
+      your teacher gives you a <span class="highlight-text">shiny gold star sticker</span> that
       <strong style="color:var(--neon-pink);">NO ONE can ever steal or lose</strong>.
     </p>
     <br>
     <p>
       This website is like that magic school! 🏫<br><br>
       <span class="highlight-text">👨‍🏫 Teachers</span> make classrooms (called "Communities") and give homework ("Tasks").<br>
-      <span class="highlight-text">🎓 Students</span> join classrooms, do homework, and get 
+      <span class="highlight-text">🎓 Students</span> join classrooms, do homework, and get
       <span class="highlight-text">digital gold star stickers</span> ("NFT Certificates").<br>
       <span class="highlight-text">🛡️ Admins</span> check that teachers are real teachers before they can teach.<br><br>
-      The <span class="highlight-text">gold star stickers</span> are stored on a 
-      <span class="highlight-text">super special magical computer</span> called the 
-      <strong style="color:var(--neon-cyan);">Blockchain</strong> (Polygon Amoy), 
+      The <span class="highlight-text">gold star stickers</span> are stored on a
+      <span class="highlight-text">super special magical computer</span> called the
+      <strong style="color:var(--neon-cyan);">Blockchain</strong> (Polygon Amoy),
       so even if the website breaks, your stickers are SAFE FOREVER! 🛡️✨
     </p>
     <br>
     <p>
-      You can also <span class="highlight-text">👋 make friends</span>, 
-      <span class="highlight-text">💬 chat with them</span>, 
-      <span class="highlight-text">🔍 discover new classrooms</span>, and 
+      You can also <span class="highlight-text">👋 make friends</span>,
+      <span class="highlight-text">💬 chat with them</span>,
+      <span class="highlight-text">🔍 discover new classrooms</span>, and
       <span class="highlight-text">🏆 see who did the best homework</span> on the leaderboard!
     </p>
     <br>
@@ -1516,64 +1613,444 @@
   </div>
 
   <div class="grid-3 mt-8">
-    <div class="card text-center">
-      <span style="font-size:36px;">🏫</span>
-      <h3 class="card-title" style="margin-top:8px;">Communities</h3>
-      <p style="color:var(--text-muted);font-size:13px;">Classrooms where teachers give homework</p>
+    <div class="card text-center reveal reveal-delay-1">
+      <span style="font-size:36px;display:block;margin-bottom:8px;">🏫</span>
+      <h3 class="card-title" style="margin-top:4px;">Communities</h3>
+      <p style="color:var(--text-muted);font-size:12px;">Classrooms where teachers give homework</p>
     </div>
-    <div class="card text-center">
-      <span style="font-size:36px;">⭐</span>
-      <h3 class="card-title" style="margin-top:8px;">NFT Certificates</h3>
-      <p style="color:var(--text-muted);font-size:13px;">Gold star stickers that last forever</p>
+    <div class="card text-center reveal reveal-delay-2">
+      <span style="font-size:36px;display:block;margin-bottom:8px;">⭐</span>
+      <h3 class="card-title" style="margin-top:4px;">NFT Certificates</h3>
+      <p style="color:var(--text-muted);font-size:12px;">Gold star stickers that last forever</p>
     </div>
-    <div class="card text-center">
-      <span style="font-size:36px;">🔗</span>
-      <h3 class="card-title" style="margin-top:8px;">Blockchain</h3>
-      <p style="color:var(--text-muted);font-size:13px;">A magic book that never forgets</p>
+    <div class="card text-center reveal reveal-delay-3">
+      <span style="font-size:36px;display:block;margin-bottom:8px;">🔗</span>
+      <h3 class="card-title" style="margin-top:4px;">Blockchain</h3>
+      <p style="color:var(--text-muted);font-size:12px;">A magic book that never forgets</p>
     </div>
   </div>
 </section>
 
-<!-- ===================== FOOTER ===================== -->
-<footer class="footer">
-  <p>WEB3CONNECT — BLOCKCHAIN ENABLED VIRTUAL CAMPUS PLATFORM</p>
-  <p style="margin-top:8px;">Built with React 19 · Node.js · Express · MongoDB · Solidity · Polygon · IPFS · Socket.IO</p>
-  <p style="margin-top:8px;">&copy; 2024-2025 Final Year Project · All Rights Reserved</p>
-</footer>
-
 </div><!-- /container -->
 
-<script>
-// Generate stars
-(function() {
-  const container = document.getElementById('stars');
-  for (let i = 0; i < 150; i++) {
-    const star = document.createElement('div');
-    star.className = 'star';
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 100 + '%';
-    star.style.setProperty('--duration', (2 + Math.random() * 4) + 's');
-    star.style.width = star.style.height = (1 + Math.random() * 2) + 'px';
-    star.style.animationDelay = Math.random() * 5 + 's';
-    container.appendChild(star);
+<!-- FOOTER -->
+<footer class="footer">
+  <p>◈ WEB3CONNECT — BLOCKCHAIN ENABLED VIRTUAL CAMPUS PLATFORM</p>
+  <p style="margin-top:6px;">Built with React 19 · Node.js · Express · MongoDB · Solidity · Polygon · IPFS · Socket.IO</p>
+  <div class="footer-links">
+    <a href="#overview">Overview</a>
+    <a href="#tech">Tech Stack</a>
+    <a href="#gallery">Screenshots</a>
+    <a href="#blockchain">Blockchain</a>
+    <a href="#eli5">ELI5</a>
+  </div>
+  <p style="margin-top:12px;">&copy; 2024-2025 Final Year Project · All Rights Reserved</p>
+</footer>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
   }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+const container = document.getElementById('three-bg');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+// Responsive
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Create particles
+const particleCount = 120;
+const positions = new Float32Array(particleCount * 3);
+const colors = new Float32Array(particleCount * 3);
+
+const palette = [
+  new THREE.Color(0x00F5FF), // cyan
+  new THREE.Color(0x7B61FF), // purple
+  new THREE.Color(0xFF4FD8), // pink
+  new THREE.Color(0x00FFA3), // green
+];
+
+for (let i = 0; i < particleCount * 3; i += 3) {
+  positions[i] = (Math.random() - 0.5) * 30;
+  positions[i + 1] = (Math.random() - 0.5) * 20;
+  positions[i + 2] = (Math.random() - 0.5) * 30;
+
+  const color = palette[Math.floor(Math.random() * palette.length)];
+  colors[i] = color.r;
+  colors[i + 1] = color.g;
+  colors[i + 2] = color.b;
+}
+
+const geometry = new THREE.BufferGeometry();
+geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+const material = new THREE.PointsMaterial({
+  size: 0.08,
+  vertexColors: true,
+  transparent: true,
+  opacity: 0.6,
+  blending: THREE.AdditiveBlending,
+});
+
+const particles = new THREE.Points(geometry, material);
+scene.add(particles);
+
+// Lines between nearby particles
+const lineMaterial = new THREE.LineBasicMaterial({
+  color: 0x7B61FF,
+  transparent: true,
+  opacity: 0.08,
+});
+
+const linePositions = new Float32Array(particleCount * particleCount * 6);
+let lineIdx = 0;
+
+for (let i = 0; i < particleCount * 3; i += 3) {
+  for (let j = i + 3; j < particleCount * 3; j += 3) {
+    const dx = positions[i] - positions[j];
+    const dy = positions[i + 1] - positions[j + 1];
+    const dz = positions[i + 2] - positions[j + 2];
+    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+    if (dist < 5) {
+      linePositions[lineIdx] = positions[i];
+      linePositions[lineIdx + 1] = positions[i + 1];
+      linePositions[lineIdx + 2] = positions[i + 2];
+      linePositions[lineIdx + 3] = positions[j];
+      linePositions[lineIdx + 4] = positions[j + 1];
+      linePositions[lineIdx + 5] = positions[j + 2];
+      lineIdx += 6;
+    }
+  }
+}
+
+const lineGeo = new THREE.BufferGeometry();
+lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions.slice(0, lineIdx), 3));
+const lines = new THREE.LineSegments(lineGeo, lineMaterial);
+scene.add(lines);
+
+camera.position.z = 15;
+
+// Mouse interaction
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+  mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+// Clock for animation
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const t = clock.getElapsedTime();
+
+  // Rotate particles slowly
+  particles.rotation.y = t * 0.02;
+  particles.rotation.x = Math.sin(t * 0.01) * 0.05;
+  lines.rotation.y = t * 0.02;
+  lines.rotation.x = Math.sin(t * 0.01) * 0.05;
+
+  // Mouse follow
+  particles.rotation.y += (mouseX * 0.1 - particles.rotation.y) * 0.01;
+  particles.rotation.x += (mouseY * 0.05 - particles.rotation.x) * 0.01;
+  lines.rotation.y += (mouseX * 0.1 - lines.rotation.y) * 0.01;
+  lines.rotation.x += (mouseY * 0.05 - lines.rotation.x) * 0.01;
+
+  // Pulse opacity
+  lineMaterial.opacity = 0.05 + Math.sin(t * 0.5) * 0.03;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+</script>
+
+<script>
+// === TYPEWRITER ===
+(function() {
+  const el = document.querySelector('.typewriter');
+  if (!el) return;
+  const phrases = [
+    'A decentralized platform for students, teachers, and communities.',
+    'Earn blockchain-backed NFT certificates on Polygon Amoy testnet.',
+    'Connect your wallet. Join a community. Complete tasks. Earn NFTs.',
+    'Real-time chat, social graph, and verifiable credentials — all in one place.',
+  ];
+  let phraseIdx = 0;
+  let charIdx = 0;
+  let isDeleting = false;
+
+  function type() {
+    const current = phrases[phraseIdx];
+    if (isDeleting) {
+      charIdx--;
+      el.textContent = current.substring(0, charIdx);
+    } else {
+      charIdx++;
+      el.textContent = current.substring(0, charIdx);
+    }
+
+    if (!isDeleting && charIdx === current.length) {
+      isDeleting = true;
+      setTimeout(type, 2000);
+      return;
+    }
+    if (isDeleting && charIdx === 0) {
+      isDeleting = false;
+      phraseIdx = (phraseIdx + 1) % phrases.length;
+      setTimeout(type, 500);
+      return;
+    }
+    setTimeout(type, isDeleting ? 30 : 60);
+  }
+  type();
 })();
 
-// Highlight active nav link on scroll
+// === INTERSECTION OBSERVER (Reveal Animations) ===
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+})();
+
+// === ANIMATED COUNTERS ===
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.target);
+        let current = 0;
+        const step = Math.ceil(target / 40);
+        const interval = setInterval(() => {
+          current += step;
+          if (current >= target) {
+            current = target;
+            clearInterval(interval);
+          }
+          el.textContent = current;
+        }, 40);
+        observer.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.counter').forEach(el => observer.observe(el));
+})();
+
+// === NAV ACTIVE ON SCROLL ===
 (function() {
   const navLinks = document.querySelectorAll('.nav-link');
-  const sections = document.querySelectorAll('.section');
+  const sections = document.querySelectorAll('.section, .hero');
   window.addEventListener('scroll', () => {
     let current = '';
     sections.forEach(s => {
-      const top = s.offsetTop - 150;
+      const top = s.offsetTop - 120;
       if (window.scrollY >= top) current = s.id;
     });
+    if (!current && window.scrollY < 100) current = 'hero';
     navLinks.forEach(l => {
       l.classList.toggle('active', l.getAttribute('href') === '#' + current);
     });
   });
 })();
+
+// === SCROLL INDICATOR ===
+(function() {
+  const sections = document.querySelectorAll('.section, .hero');
+  const indicator = document.querySelector('.scroll-indicator');
+
+  sections.forEach((s, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'scroll-dot' + (i === 0 ? ' active' : '');
+    dot.dataset.index = i;
+    dot.addEventListener('click', () => {
+      s.scrollIntoView({ behavior: 'smooth' });
+    });
+    indicator.appendChild(dot);
+  });
+
+  window.addEventListener('scroll', () => {
+    let activeIdx = 0;
+    sections.forEach((s, i) => {
+      const top = s.offsetTop - 120;
+      if (window.scrollY >= top) activeIdx = i;
+    });
+    document.querySelectorAll('.scroll-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === activeIdx);
+    });
+  });
+})();
+
+// === GALLERY TABS ===
+(function() {
+  const tabs = document.querySelectorAll('.tab-btn');
+  const items = document.querySelectorAll('.gallery-item');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const filter = tab.dataset.tab;
+      items.forEach(item => {
+        if (filter === 'all' || item.dataset.category === filter) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+})();
+
+// === LIGHTBOX ===
+const lightboxImages = [
+  'screenshots/01-home.png',
+  'screenshots/16-connect-wallet.png',
+  'screenshots/13-admin-setup.png',
+  'screenshots/03-communities.png',
+  'screenshots/04-community-view.png',
+  'screenshots/05-servers.png',
+  'screenshots/06-marketplace.png',
+  'screenshots/07-discover.png',
+  'screenshots/08-leaderboard.png',
+  'screenshots/09-connections.png',
+  'screenshots/10-messages.png',
+  'screenshots/02-dashboard.png',
+  'screenshots/11-certificates.png',
+  'screenshots/12-admin.png',
+  'screenshots/14-profile.png',
+  'screenshots/15-verification.png',
+];
+
+let currentLightboxIdx = 0;
+
+function openLightbox(idx) {
+  currentLightboxIdx = idx;
+  const lb = document.getElementById('lightbox');
+  document.getElementById('lightbox-img').src = lightboxImages[idx];
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function navigateLightbox(dir) {
+  currentLightboxIdx = (currentLightboxIdx + dir + lightboxImages.length) % lightboxImages.length;
+  document.getElementById('lightbox-img').src = lightboxImages[currentLightboxIdx];
+}
+
+document.addEventListener('keydown', (e) => {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') navigateLightbox(-1);
+  if (e.key === 'ArrowRight') navigateLightbox(1);
+});
+
+// === INTERACTIVE DEMOS ===
+function simulateWallet() {
+  const addrs = [
+    '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18',
+    '0x1234d35Cc6634C0532925a3b844Bc9e7595f2bD12',
+    '0xABCD35Cc6634C0532925a3b844Bc9e7595f2bDEF',
+    '0x0000d35Cc6634C0532925a3b844Bc9e7595f2b00',
+  ];
+  const addr = addrs[Math.floor(Math.random() * addrs.length)];
+  document.getElementById('wallet-demo').textContent =
+    `✓ Connected: ${addr.substring(0, 10)}...${addr.substring(addr.length - 4)}`;
+  flash(document.getElementById('wallet-demo'));
+}
+
+function simulateMint() {
+  const steps = ['Generating image...', 'Uploading to IPFS...', 'Creating metadata...', 'Uploading metadata...', 'Minting NFT on Polygon...', '✓ Certificate minted! Token #' + Math.floor(Math.random() * 100 + 1)];
+  const el = document.getElementById('mint-demo');
+  let i = 0;
+  el.textContent = steps[i];
+  const interval = setInterval(() => {
+    i++;
+    if (i >= steps.length) { clearInterval(interval); return; }
+    el.textContent = steps[i];
+    if (i === steps.length - 1) flash(el);
+  }, 600);
+}
+
+function simulateChat() {
+  const msgs = [
+    '👋 Hey! Great work on the latest task!',
+    '📢 New assignment posted in Web3 Development community',
+    '🎉 Certificate issued for Blockchain Basics! Check your profile.',
+    '💡 Tip: Connect your wallet to earn NFT certificates',
+  ];
+  const el = document.getElementById('chat-demo');
+  el.textContent = '→ ' + msgs[Math.floor(Math.random() * msgs.length)];
+  flash(el);
+}
+
+function simulateFollow() {
+  const users = ['@sarah_dev', '@crypto_teacher', '@web3_student', '@blockchain_prof'];
+  const user = users[Math.floor(Math.random() * users.length)];
+  const el = document.getElementById('follow-demo');
+  el.textContent = '✓ Now following ' + user;
+  flash(el);
+}
+
+function simulateOCR() {
+  const results = [
+    '✓ Match: John Doe, MIT, Reg# MIT-2024-1234 (92% confidence)',
+    '✓ Match: Jane Smith, Stanford, Reg# ST-2024-5678 (95% confidence)',
+    '⚠ Partial match (78%): Name OK, college mismatch — requires manual review',
+    '✓ Match: Alex Chen, UC Berkeley, Reg# UC-2024-9012 (97% confidence)',
+  ];
+  const el = document.getElementById('ocr-demo');
+  el.textContent = results[Math.floor(Math.random() * results.length)];
+  flash(el);
+}
+
+function simulateVerify() {
+  const results = [
+    '✓ Certificate #42 verified on Polygon Amoy! Issued to 0x742d...bD18',
+    '✓ Certificate #17 verified! TokenURI: ipfs://QmXyZ...abc123',
+    '✓ Certificate #88 verified! Minted on 2025-03-15 by Teacher@MIT',
+    '✓ Authentic ERC-721 soulbound token. Owner: 0xABCD...DEF0',
+  ];
+  const el = document.getElementById('verify-demo');
+  el.textContent = results[Math.floor(Math.random() * results.length)];
+  flash(el);
+}
+
+function flash(el) {
+  el.style.transition = 'background 0.3s';
+  el.style.background = 'rgba(0,255,163,0.12)';
+  setTimeout(() => { el.style.background = ''; }, 600);
+}
 </script>
 
 </body>

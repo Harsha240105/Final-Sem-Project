@@ -26,3 +26,6 @@ frontend/dist/
 
 # Uploaded files (generated at runtime)
 backend/server/uploads/
+
+# Generated screenshots (dev server captures)
+screenshots/
