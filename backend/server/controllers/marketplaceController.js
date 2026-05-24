@@ -17,7 +17,12 @@ const POPULATE_FIELDS = [
 ];
 
 async function populatePost(post) {
-  return Marketplace.findById(post._id).populate(POPULATE_FIELDS).lean();
+  try {
+    return await Marketplace.findById(post._id).populate(POPULATE_FIELDS).lean();
+  } catch (e) {
+    console.error("populatePost error:", e.message);
+    return Marketplace.findById(post._id).lean();
+  }
 }
 
 exports.createPost = async (req, res) => {
@@ -73,7 +78,20 @@ exports.getPosts = async (req, res) => {
     if (community) filter.community = community;
 
     const posts = await Marketplace.find(filter)
-      .sort({ createdAt: -1 }).limit(limit).populate(POPULATE_FIELDS).lean();
+      .sort({ createdAt: -1 }).limit(limit).lean();
+
+    // Safe populate each field individually - handles missing refs gracefully
+    async function safePopulate(docs, path) {
+      try {
+        await Marketplace.populate(docs, path);
+      } catch (e) {
+        console.error("Populate warning for " + JSON.stringify(path) + ":", e.message);
+      }
+    }
+    for (const field of POPULATE_FIELDS) {
+      await safePopulate(posts, field);
+    }
+
     res.json(posts);
   } catch (err) {
     console.error("Get posts error:", err);
@@ -84,8 +102,9 @@ exports.getPosts = async (req, res) => {
 exports.getPost = async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid post ID" });
-    const post = await Marketplace.findById(req.params.id).populate(POPULATE_FIELDS).lean();
+    const post = await Marketplace.findById(req.params.id).lean();
     if (!post) return res.status(404).json({ error: "Post not found" });
+    try { await Marketplace.populate(post, POPULATE_FIELDS); } catch (e) { console.error("getPost populate:", e.message); }
     res.json(post);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch post" });
@@ -248,8 +267,9 @@ exports.publishShowcase = async (req, res) => {
 
 exports.getMyPosts = async (req, res) => {
   try {
-    const posts = await Marketplace.find({ createdBy: req.user.id })
-      .sort({ createdAt: -1 }).populate(POPULATE_FIELDS).lean();
+    let posts = await Marketplace.find({ createdBy: req.user.id })
+      .sort({ createdAt: -1 }).lean();
+    try { await Marketplace.populate(posts, POPULATE_FIELDS); } catch (e) { console.error("getMyPosts populate:", e.message); }
     res.json(posts);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch my posts" });
@@ -258,8 +278,9 @@ exports.getMyPosts = async (req, res) => {
 
 exports.getMyCollaborations = async (req, res) => {
   try {
-    const posts = await Marketplace.find({ "collaborators.user": req.user.id })
-      .sort({ createdAt: -1 }).populate(POPULATE_FIELDS).lean();
+    let posts = await Marketplace.find({ "collaborators.user": req.user.id })
+      .sort({ createdAt: -1 }).lean();
+    try { await Marketplace.populate(posts, POPULATE_FIELDS); } catch (e) { console.error("getMyCollaborations populate:", e.message); }
     res.json(posts);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch collaborations" });

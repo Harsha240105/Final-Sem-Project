@@ -93,7 +93,7 @@ body::before{
 /* === NAVIGATION === */
 .nav{
   position:fixed;
-  top:0;left:0;right:0;
+  top:37px;left:0;right:0;
   z-index:200;
   background:rgba(5,8,22,0.8);
   backdrop-filter:blur(20px) saturate(1.5);
@@ -172,7 +172,7 @@ body::before{
   align-items:center;
   justify-content:center;
   text-align:center;
-  padding:120px 24px 80px;
+  padding:157px 24px 80px;
   position:relative;
 }
 .hero-badge{
@@ -740,7 +740,142 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 </head>
 <body>
 
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <div class="loader-content">
+    <div class="loader-logo">
+      <span class="loader-letter" style="--i:0">V</span>
+      <span class="loader-letter" style="--i:1">C</span>
+    </div>
+    <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+  </div>
+</div>
+
+<style>
+#loading-screen{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  z-index:9999;
+  background:#050816;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:opacity 0.6s ease,visibility 0.6s ease;
+}
+#loading-screen.hide{opacity:0;visibility:hidden;pointer-events:none}
+.loader-content{text-align:center}
+.loader-logo{
+  display:flex;
+  justify-content:center;
+  gap:4px;
+  margin-bottom:24px;
+}
+.loader-letter{
+  font-family:'Orbitron',monospace;
+  font-size:64px;
+  font-weight:900;
+  background:linear-gradient(135deg,#00F5FF,#7B61FF);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:loaderBounce 0.8s ease infinite alternate;
+  animation-delay:calc(var(--i) * 0.15s);
+  display:inline-block;
+}
+@keyframes loaderBounce{
+  0%{transform:translateY(0) scale(1);opacity:0.4}
+  100%{transform:translateY(-16px) scale(1.1);opacity:1}
+}
+.loader-bar{
+  width:120px;height:3px;
+  background:rgba(123,97,255,0.15);
+  border-radius:4px;
+  overflow:hidden;
+  margin:0 auto;
+}
+.loader-bar-fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#00F5FF,#7B61FF);
+  border-radius:4px;
+  animation:loaderFill 1.5s ease forwards;
+}
+@keyframes loaderFill{
+  0%{width:0%}
+  70%{width:70%}
+  100%{width:100%}
+}
+</style>
+
+<script>
+(function(){
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      document.getElementById('loading-screen').classList.add('hide');
+    }, 600);
+  });
+  // Fallback: hide after 3s if load event is slow
+  setTimeout(function(){
+    var ls = document.getElementById('loading-screen');
+    if(ls && !ls.classList.contains('hide')){
+      ls.classList.add('hide');
+    }
+  }, 3000);
+})();
+</script>
+
 <div id="three-bg"></div>
+
+<!-- TOP BANNER -->
+<div class="top-banner">
+  <span class="top-banner-text">FINAL YEAR PROJECT 2024-2025</span>
+  <span class="top-banner-sep">|</span>
+  <span class="top-banner-text">ACADEMIC YEARS 2023-2026</span>
+  <span class="top-banner-sep">|</span>
+  <a href="https://github.com/Harsha240105/Final-Sem-Project" target="_blank" rel="noopener" class="top-banner-github">
+    <svg style="width:14px;height:14px;vertical-align:middle;margin-right:6px;fill:currentColor" viewBox="0 0 16 16">
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+    </svg>
+    GitHub Repository
+  </a>
+</div>
+
+<style>
+.top-banner{
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:300;
+  height:37px;
+  background:linear-gradient(90deg,rgba(123,97,255,0.12),rgba(0,245,255,0.08),rgba(123,97,255,0.12));
+  border-bottom:1px solid rgba(123,97,255,0.15);
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:1px;
+}
+.top-banner-text{
+  color:var(--neon-cyan);
+  font-weight:600;
+}
+.top-banner-sep{color:var(--text-muted);opacity:0.4}
+.top-banner-github{
+  display:inline-flex;
+  align-items:center;
+  color:var(--text-muted);
+  text-decoration:none;
+  transition:color 0.3s;
+}
+.top-banner-github:hover{color:var(--neon-cyan)}
+@media(max-width:600px){
+  .top-banner{font-size:9px;gap:6px;padding:6px 10px}
+  .top-banner-sep{display:none}
+}
+</style>
 
 <!-- NAV -->
 <nav class="nav">
@@ -757,6 +892,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
     <a href="#blockchain" class="nav-link">Blockchain</a>
     <a href="#database" class="nav-link">Database</a>
     <a href="#security" class="nav-link">Security</a>
+    <a href="#about" class="nav-link">About</a>
   </div>
   <span class="nav-badge">v2.0.0</span>
   <a href="https://github.com/Harsha240105/Final-Sem-Project" target="_blank" rel="noopener" class="nav-github" aria-label="GitHub Repository">
@@ -1482,6 +1618,89 @@ td .mono{font-family:var(--font-mono);font-size:11px}
         <li>Duplicate mint idempotency checks</li>
         <li>Input validation (address format, URI format)</li>
       </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: ABOUT -->
+<section class="section" id="about">
+  <div class="section-header reveal">
+    <div class="section-number">12</div>
+    <h2 class="section-title">About This <span class="highlight">Project</span></h2>
+    <p class="section-desc">A blockchain-enabled virtual campus platform built as a final year engineering project.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card reveal reveal-delay-1">
+      <span class="card-icon">📖</span>
+      <h3 class="card-title">Project Overview</h3>
+      <p style="color:var(--text-secondary);font-size:14px;line-height:1.8;">
+        <strong style="color:var(--neon-cyan);">Web3Connect</strong> is a comprehensive
+        <strong style="color:var(--neon-purple);">Blockchain-Enabled Virtual Campus Platform</strong>
+        developed as a final year engineering project (2024-2025, Academic Years 2023-2026).
+        It integrates Web3 wallet authentication, NFT certificate minting, real-time communication,
+        and social learning into a single platform.
+      </p>
+      <div class="stat-row" style="margin-top:16px">
+        <div class="stat-item"><div class="stat-value">19</div><div class="stat-label">DB Models</div></div>
+        <div class="stat-item"><div class="stat-value">50+</div><div class="stat-label">API Endpoints</div></div>
+        <div class="stat-item"><div class="stat-value">22</div><div class="stat-label">Pages</div></div>
+        <div class="stat-item"><div class="stat-value">50k+</div><div class="stat-label">Lines of Code</div></div>
+      </div>
+    </div>
+
+    <div class="card reveal reveal-delay-2">
+      <span class="card-icon">👨‍💻</span>
+      <h3 class="card-title">Developer</h3>
+      <p style="color:var(--text-secondary);font-size:14px;line-height:1.8;">
+        Built by <strong style="color:var(--neon-cyan);">Harsha</strong> as a final year project.
+        The platform showcases the practical application of blockchain technology in the education sector,
+        combining modern web development with decentralized credentialing.
+      </p>
+      <div class="tech-wrap" style="margin-top:16px">
+        <a href="https://github.com/Harsha240105" target="_blank" rel="noopener" class="tech-badge cyan" style="text-decoration:none">
+          <svg style="width:14px;height:14px;margin-right:4px;fill:currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
+          GitHub Profile
+        </a>
+        <a href="https://github.com/Harsha240105/Final-Sem-Project" target="_blank" rel="noopener" class="tech-badge purple" style="text-decoration:none">
+          Project Repository
+        </a>
+      </div>
+    </div>
+
+    <div class="card reveal reveal-delay-3">
+      <span class="card-icon">🎯</span>
+      <h3 class="card-title">Purpose</h3>
+      <p style="color:var(--text-secondary);font-size:14px;line-height:1.8;">
+        This project aims to solve real-world problems in education:
+      </p>
+      <ul class="feature-list" style="margin-top:8px">
+        <li>Decentralized certificate issuance preventing fraud</li>
+        <li>Student-owned credentials via soulbound NFTs</li>
+        <li>Transparent and instant verification system</li>
+        <li>Integrated social and collaborative learning tools</li>
+        <li>Teacher credentialing with admin oversight</li>
+      </ul>
+    </div>
+
+    <div class="card reveal reveal-delay-4">
+      <span class="card-icon">🛠️</span>
+      <h3 class="card-title">Tech Stack</h3>
+      <p style="color:var(--text-secondary);font-size:14px;line-height:1.8;margin-bottom:12px;">
+        Built with modern technologies:
+      </p>
+      <div class="tech-wrap">
+        <span class="tech-badge cyan">React 19</span>
+        <span class="tech-badge cyan">Vite 7</span>
+        <span class="tech-badge cyan">Tailwind CSS</span>
+        <span class="tech-badge green">Node.js</span>
+        <span class="tech-badge green">Express</span>
+        <span class="tech-badge yellow">MongoDB</span>
+        <span class="tech-badge pink">Solidity</span>
+        <span class="tech-badge pink">Polygon Amoy</span>
+        <span class="tech-badge blue">Socket.IO</span>
+        <span class="tech-badge blue">IPFS</span>
+      </div>
     </div>
   </div>
 </section>

@@ -229,9 +229,6 @@ function Login() {
         {/* Animated galaxy background - subtle */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-transparent to-cyan-900/10" />
-        {/* Subtle orbit rings */}
-        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[200px] h-[200px] border border-cyan-500/3 rounded-full animate-spin-slower" />
-        <div className="absolute top-1/3 right-1/3 w-[150px] h-[150px] border border-purple-500/3 rounded-full animate-spin-slow" />
         {/* Tiny particles */}
       </div>
 

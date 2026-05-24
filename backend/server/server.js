@@ -192,6 +192,25 @@ app.use("/api/network", networkRoutes);
 app.use("/api/canvas", canvasRoutes);
 app.use("/api/social", require("./routes/social.routes"));
 app.use("/api/servers", serverRoutes);
+
+// Temporary stats endpoint
+app.get("/api/dbstats", async (req, res) => {
+  try {
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    const stats = { collections: {} };
+    for (const c of collections) {
+      stats.collections[c.name] = await mongoose.connection.db.collection(c.name).countDocuments();
+    }
+    const comms = await mongoose.connection.db.collection('communities').find().limit(20).toArray();
+    stats.communities = comms.map(x => ({ name: x.name, type: x.communityType||'?', members: x.members?.length||0, tasks: x.tasks?.length||0, privacy: x.privacy||'?' }));
+    const certs = await mongoose.connection.db.collection('certificates').find().limit(20).toArray();
+    stats.certificates = certs.map(x => ({ tokenId: x.tokenId, status: x.status, txHash: x.txHash?.substring(0,20) }));
+    const tasks = await mongoose.connection.db.collection('tasks').find().limit(20).toArray();
+    stats.tasks = tasks.map(x => ({ title: x.title, completedBy: x.completedBy?.length||0 }));
+    res.json(stats);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 app.use((req, res) => {
   console.warn(`[404] ${req.method} ${req.originalUrl}`);
   res.status(404).json({
