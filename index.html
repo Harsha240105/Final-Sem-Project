@@ -743,9 +743,11 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- LOADING SCREEN -->
 <div id="loading-screen">
   <div class="loader-content">
-    <div class="loader-logo">
-      <span class="loader-letter" style="--i:0">V</span>
-      <span class="loader-letter" style="--i:1">C</span>
+    <div class="loader-logos">
+      <img src="frontend/public/logo.png" alt="OXK" class="loader-img" style="--i:0" />
+      <span class="loader-letter" style="--i:1">O</span>
+      <span class="loader-letter" style="--i:2">X</span>
+      <span class="loader-letter" style="--i:3">K</span>
     </div>
     <div class="loader-bar"><div class="loader-bar-fill"></div></div>
   </div>
@@ -764,22 +766,29 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 }
 #loading-screen.hide{opacity:0;visibility:hidden;pointer-events:none}
 .loader-content{text-align:center}
-.loader-logo{
+.loader-logos{
   display:flex;
+  align-items:center;
   justify-content:center;
-  gap:4px;
+  gap:6px;
   margin-bottom:24px;
+}
+.loader-img{
+  width:56px;height:56px;
+  object-fit:contain;
+  animation:loaderBounce 0.8s ease infinite alternate;
+  animation-delay:calc(var(--i) * 0.12s);
 }
 .loader-letter{
   font-family:'Orbitron',monospace;
-  font-size:64px;
+  font-size:56px;
   font-weight:900;
   background:linear-gradient(135deg,#00F5FF,#7B61FF);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   background-clip:text;
   animation:loaderBounce 0.8s ease infinite alternate;
-  animation-delay:calc(var(--i) * 0.15s);
+  animation-delay:calc(var(--i) * 0.12s);
   display:inline-block;
 }
 @keyframes loaderBounce{
@@ -814,7 +823,6 @@ td .mono{font-family:var(--font-mono);font-size:11px}
       document.getElementById('loading-screen').classList.add('hide');
     }, 600);
   });
-  // Fallback: hide after 3s if load event is slow
   setTimeout(function(){
     var ls = document.getElementById('loading-screen');
     if(ls && !ls.classList.contains('hide')){
