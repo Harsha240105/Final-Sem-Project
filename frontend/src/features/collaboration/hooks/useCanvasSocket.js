@@ -3,7 +3,7 @@ import { useSocket } from "../../../shared/services/SocketContext";
 import { getCanvasStore } from "../store/canvasStore";
 
 export function useCanvasSocket(canvasId) {
-  const socket = useSocket();
+  const { socket } = useSocket();
   const store = useRef(null);
   const joined = useRef(false);
 

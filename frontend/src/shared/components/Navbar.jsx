@@ -79,9 +79,9 @@ function Navbar({ onToggleSidebar }) {
           </button>
           <div className="flex items-center gap-2 md:hidden">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden bg-gradient-to-br from-cyan-500 to-purple-600">
-              <span className="text-lg font-black font-display bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">VC</span>
+              <img src="/logo.png" alt="OXK" className="h-5 w-5 object-contain" />
             </div>
-            <span className="text-base font-bold tracking-tight text-white">Web3Connect</span>
+            <span className="text-base font-bold tracking-tight text-white">OXK</span>
           </div>
         </div>
 

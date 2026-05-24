@@ -241,7 +241,7 @@ function Login() {
           className="text-center"
         >
           <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl overflow-hidden bg-gradient-to-br from-cyan-500 to-purple-600 shadow-2xl shadow-cyan-500/40 mb-6 animate-pulse-glow">
-            <span className="text-5xl font-black font-display bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">VC</span>
+            <img src="/logo.png" alt="OXK" className="h-14 w-14 object-contain" />
           </div>
           <h1 className="text-5xl font-extrabold text-white mb-3 tracking-tight">
             Blockchain Enabled<br /><span className="text-gradient-cyan">Virtual Campus</span>
@@ -273,9 +273,9 @@ function Login() {
 
             <div className="text-center lg:hidden pt-8 pb-2 px-8">
               <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-500 to-purple-600 shadow-lg shadow-cyan-500/30 mb-3">
-            <span className="text-6xl font-black font-display bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">VC</span>
+            <img src="/logo.png" alt="OXK" className="h-9 w-9 object-contain" />
               </div>
-              <h1 className="text-xl font-extrabold text-white">Web3Connect</h1>
+              <h1 className="text-xl font-extrabold text-white">OXK</h1>
             </div>
 
             {/* Tabs */}

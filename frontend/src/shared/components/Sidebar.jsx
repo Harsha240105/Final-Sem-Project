@@ -7,6 +7,9 @@ import {
   ShoppingCart, Compass, Award, Link2, Settings, Grid3X3, Info,
 } from "lucide-react";
 
+const certLink = { to: "/my-certificates", label: "Certificates", icon: Award, color: "from-yellow-500 to-orange-500", glow: "shadow-yellow-500/20" };
+const aboutLink = { to: "/about", label: "About", icon: Info, color: "from-gray-500 to-slate-500", glow: "shadow-gray-500/20" };
+
 const baseLinks = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, color: "from-cyan-500 to-blue-500", glow: "shadow-cyan-500/20" },
   { to: "/messages", label: "Messages", icon: MessageSquare, color: "from-pink-500 to-rose-500", glow: "shadow-pink-500/20" },
@@ -15,10 +18,7 @@ const baseLinks = [
   { to: "/discover", label: "Discover", icon: Compass, color: "from-cyan-500 to-purple-500", glow: "shadow-cyan-500/20" },
   { to: "/connections", label: "Connections", icon: Link2, color: "from-cyan-500 to-green-500", glow: "shadow-cyan-500/20" },
   { to: "/collaboration", label: "Collaboration", icon: Grid3X3, color: "from-teal-500 to-emerald-500", glow: "shadow-teal-500/20" },
-  { to: "/about", label: "About", icon: Info, color: "from-gray-500 to-slate-500", glow: "shadow-gray-500/20" },
 ];
-
-const certLink = { to: "/my-certificates", label: "Certificates", icon: Award, color: "from-yellow-500 to-orange-500", glow: "shadow-yellow-500/20" };
 
 function Sidebar({ isOpen, onClose }) {
   const { user } = useAuth();
@@ -30,8 +30,9 @@ function Sidebar({ isOpen, onClose }) {
         ...(user?.role === "admin"
           ? [{ to: "/admin/panel", label: "Admin Panel", icon: Settings, color: "from-emerald-500 to-teal-500", glow: "shadow-emerald-500/20" }]
           : []),
+        aboutLink,
       ]
-    : [...baseLinks, certLink];
+    : [...baseLinks, certLink, aboutLink];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -76,11 +77,11 @@ function Sidebar({ isOpen, onClose }) {
             transition={{ delay: 0.1 }}
           >
             <div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden bg-gradient-to-br from-cyan-500 to-purple-600 shadow-lg shadow-cyan-500/30">
-              <span className="text-lg font-black font-display bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">VC</span>
+              <img src="/logo.png" alt="OXK" className="h-7 w-7 object-contain" />
               <div className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
             </div>
             <div>
-              <div className="text-base font-bold tracking-tight text-white">Web3Connect</div>
+              <div className="text-base font-bold tracking-tight text-white">OXK</div>
               <div className="text-xs text-gray-500">Virtual Campus</div>
             </div>
           </motion.div>
