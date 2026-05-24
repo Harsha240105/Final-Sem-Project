@@ -744,7 +744,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <div id="loading-screen">
   <div class="loader-content">
     <div class="loader-logos">
-      <img src="frontend/public/logo.png" alt="OXK" class="loader-img" style="--i:0" />
+      <img src="frontend/public/logo.svg" alt="OXK" class="loader-img" style="--i:0" />
       <span class="loader-letter" style="--i:1">O</span>
       <span class="loader-letter" style="--i:2">X</span>
       <span class="loader-letter" style="--i:3">K</span>
@@ -894,6 +894,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 
     <a href="#architecture" class="nav-link">Architecture</a>
     <a href="#features" class="nav-link">Features</a>
+    <a href="#screenshots" class="nav-link">Screenshots</a>
     <a href="#student" class="nav-link">Student</a>
     <a href="#teacher" class="nav-link">Teacher</a>
     <a href="#admin" class="nav-link">Admin</a>
@@ -1272,10 +1273,160 @@ td .mono{font-family:var(--font-mono);font-size:11px}
   </div>
 </section>
 
+<!-- SECTION: SCREENSHOTS -->
+<section class="section" id="screenshots">
+  <div class="section-header reveal">
+    <div class="section-number">05</div>
+    <h2 class="section-title">Platform <span class="highlight">Screenshots</span></h2>
+    <p class="section-desc">Step-by-step walkthrough of the platform for each user role.</p>
+  </div>
+
+  <div class="tabs reveal" id="roleTabs">
+    <button class="tab-btn active" data-tab="student-scenarios" onclick="switchRoleTab('student-scenarios')">🎓 Student</button>
+    <button class="tab-btn" data-tab="teacher-scenarios" onclick="switchRoleTab('teacher-scenarios')">👨‍🏫 Teacher</button>
+    <button class="tab-btn" data-tab="admin-scenarios" onclick="switchRoleTab('admin-scenarios')">🛡️ Admin</button>
+  </div>
+
+  <!-- Student Scenarios -->
+  <div class="tab-content active" id="student-scenarios">
+    <div class="grid-2">
+      <div class="card reveal" style="border-color:rgba(0,245,255,0.2);">
+        <div class="card-icon">🔑</div>
+        <h3 class="card-title">Step 1: Connect Wallet</h3>
+        <p class="section-desc" style="margin:0 0 12px">Student connects MetaMask wallet on the Login page. Polygon Amoy network is auto-detected. Wallet signature provides authentication.</p>
+        <div class="demo-area" style="background:rgba(0,245,255,0.03);border-color:rgba(0,245,255,0.1)">🦊 <strong style="color:var(--neon-cyan)">0x742d...bD18</strong> — Connected</div>
+      </div>
+      <div class="card reveal reveal-delay-1" style="border-color:rgba(0,245,255,0.2);">
+        <div class="card-icon">🪪</div>
+        <h3 class="card-title">Step 2: Verify Identity</h3>
+        <p class="section-desc" style="margin:0 0 12px">Student uploads college ID card. AI-powered OCR (Tesseract.js) extracts name, college, registration number. Matching engine validates against form data (85% threshold).</p>
+        <div class="demo-area" style="background:rgba(0,255,163,0.03);border-color:rgba(0,255,163,0.1)">✓ <strong style="color:var(--neon-green)">Match: John Doe, MIT (92% confidence)</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-2" style="border-color:rgba(0,245,255,0.2);">
+        <div class="card-icon">🏫</div>
+        <h3 class="card-title">Step 3: Join Communities</h3>
+        <p class="section-desc" style="margin:0 0 12px">Student browses communities on the Communities page. Can join any public community created by verified teachers. Each community has tasks, members, and chat.</p>
+        <div class="demo-area" style="background:rgba(123,97,255,0.03);border-color:rgba(123,97,255,0.1)">📚 <strong style="color:var(--neon-purple)">Joined "Web3 Development" community</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-3" style="border-color:rgba(0,245,255,0.2);">
+        <div class="card-icon">✅</div>
+        <h3 class="card-title">Step 4: Complete Tasks</h3>
+        <p class="section-desc" style="margin:0 0 12px">Student views assigned tasks, submits solutions with text and file uploads. Tracks completion progress per community.</p>
+        <div class="demo-area" style="background:rgba(0,245,255,0.03);border-color:rgba(0,245,255,0.1)">📋 <strong style="color:var(--neon-cyan)">5/8 tasks completed</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-4" style="border-color:rgba(0,245,255,0.2);">
+        <div class="card-icon">🎓</div>
+        <h3 class="card-title">Step 5: Earn NFT Certificate</h3>
+        <p class="section-desc" style="margin:0 0 12px">Teacher triggers minting. The pipeline generates certificate image → uploads to IPFS → mints ERC-721 soulbound NFT on Polygon Amoy → stores on blockchain.</p>
+        <div class="demo-area" style="background:rgba(255,79,216,0.03);border-color:rgba(255,79,216,0.1)">🏆 <strong style="color:var(--neon-pink)">Token #42 — View on Explorer</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-5" style="border-color:rgba(0,245,255,0.2);">
+        <div class="card-icon">👥</div>
+        <h3 class="card-title">Step 6: Social &amp; Collaborate</h3>
+        <p class="section-desc" style="margin:0 0 12px">Follow users, discover connections, send direct messages, join collaboration projects, earn leaderboard ranks.</p>
+        <div class="demo-area" style="background:rgba(0,255,163,0.03);border-color:rgba(0,255,163,0.1)">🌐 <strong style="color:var(--neon-green)">42 followers · 15 connections</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teacher Scenarios -->
+  <div class="tab-content" id="teacher-scenarios">
+    <div class="grid-2">
+      <div class="card reveal" style="border-color:rgba(123,97,255,0.2);">
+        <div class="card-icon">🔑</div>
+        <h3 class="card-title">Step 1: Register as Teacher</h3>
+        <p class="section-desc" style="margin:0 0 12px">Teacher connects wallet and registers with role "teacher". Profile stored in both User and Teacher collections with role-specific fields.</p>
+        <div class="demo-area" style="background:rgba(123,97,255,0.03);border-color:rgba(123,97,255,0.1)">👨‍🏫 <strong style="color:var(--neon-purple)">Registered as Teacher</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-1" style="border-color:rgba(123,97,255,0.2);">
+        <div class="card-icon">📄</div>
+        <h3 class="card-title">Step 2: Submit Documents</h3>
+        <p class="section-desc" style="margin:0 0 12px">Teacher submits full name, employee ID, college email, college ID image, and signature via SignaturePad. Documents stored via Multer on server.</p>
+        <div class="demo-area" style="background:rgba(255,209,102,0.03);border-color:rgba(255,209,102,0.1)">📎 <strong style="color:var(--neon-yellow)">Documents submitted for review</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-2" style="border-color:rgba(123,97,255,0.2);">
+        <div class="card-icon">⏳</div>
+        <h3 class="card-title">Step 3: Wait for Approval</h3>
+        <p class="section-desc" style="margin:0 0 12px">Status set to "pending_approval". Admin reviews documents in Admin Panel. Teacher receives email notification on approval/rejection.</p>
+        <div class="demo-area" style="background:rgba(123,97,255,0.03);border-color:rgba(123,97,255,0.1)">⏰ <strong style="color:var(--neon-purple)">Status: Pending Approval</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-3" style="border-color:rgba(123,97,255,0.2);">
+        <div class="card-icon">🏗️</div>
+        <h3 class="card-title">Step 4: Create Community</h3>
+        <p class="section-desc" style="margin:0 0 12px">Approved teacher creates communities with name, description, image, and college name. Becomes community creator with full management rights.</p>
+        <div class="demo-area" style="background:rgba(0,245,255,0.03);border-color:rgba(0,245,255,0.1)">🏫 <strong style="color:var(--neon-cyan)">"Blockchain Basics" community created</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-4" style="border-color:rgba(123,97,255,0.2);">
+        <div class="card-icon">📝</div>
+        <h3 class="card-title">Step 5: Create &amp; Manage Tasks</h3>
+        <p class="section-desc" style="margin:0 0 12px">Teacher posts tasks: title, description, attachments. Tracks completion per student. Tasks can require file submissions.</p>
+        <div class="demo-area" style="background:rgba(123,97,255,0.03);border-color:rgba(123,97,255,0.1)">📋 <strong style="color:var(--neon-purple)">12 tasks created · 8 completed</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-5" style="border-color:rgba(123,97,255,0.2);">
+        <div class="card-icon">🖨️</div>
+        <h3 class="card-title">Step 6: Issue NFT Certificates</h3>
+        <p class="section-desc" style="margin:0 0 12px">Teacher triggers NFT minting for students who completed all tasks. 6-step pipeline: generate image → IPFS → metadata → IPFS → mint → persist.</p>
+        <div class="demo-area" style="background:rgba(0,255,163,0.03);border-color:rgba(0,255,163,0.1)">✅ <strong style="color:var(--neon-green)">Certificate #42 minted on Polygon</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Scenarios -->
+  <div class="tab-content" id="admin-scenarios">
+    <div class="grid-2">
+      <div class="card reveal" style="border-color:rgba(255,209,102,0.2);">
+        <div class="card-icon">⚙️</div>
+        <h3 class="card-title">Step 1: Admin Setup</h3>
+        <p class="section-desc" style="margin:0 0 12px">First admin created via /admin/setup page using ADMIN_SECRET env variable. Subsequent admins created by existing admins.</p>
+        <div class="demo-area" style="background:rgba(255,209,102,0.03);border-color:rgba(255,209,102,0.1)">🔐 <strong style="color:var(--neon-yellow)">Admin account configured</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-1" style="border-color:rgba(255,209,102,0.2);">
+        <div class="card-icon">📊</div>
+        <h3 class="card-title">Step 2: Dashboard Overview</h3>
+        <p class="section-desc" style="margin:0 0 12px">Admin panel shows total counts: students, teachers (pending/approved/rejected), communities, tasks, certificates minted, and platform stats.</p>
+        <div class="demo-area" style="background:rgba(255,209,102,0.03);border-color:rgba(255,209,102,0.1)">📈 <strong style="color:var(--neon-yellow)">120 students · 15 teachers · 8 communities</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-2" style="border-color:rgba(255,209,102,0.2);">
+        <div class="card-icon">👁️</div>
+        <h3 class="card-title">Step 3: Review Teacher Applications</h3>
+        <p class="section-desc" style="margin:0 0 12px">Admin reviews pending teacher applications. Views uploaded documents (college ID, signature). Can approve or reject with reason.</p>
+        <div class="demo-area" style="background:rgba(255,209,102,0.03);border-color:rgba(255,209,102,0.1)">👨‍🏫 <strong style="color:var(--neon-yellow)">3 pending applications</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-3" style="border-color:rgba(255,209,102,0.2);">
+        <div class="card-icon">👥</div>
+        <h3 class="card-title">Step 4: User Management</h3>
+        <p class="section-desc" style="margin:0 0 12px">Admin views and manages all users. Can approve/reject students, view user details, and manage platform-wide settings.</p>
+        <div class="demo-area" style="background:rgba(255,209,102,0.03);border-color:rgba(255,209,102,0.1)">👤 <strong style="color:var(--neon-yellow)">120 users managed</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-4" style="border-color:rgba(255,209,102,0.2);">
+        <div class="card-icon">⛓️</div>
+        <h3 class="card-title">Step 5: Blockchain Diagnostics</h3>
+        <p class="section-desc" style="margin:0 0 12px">Admin runs blockchain diagnostics: check contract deployment, verify signer wallet balance, validate network config, retry failed mints.</p>
+        <div class="demo-area" style="background:rgba(255,79,216,0.03);border-color:rgba(255,79,216,0.1)">⛓️ <strong style="color:var(--neon-pink)">Contract: 0x8F2... valid · Balance: 0.5 MATIC</strong></div>
+      </div>
+      <div class="card reveal reveal-delay-5" style="border-color:rgba(255,209,102,0.2);">
+        <div class="card-icon">🛡️</div>
+        <h3 class="card-title">Step 6: Platform Governance</h3>
+        <p class="section-desc" style="margin:0 0 12px">Full platform oversight: create admins, monitor activity, view analytics, manage platform configuration and security settings.</p>
+        <div class="demo-area" style="background:rgba(0,245,255,0.03);border-color:rgba(0,245,255,0.1)">🏛️ <strong style="color:var(--neon-cyan)">Platform governance active</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function switchRoleTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+}
+</script>
+
 <!-- SECTION: STUDENT -->
 <section class="section" id="student">
   <div class="section-header reveal">
-    <div class="section-number">05</div>
+    <div class="section-number">06</div>
     <h2 class="section-title">Student <span class="highlight">Journey</span></h2>
     <p class="section-desc">Everything a student can do on the platform, explained step by step.</p>
   </div>
@@ -1313,7 +1464,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: TEACHER -->
 <section class="section" id="teacher">
   <div class="section-header reveal">
-    <div class="section-number">06</div>
+    <div class="section-number">07</div>
     <h2 class="section-title">Teacher <span class="highlight">Journey</span></h2>
     <p class="section-desc">How teachers join, get verified, create communities, and issue certificates.</p>
   </div>
@@ -1344,7 +1495,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: ADMIN -->
 <section class="section" id="admin">
   <div class="section-header reveal">
-    <div class="section-number">07</div>
+    <div class="section-number">08</div>
     <h2 class="section-title">Admin <span class="highlight">Journey</span></h2>
     <p class="section-desc">Platform governance and oversight capabilities.</p>
   </div>
@@ -1373,7 +1524,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: API -->
 <section class="section" id="api-section">
   <div class="section-header reveal">
-    <div class="section-number">08</div>
+    <div class="section-number">09</div>
     <h2 class="section-title">API <span class="highlight">Architecture</span></h2>
     <p class="section-desc">RESTful APIs and Socket.IO real-time communication — how they work.</p>
   </div>
@@ -1444,7 +1595,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: BLOCKCHAIN -->
 <section class="section" id="blockchain">
   <div class="section-header reveal">
-    <div class="section-number">09</div>
+    <div class="section-number">10</div>
     <h2 class="section-title">Blockchain <span class="highlight">Integration</span></h2>
     <p class="section-desc">Smart contract, NFT minting pipeline, IPFS storage, and wallet integration explained.</p>
   </div>
@@ -1497,7 +1648,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: DATABASE -->
 <section class="section" id="database">
   <div class="section-header reveal">
-    <div class="section-number">10</div>
+    <div class="section-number">11</div>
     <h2 class="section-title">Database <span class="highlight">Models</span></h2>
     <p class="section-desc">All 19 MongoDB/Mongoose models with their purpose and relationships.</p>
   </div>
@@ -1589,7 +1740,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: SECURITY -->
 <section class="section" id="security">
   <div class="section-header reveal">
-    <div class="section-number">11</div>
+    <div class="section-number">12</div>
     <h2 class="section-title">Security <span class="highlight">Layers</span></h2>
     <p class="section-desc">How the platform keeps data safe — 3 layers of defense.</p>
   </div>
@@ -1633,7 +1784,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: ABOUT -->
 <section class="section" id="about">
   <div class="section-header reveal">
-    <div class="section-number">12</div>
+    <div class="section-number">13</div>
     <h2 class="section-title">About This <span class="highlight">Project</span></h2>
     <p class="section-desc">A blockchain-enabled virtual campus platform built as a final year engineering project.</p>
   </div>

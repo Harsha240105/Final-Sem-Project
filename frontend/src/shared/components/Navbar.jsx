@@ -79,7 +79,7 @@ function Navbar({ onToggleSidebar }) {
           </button>
           <div className="flex items-center gap-2 md:hidden">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden bg-gradient-to-br from-cyan-500 to-purple-600">
-              <img src="/logo.png" alt="OXK" className="h-5 w-5 object-contain" />
+              <img src="/logo.svg" alt="OXK" className="h-5 w-5 object-contain" />
             </div>
             <span className="text-base font-bold tracking-tight text-white">OXK</span>
           </div>

@@ -77,7 +77,7 @@ function Sidebar({ isOpen, onClose }) {
             transition={{ delay: 0.1 }}
           >
             <div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden bg-gradient-to-br from-cyan-500 to-purple-600 shadow-lg shadow-cyan-500/30">
-              <img src="/logo.png" alt="OXK" className="h-7 w-7 object-contain" />
+              <img src="/logo.svg" alt="OXK" className="h-7 w-7 object-contain" />
               <div className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
             </div>
             <div>
