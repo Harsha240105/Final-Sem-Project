@@ -731,7 +731,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
   <div class="nav-links">
     <a href="#overview" class="nav-link">Overview</a>
     <a href="#tech" class="nav-link">Tech</a>
-    <a href="#gallery" class="nav-link">Gallery</a>
+
     <a href="#architecture" class="nav-link">Architecture</a>
     <a href="#features" class="nav-link">Features</a>
     <a href="#student" class="nav-link">Student</a>
@@ -769,8 +769,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
     <span class="hero-meta-item">ERC-721</span>
   </div>
   <div class="hero-cta">
-    <a href="#gallery" class="primary">⟶ View Screenshots</a>
-    <a href="#security" class="secondary">How It Works</a>
+    <a href="#security" class="primary">How It Works</a>
   </div>
   <div class="hero-line"></div>
   <div class="scroll-hint">
@@ -959,101 +958,10 @@ td .mono{font-family:var(--font-mono);font-size:11px}
   </div>
 </section>
 
-<!-- SECTION: SCREENSHOT GALLERY -->
-<section class="section" id="gallery">
-  <div class="section-header reveal">
-    <div class="section-number">03</div>
-    <h2 class="section-title">Live App <span class="highlight">Gallery</span></h2>
-    <p class="section-desc">Real screenshots of Web3Connect running on localhost:5173 with the backend at localhost:5001.</p>
-  </div>
-
-  <div class="tabs reveal" id="gallery-tabs">
-    <button class="tab-btn active" data-tab="all">All</button>
-    <button class="tab-btn" data-tab="auth">Auth</button>
-    <button class="tab-btn" data-tab="social">Social</button>
-    <button class="tab-btn" data-tab="admin">Admin</button>
-  </div>
-
-  <div class="gallery-grid reveal" id="gallery-grid">
-    <div class="gallery-item" data-category="auth" onclick="openLightbox(0)">
-      <img src="screenshots/01-home.png" alt="Home / Landing Page" loading="lazy">
-      <div class="gallery-overlay"><span>🏠 Home / Landing Page</span></div>
-    </div>
-    <div class="gallery-item" data-category="auth" onclick="openLightbox(1)">
-      <img src="screenshots/16-connect-wallet.png" alt="Connect Wallet Page" loading="lazy">
-      <div class="gallery-overlay"><span>🔗 Connect Wallet</span></div>
-    </div>
-    <div class="gallery-item" data-category="auth" onclick="openLightbox(2)">
-      <img src="screenshots/13-admin-setup.png" alt="Admin Setup Page" loading="lazy">
-      <div class="gallery-overlay"><span>🛡️ Admin Setup</span></div>
-    </div>
-    <div class="gallery-item" data-category="social" onclick="openLightbox(3)">
-      <img src="screenshots/03-communities.png" alt="Communities Page" loading="lazy">
-      <div class="gallery-overlay"><span>🏫 Communities</span></div>
-    </div>
-    <div class="gallery-item" data-category="social" onclick="openLightbox(4)">
-      <img src="screenshots/04-community-view.png" alt="Community View" loading="lazy">
-      <div class="gallery-overlay"><span>👥 Community View</span></div>
-    </div>
-    <div class="gallery-item" data-category="social" onclick="openLightbox(5)">
-      <img src="screenshots/05-servers.png" alt="Servers Page" loading="lazy">
-      <div class="gallery-overlay"><span>💬 Servers / Chat</span></div>
-    </div>
-    <div class="gallery-item" data-category="social" onclick="openLightbox(6)">
-      <img src="screenshots/06-marketplace.png" alt="Marketplace Page" loading="lazy">
-      <div class="gallery-overlay"><span>🏪 Marketplace</span></div>
-    </div>
-    <div class="gallery-item" data-category="social" onclick="openLightbox(7)">
-      <img src="screenshots/07-discover.png" alt="Discover Page" loading="lazy">
-      <div class="gallery-overlay"><span>🔍 Discover</span></div>
-    </div>
-    <div class="gallery-item" data-category="social" onclick="openLightbox(8)">
-      <img src="screenshots/08-leaderboard.png" alt="Leaderboard" loading="lazy">
-      <div class="gallery-overlay"><span>🏆 Leaderboard</span></div>
-    </div>
-    <div class="gallery-item" data-category="social" onclick="openLightbox(9)">
-      <img src="screenshots/09-connections.png" alt="Connections Graph" loading="lazy">
-      <div class="gallery-overlay"><span>🕸️ Connections</span></div>
-    </div>
-    <div class="gallery-item" data-category="social" onclick="openLightbox(10)">
-      <img src="screenshots/10-messages.png" alt="Messages" loading="lazy">
-      <div class="gallery-overlay"><span>💌 Direct Messages</span></div>
-    </div>
-    <div class="gallery-item" data-category="auth" onclick="openLightbox(11)">
-      <img src="screenshots/02-dashboard.png" alt="Dashboard" loading="lazy">
-      <div class="gallery-overlay"><span>📊 Dashboard</span></div>
-    </div>
-    <div class="gallery-item" data-category="auth" onclick="openLightbox(12)">
-      <img src="screenshots/11-certificates.png" alt="My Certificates" loading="lazy">
-      <div class="gallery-overlay"><span>🎓 My Certificates</span></div>
-    </div>
-    <div class="gallery-item" data-category="auth" onclick="openLightbox(13)">
-      <img src="screenshots/12-admin.png" alt="Admin Panel" loading="lazy">
-      <div class="gallery-overlay"><span>🛡️ Admin Panel</span></div>
-    </div>
-    <div class="gallery-item" data-category="auth" onclick="openLightbox(14)">
-      <img src="screenshots/14-profile.png" alt="User Profile" loading="lazy">
-      <div class="gallery-overlay"><span>👤 User Profile</span></div>
-    </div>
-    <div class="gallery-item" data-category="auth" onclick="openLightbox(15)">
-      <img src="screenshots/15-verification.png" alt="Verification Page" loading="lazy">
-      <div class="gallery-overlay"><span>✅ Student Verification</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
-  <span class="lightbox-close" onclick="closeLightbox()">✕</span>
-  <span class="lightbox-nav prev" onclick="navigateLightbox(-1)">‹</span>
-  <img id="lightbox-img" alt="Screenshot">
-  <span class="lightbox-nav next" onclick="navigateLightbox(1)">›</span>
-</div>
-
 <!-- SECTION: ARCHITECTURE -->
 <section class="section" id="architecture">
   <div class="section-header reveal">
-    <div class="section-number">04</div>
+    <div class="section-number">03</div>
     <h2 class="section-title">System <span class="highlight">Architecture</span></h2>
     <p class="section-desc">How all the pieces fit together — from the user's browser to the blockchain.</p>
   </div>
@@ -1103,7 +1011,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: FEATURES -->
 <section class="section" id="features">
   <div class="section-header reveal">
-    <div class="section-number">05</div>
+    <div class="section-number">04</div>
     <h2 class="section-title">Interactive <span class="highlight">Features</span></h2>
     <p class="section-desc">Core platform features demonstrated with live demos.</p>
   </div>
@@ -1202,7 +1110,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: STUDENT -->
 <section class="section" id="student">
   <div class="section-header reveal">
-    <div class="section-number">06</div>
+    <div class="section-number">05</div>
     <h2 class="section-title">Student <span class="highlight">Journey</span></h2>
     <p class="section-desc">Everything a student can do on the platform, explained step by step.</p>
   </div>
@@ -1240,7 +1148,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: TEACHER -->
 <section class="section" id="teacher">
   <div class="section-header reveal">
-    <div class="section-number">07</div>
+    <div class="section-number">06</div>
     <h2 class="section-title">Teacher <span class="highlight">Journey</span></h2>
     <p class="section-desc">How teachers join, get verified, create communities, and issue certificates.</p>
   </div>
@@ -1271,7 +1179,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: ADMIN -->
 <section class="section" id="admin">
   <div class="section-header reveal">
-    <div class="section-number">08</div>
+    <div class="section-number">07</div>
     <h2 class="section-title">Admin <span class="highlight">Journey</span></h2>
     <p class="section-desc">Platform governance and oversight capabilities.</p>
   </div>
@@ -1300,7 +1208,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: API -->
 <section class="section" id="api-section">
   <div class="section-header reveal">
-    <div class="section-number">09</div>
+    <div class="section-number">08</div>
     <h2 class="section-title">API <span class="highlight">Architecture</span></h2>
     <p class="section-desc">RESTful APIs and Socket.IO real-time communication — how they work.</p>
   </div>
@@ -1371,7 +1279,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: BLOCKCHAIN -->
 <section class="section" id="blockchain">
   <div class="section-header reveal">
-    <div class="section-number">10</div>
+    <div class="section-number">09</div>
     <h2 class="section-title">Blockchain <span class="highlight">Integration</span></h2>
     <p class="section-desc">Smart contract, NFT minting pipeline, IPFS storage, and wallet integration explained.</p>
   </div>
@@ -1424,7 +1332,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: DATABASE -->
 <section class="section" id="database">
   <div class="section-header reveal">
-    <div class="section-number">11</div>
+    <div class="section-number">10</div>
     <h2 class="section-title">Database <span class="highlight">Models</span></h2>
     <p class="section-desc">All 19 MongoDB/Mongoose models with their purpose and relationships.</p>
   </div>
@@ -1516,7 +1424,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
 <!-- SECTION: SECURITY -->
 <section class="section" id="security">
   <div class="section-header reveal">
-    <div class="section-number">12</div>
+    <div class="section-number">11</div>
     <h2 class="section-title">Security <span class="highlight">Layers</span></h2>
     <p class="section-desc">How the platform keeps data safe — 3 layers of defense.</p>
   </div>
@@ -1566,9 +1474,9 @@ td .mono{font-family:var(--font-mono);font-size:11px}
   <div class="footer-links">
     <a href="#overview">Overview</a>
     <a href="#tech">Tech Stack</a>
-    <a href="#gallery">Screenshots</a>
     <a href="#blockchain">Blockchain</a>
     <a href="#security">Security</a>
+    <a href="https://github.com/Harsha240105/Final-Sem-Project" target="_blank" rel="noopener"><svg style="width:14px;height:14px;vertical-align:middle;margin-right:4px;fill:currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>GitHub</a>
   </div>
   <p style="margin-top:12px;">&copy; 2024-2025 Final Year Project · All Rights Reserved</p>
 </footer>
@@ -1831,75 +1739,6 @@ animate();
     });
   });
 })();
-
-// === GALLERY TABS ===
-(function() {
-  const tabs = document.querySelectorAll('.tab-btn');
-  const items = document.querySelectorAll('.gallery-item');
-
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const filter = tab.dataset.tab;
-      items.forEach(item => {
-        if (filter === 'all' || item.dataset.category === filter) {
-          item.style.display = 'block';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  });
-})();
-
-// === LIGHTBOX ===
-const lightboxImages = [
-  'screenshots/01-home.png',
-  'screenshots/16-connect-wallet.png',
-  'screenshots/13-admin-setup.png',
-  'screenshots/03-communities.png',
-  'screenshots/04-community-view.png',
-  'screenshots/05-servers.png',
-  'screenshots/06-marketplace.png',
-  'screenshots/07-discover.png',
-  'screenshots/08-leaderboard.png',
-  'screenshots/09-connections.png',
-  'screenshots/10-messages.png',
-  'screenshots/02-dashboard.png',
-  'screenshots/11-certificates.png',
-  'screenshots/12-admin.png',
-  'screenshots/14-profile.png',
-  'screenshots/15-verification.png',
-];
-
-let currentLightboxIdx = 0;
-
-function openLightbox(idx) {
-  currentLightboxIdx = idx;
-  const lb = document.getElementById('lightbox');
-  document.getElementById('lightbox-img').src = lightboxImages[idx];
-  lb.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeLightbox(e) {
-  if (e && e.target !== e.currentTarget) return;
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function navigateLightbox(dir) {
-  currentLightboxIdx = (currentLightboxIdx + dir + lightboxImages.length) % lightboxImages.length;
-  document.getElementById('lightbox-img').src = lightboxImages[currentLightboxIdx];
-}
-
-document.addEventListener('keydown', (e) => {
-  if (!document.getElementById('lightbox').classList.contains('open')) return;
-  if (e.key === 'Escape') closeLightbox();
-  if (e.key === 'ArrowLeft') navigateLightbox(-1);
-  if (e.key === 'ArrowRight') navigateLightbox(1);
-});
 
 // === INTERACTIVE DEMOS ===
 function simulateWallet() {
