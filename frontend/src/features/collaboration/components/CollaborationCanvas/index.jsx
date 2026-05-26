@@ -7,7 +7,7 @@ import { Toolbar } from "../Toolbar";
 import { useCanvasStore, getCanvasStore } from "../../store/canvasStore";
 import { useCanvasSocket } from "../../hooks/useCanvasSocket";
 import { useCanvasDrag } from "../../hooks/useCanvasDrag";
-import { calculateZoomLevel, screenToCanvas, createDefaultNode } from "../../utils/canvasUtils";
+import { calculateZoomLevel, screenToCanvas, createDefaultNode, createDefaultEdge } from "../../utils/canvasUtils";
 import * as api from "../../../../shared/services/api";
 
 const GRID_SIZE = 20;
@@ -21,6 +21,16 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
   const [error, setError] = useState(null);
 
   const { handleDragStart, handleDragMove, handleDragEnd } = useCanvasDrag(store, socketActions, true);
+
+  const [connectingMode, setConnectingMode] = useState(false);
+
+  useEffect(() => {
+    const unsub = store.subscribe(() => {
+      const cs = store.getState().connecting;
+      setConnectingMode(cs.active);
+    });
+    return unsub;
+  }, [store]);
 
   useEffect(() => {
     if (!canvasId) return;
@@ -46,6 +56,17 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
     loadCanvas();
     return () => { mounted = false; };
   }, [canvasId, store]);
+
+  useEffect(() => {
+    if (!connectingMode) return;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        store.setConnecting({ active: false, source: null });
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [connectingMode, store]);
 
   const handleWheel = useCallback(
     (e) => {
@@ -92,6 +113,11 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
       }
 
       if (e.button === 0 && !e.target.closest("[data-node-id]")) {
+        const cs = store.getState().connecting;
+        if (cs.active) {
+          store.setConnecting({ active: false, source: null });
+          return;
+        }
         store.clearSelection();
       }
     },
@@ -162,7 +188,7 @@ export function CollaborationCanvas({ canvasId, readOnly = false }) {
     <div className="relative w-full h-full overflow-hidden bg-[#060812]">
       <div
         ref={containerRef}
-        className="absolute inset-0 cursor-grab active:cursor-grabbing"
+        className={`absolute inset-0 ${connectingMode ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleCanvasMouseMove}

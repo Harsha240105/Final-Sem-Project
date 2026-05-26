@@ -1,4 +1,4 @@
-import { memo, useRef, useCallback, useState, useEffect } from "react";
+import { memo, useRef, useCallback, useState } from "react";
 import { Maximize2 } from "lucide-react";
 
 const MINIMAP_SIZE = 160;
@@ -18,25 +18,13 @@ export const MiniMap = memo(function MiniMap({ nodes, edges, viewport, container
     { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
   );
 
-  if (nodes.length === 0) {
-    return null;
-  }
-
   const canvasW = bounds.maxX - bounds.minX + VIEWPORT_PADDING * 2 || 500;
   const canvasH = bounds.maxY - bounds.minY + VIEWPORT_PADDING * 2 || 500;
   const scale = Math.min(MINIMAP_SIZE / canvasW, MINIMAP_SIZE / canvasH);
 
-  const mapW = canvasW * scale;
-  const mapH = canvasH * scale;
-
   const containerRect = containerRef?.current?.getBoundingClientRect();
   const viewW = containerRect?.width || 800;
   const viewH = containerRect?.height || 600;
-
-  const viewX = (-viewport.panX / viewport.zoom - bounds.minX + VIEWPORT_PADDING) * scale;
-  const viewY = (-viewport.panY / viewport.zoom - bounds.minY + VIEWPORT_PADDING) * scale;
-  const viewBoxW = (viewW / viewport.zoom) * scale;
-  const viewBoxH = (viewH / viewport.zoom) * scale;
 
   const handleMiniMapClick = useCallback(
     (e) => {
@@ -49,8 +37,12 @@ export const MiniMap = memo(function MiniMap({ nodes, edges, viewport, container
 
       onViewportChange({ zoom: viewport.zoom, panX: targetX, panY: targetY });
     },
-    [viewport, viewW, viewH, onViewportChange]
+    [viewport, viewW, viewH, scale, onViewportChange]
   );
+
+  if (nodes.length === 0) {
+    return null;
+  }
 
   return (
     <div

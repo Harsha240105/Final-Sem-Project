@@ -1,5 +1,5 @@
 import { memo, useCallback, useRef, useState } from "react";
-import { NODE_TYPE_CONFIG } from "../../utils/canvasUtils";
+import { NODE_TYPE_CONFIG, createDefaultEdge } from "../../utils/canvasUtils";
 import { RoomTypeContent } from "../RoomTypes";
 import { MessageSquare, Headphones, FolderOpen, ExternalLink, Layout, User, Layers, GripVertical, Trash2, Link2 } from "lucide-react";
 import * as api from "../../../../shared/services/api";
@@ -30,11 +30,25 @@ export const CanvasNode = memo(function CanvasNode({
   const handleMouseDown = useCallback(
     (e) => {
       if (readOnly) return;
+      const state = store.getState();
+      if (state.connecting.active) {
+        e.preventDefault();
+        if (state.connecting.source !== node.nodeId) {
+          const edge = createDefaultEdge(state.connecting.source, node.nodeId);
+          store.addEdge(edge);
+          socketActions?.emitEdgeAdd(edge);
+          if (canvasId) {
+            api.addCanvasEdge(canvasId, edge, localStorage.getItem("token")).catch(() => {});
+          }
+        }
+        store.setConnecting({ active: false, source: null });
+        return;
+      }
       if (e.button === 0 && !e.target.closest("[data-no-drag]")) {
         onDragStart(e, false);
       }
     },
-    [onDragStart, readOnly]
+    [onDragStart, readOnly, store, socketActions, canvasId, node.nodeId]
   );
 
   const handleDelete = useCallback(async () => {

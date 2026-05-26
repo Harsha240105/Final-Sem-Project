@@ -75,6 +75,16 @@ export function generateEdgeId() {
   return `edge_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
 }
 
+export function createDefaultEdge(source, target, type = "straight", label = "") {
+  return {
+    edgeId: generateEdgeId(),
+    source,
+    target,
+    type,
+    label,
+  };
+}
+
 export function createDefaultNode(type, position = { x: 0, y: 0 }, label = "") {
   const config = NODE_TYPE_CONFIG[type] || NODE_TYPE_CONFIG.text_room;
   return {

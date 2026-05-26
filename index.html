@@ -1278,7 +1278,7 @@ td .mono{font-family:var(--font-mono);font-size:11px}
   <div class="section-header reveal">
     <div class="section-number">05</div>
     <h2 class="section-title">Platform <span class="highlight">Screenshots</span></h2>
-    <p class="section-desc">Step-by-step walkthrough of the platform for each user role.</p>
+    <p class="section-desc">Click any screenshot to view full-size with navigation.</p>
   </div>
 
   <div class="tabs reveal" id="roleTabs">
@@ -1287,139 +1287,197 @@ td .mono{font-family:var(--font-mono);font-size:11px}
     <button class="tab-btn" data-tab="admin-scenarios" onclick="switchRoleTab('admin-scenarios')">🛡️ Admin</button>
   </div>
 
-  <!-- Student Scenarios -->
+  <!-- Student Screenshots -->
   <div class="tab-content active" id="student-scenarios">
-    <div class="grid-2">
-      <div class="card reveal" style="border-color:rgba(0,245,255,0.2);">
-        <div class="card-icon">🔑</div>
-        <h3 class="card-title">Step 1: Connect Wallet</h3>
-        <p class="section-desc" style="margin:0 0 12px">Student connects MetaMask wallet on the Login page. Polygon Amoy network is auto-detected. Wallet signature provides authentication.</p>
-        <div class="demo-area" style="background:rgba(0,245,255,0.03);border-color:rgba(0,245,255,0.1)">🦊 <strong style="color:var(--neon-cyan)">0x742d...bD18</strong> — Connected</div>
+    <div class="gallery-grid">
+      <div class="gallery-item" onclick="openLightbox(0)">
+        <img src="frontend/public/screenshots/16-connect-wallet.png" alt="Connect Wallet" loading="lazy">
+        <div class="gallery-overlay"><span>🔑 Connect Wallet</span></div>
       </div>
-      <div class="card reveal reveal-delay-1" style="border-color:rgba(0,245,255,0.2);">
-        <div class="card-icon">🪪</div>
-        <h3 class="card-title">Step 2: Verify Identity</h3>
-        <p class="section-desc" style="margin:0 0 12px">Student uploads college ID card. AI-powered OCR (Tesseract.js) extracts name, college, registration number. Matching engine validates against form data (85% threshold).</p>
-        <div class="demo-area" style="background:rgba(0,255,163,0.03);border-color:rgba(0,255,163,0.1)">✓ <strong style="color:var(--neon-green)">Match: John Doe, MIT (92% confidence)</strong></div>
+      <div class="gallery-item" onclick="openLightbox(1)">
+        <img src="frontend/public/screenshots/15-verification.png" alt="Student Verification" loading="lazy">
+        <div class="gallery-overlay"><span>🪪 Verify Identity</span></div>
       </div>
-      <div class="card reveal reveal-delay-2" style="border-color:rgba(0,245,255,0.2);">
-        <div class="card-icon">🏫</div>
-        <h3 class="card-title">Step 3: Join Communities</h3>
-        <p class="section-desc" style="margin:0 0 12px">Student browses communities on the Communities page. Can join any public community created by verified teachers. Each community has tasks, members, and chat.</p>
-        <div class="demo-area" style="background:rgba(123,97,255,0.03);border-color:rgba(123,97,255,0.1)">📚 <strong style="color:var(--neon-purple)">Joined "Web3 Development" community</strong></div>
+      <div class="gallery-item" onclick="openLightbox(2)">
+        <img src="frontend/public/screenshots/03-communities.png" alt="Communities" loading="lazy">
+        <div class="gallery-overlay"><span>🏫 Browse Communities</span></div>
       </div>
-      <div class="card reveal reveal-delay-3" style="border-color:rgba(0,245,255,0.2);">
-        <div class="card-icon">✅</div>
-        <h3 class="card-title">Step 4: Complete Tasks</h3>
-        <p class="section-desc" style="margin:0 0 12px">Student views assigned tasks, submits solutions with text and file uploads. Tracks completion progress per community.</p>
-        <div class="demo-area" style="background:rgba(0,245,255,0.03);border-color:rgba(0,245,255,0.1)">📋 <strong style="color:var(--neon-cyan)">5/8 tasks completed</strong></div>
+      <div class="gallery-item" onclick="openLightbox(3)">
+        <img src="frontend/public/screenshots/04-community-view.png" alt="Community View" loading="lazy">
+        <div class="gallery-overlay"><span>📋 Community &amp; Tasks</span></div>
       </div>
-      <div class="card reveal reveal-delay-4" style="border-color:rgba(0,245,255,0.2);">
-        <div class="card-icon">🎓</div>
-        <h3 class="card-title">Step 5: Earn NFT Certificate</h3>
-        <p class="section-desc" style="margin:0 0 12px">Teacher triggers minting. The pipeline generates certificate image → uploads to IPFS → mints ERC-721 soulbound NFT on Polygon Amoy → stores on blockchain.</p>
-        <div class="demo-area" style="background:rgba(255,79,216,0.03);border-color:rgba(255,79,216,0.1)">🏆 <strong style="color:var(--neon-pink)">Token #42 — View on Explorer</strong></div>
+      <div class="gallery-item" onclick="openLightbox(4)">
+        <img src="frontend/public/screenshots/01-home.png" alt="Dashboard" loading="lazy">
+        <div class="gallery-overlay"><span>🏠 Dashboard</span></div>
       </div>
-      <div class="card reveal reveal-delay-5" style="border-color:rgba(0,245,255,0.2);">
-        <div class="card-icon">👥</div>
-        <h3 class="card-title">Step 6: Social &amp; Collaborate</h3>
-        <p class="section-desc" style="margin:0 0 12px">Follow users, discover connections, send direct messages, join collaboration projects, earn leaderboard ranks.</p>
-        <div class="demo-area" style="background:rgba(0,255,163,0.03);border-color:rgba(0,255,163,0.1)">🌐 <strong style="color:var(--neon-green)">42 followers · 15 connections</strong></div>
+      <div class="gallery-item" onclick="openLightbox(5)">
+        <img src="frontend/public/screenshots/02-dashboard.png" alt="Dashboard Overview" loading="lazy">
+        <div class="gallery-overlay"><span>📊 Dashboard Stats</span></div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(6)">
+        <img src="frontend/public/screenshots/10-messages.png" alt="Messages" loading="lazy">
+        <div class="gallery-overlay"><span>💬 Messages</span></div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(7)">
+        <img src="frontend/public/screenshots/11-certificates.png" alt="Certificates" loading="lazy">
+        <div class="gallery-overlay"><span>🎓 NFT Certificates</span></div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(8)">
+        <img src="frontend/public/screenshots/09-connections.png" alt="Connections" loading="lazy">
+        <div class="gallery-overlay"><span>👥 Connections</span></div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(9)">
+        <img src="frontend/public/screenshots/08-leaderboard.png" alt="Leaderboard" loading="lazy">
+        <div class="gallery-overlay"><span>🏆 Leaderboard</span></div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(10)">
+        <img src="frontend/public/screenshots/07-discover.png" alt="Discover Users" loading="lazy">
+        <div class="gallery-overlay"><span>🔍 Discover</span></div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(11)">
+        <img src="frontend/public/screenshots/06-marketplace.png" alt="Marketplace" loading="lazy">
+        <div class="gallery-overlay"><span>🏪 Marketplace</span></div>
       </div>
     </div>
   </div>
 
-  <!-- Teacher Scenarios -->
+  <!-- Teacher Screenshots -->
   <div class="tab-content" id="teacher-scenarios">
-    <div class="grid-2">
-      <div class="card reveal" style="border-color:rgba(123,97,255,0.2);">
-        <div class="card-icon">🔑</div>
-        <h3 class="card-title">Step 1: Register as Teacher</h3>
-        <p class="section-desc" style="margin:0 0 12px">Teacher connects wallet and registers with role "teacher". Profile stored in both User and Teacher collections with role-specific fields.</p>
-        <div class="demo-area" style="background:rgba(123,97,255,0.03);border-color:rgba(123,97,255,0.1)">👨‍🏫 <strong style="color:var(--neon-purple)">Registered as Teacher</strong></div>
+    <div class="gallery-grid">
+      <div class="gallery-item" onclick="openLightbox(12)">
+        <img src="frontend/public/screenshots/16-connect-wallet.png" alt="Teacher Registration" loading="lazy">
+        <div class="gallery-overlay"><span>🔑 Register as Teacher</span></div>
       </div>
-      <div class="card reveal reveal-delay-1" style="border-color:rgba(123,97,255,0.2);">
-        <div class="card-icon">📄</div>
-        <h3 class="card-title">Step 2: Submit Documents</h3>
-        <p class="section-desc" style="margin:0 0 12px">Teacher submits full name, employee ID, college email, college ID image, and signature via SignaturePad. Documents stored via Multer on server.</p>
-        <div class="demo-area" style="background:rgba(255,209,102,0.03);border-color:rgba(255,209,102,0.1)">📎 <strong style="color:var(--neon-yellow)">Documents submitted for review</strong></div>
+      <div class="gallery-item" onclick="openLightbox(13)">
+        <img src="frontend/public/screenshots/14-profile.png" alt="Teacher Profile" loading="lazy">
+        <div class="gallery-overlay"><span>👤 Teacher Profile</span></div>
       </div>
-      <div class="card reveal reveal-delay-2" style="border-color:rgba(123,97,255,0.2);">
-        <div class="card-icon">⏳</div>
-        <h3 class="card-title">Step 3: Wait for Approval</h3>
-        <p class="section-desc" style="margin:0 0 12px">Status set to "pending_approval". Admin reviews documents in Admin Panel. Teacher receives email notification on approval/rejection.</p>
-        <div class="demo-area" style="background:rgba(123,97,255,0.03);border-color:rgba(123,97,255,0.1)">⏰ <strong style="color:var(--neon-purple)">Status: Pending Approval</strong></div>
+      <div class="gallery-item" onclick="openLightbox(14)">
+        <img src="frontend/public/screenshots/03-communities.png" alt="Create Community" loading="lazy">
+        <div class="gallery-overlay"><span>🏗️ Create Community</span></div>
       </div>
-      <div class="card reveal reveal-delay-3" style="border-color:rgba(123,97,255,0.2);">
-        <div class="card-icon">🏗️</div>
-        <h3 class="card-title">Step 4: Create Community</h3>
-        <p class="section-desc" style="margin:0 0 12px">Approved teacher creates communities with name, description, image, and college name. Becomes community creator with full management rights.</p>
-        <div class="demo-area" style="background:rgba(0,245,255,0.03);border-color:rgba(0,245,255,0.1)">🏫 <strong style="color:var(--neon-cyan)">"Blockchain Basics" community created</strong></div>
+      <div class="gallery-item" onclick="openLightbox(15)">
+        <img src="frontend/public/screenshots/04-community-view.png" alt="Community Management" loading="lazy">
+        <div class="gallery-overlay"><span>📝 Manage Community</span></div>
       </div>
-      <div class="card reveal reveal-delay-4" style="border-color:rgba(123,97,255,0.2);">
-        <div class="card-icon">📝</div>
-        <h3 class="card-title">Step 5: Create &amp; Manage Tasks</h3>
-        <p class="section-desc" style="margin:0 0 12px">Teacher posts tasks: title, description, attachments. Tracks completion per student. Tasks can require file submissions.</p>
-        <div class="demo-area" style="background:rgba(123,97,255,0.03);border-color:rgba(123,97,255,0.1)">📋 <strong style="color:var(--neon-purple)">12 tasks created · 8 completed</strong></div>
+      <div class="gallery-item" onclick="openLightbox(16)">
+        <img src="frontend/public/screenshots/11-certificates.png" alt="Issue Certificate" loading="lazy">
+        <div class="gallery-overlay"><span>🖨️ Issue NFT Certificate</span></div>
       </div>
-      <div class="card reveal reveal-delay-5" style="border-color:rgba(123,97,255,0.2);">
-        <div class="card-icon">🖨️</div>
-        <h3 class="card-title">Step 6: Issue NFT Certificates</h3>
-        <p class="section-desc" style="margin:0 0 12px">Teacher triggers NFT minting for students who completed all tasks. 6-step pipeline: generate image → IPFS → metadata → IPFS → mint → persist.</p>
-        <div class="demo-area" style="background:rgba(0,255,163,0.03);border-color:rgba(0,255,163,0.1)">✅ <strong style="color:var(--neon-green)">Certificate #42 minted on Polygon</strong></div>
+      <div class="gallery-item" onclick="openLightbox(17)">
+        <img src="frontend/public/screenshots/05-servers.png" alt="Servers Communication" loading="lazy">
+        <div class="gallery-overlay"><span>💬 Server Channels</span></div>
       </div>
     </div>
   </div>
 
-  <!-- Admin Scenarios -->
+  <!-- Admin Screenshots -->
   <div class="tab-content" id="admin-scenarios">
-    <div class="grid-2">
-      <div class="card reveal" style="border-color:rgba(255,209,102,0.2);">
-        <div class="card-icon">⚙️</div>
-        <h3 class="card-title">Step 1: Admin Setup</h3>
-        <p class="section-desc" style="margin:0 0 12px">First admin created via /admin/setup page using ADMIN_SECRET env variable. Subsequent admins created by existing admins.</p>
-        <div class="demo-area" style="background:rgba(255,209,102,0.03);border-color:rgba(255,209,102,0.1)">🔐 <strong style="color:var(--neon-yellow)">Admin account configured</strong></div>
+    <div class="gallery-grid">
+      <div class="gallery-item" onclick="openLightbox(18)">
+        <img src="frontend/public/screenshots/13-admin-setup.png" alt="Admin Setup" loading="lazy">
+        <div class="gallery-overlay"><span>⚙️ Admin Setup</span></div>
       </div>
-      <div class="card reveal reveal-delay-1" style="border-color:rgba(255,209,102,0.2);">
-        <div class="card-icon">📊</div>
-        <h3 class="card-title">Step 2: Dashboard Overview</h3>
-        <p class="section-desc" style="margin:0 0 12px">Admin panel shows total counts: students, teachers (pending/approved/rejected), communities, tasks, certificates minted, and platform stats.</p>
-        <div class="demo-area" style="background:rgba(255,209,102,0.03);border-color:rgba(255,209,102,0.1)">📈 <strong style="color:var(--neon-yellow)">120 students · 15 teachers · 8 communities</strong></div>
+      <div class="gallery-item" onclick="openLightbox(19)">
+        <img src="frontend/public/screenshots/12-admin.png" alt="Admin Panel" loading="lazy">
+        <div class="gallery-overlay"><span>📊 Admin Dashboard</span></div>
       </div>
-      <div class="card reveal reveal-delay-2" style="border-color:rgba(255,209,102,0.2);">
-        <div class="card-icon">👁️</div>
-        <h3 class="card-title">Step 3: Review Teacher Applications</h3>
-        <p class="section-desc" style="margin:0 0 12px">Admin reviews pending teacher applications. Views uploaded documents (college ID, signature). Can approve or reject with reason.</p>
-        <div class="demo-area" style="background:rgba(255,209,102,0.03);border-color:rgba(255,209,102,0.1)">👨‍🏫 <strong style="color:var(--neon-yellow)">3 pending applications</strong></div>
+      <div class="gallery-item" onclick="openLightbox(20)">
+        <img src="frontend/public/screenshots/12-admin.png" alt="Teacher Approvals" loading="lazy">
+        <div class="gallery-overlay"><span>👁️ Review Applications</span></div>
       </div>
-      <div class="card reveal reveal-delay-3" style="border-color:rgba(255,209,102,0.2);">
-        <div class="card-icon">👥</div>
-        <h3 class="card-title">Step 4: User Management</h3>
-        <p class="section-desc" style="margin:0 0 12px">Admin views and manages all users. Can approve/reject students, view user details, and manage platform-wide settings.</p>
-        <div class="demo-area" style="background:rgba(255,209,102,0.03);border-color:rgba(255,209,102,0.1)">👤 <strong style="color:var(--neon-yellow)">120 users managed</strong></div>
+      <div class="gallery-item" onclick="openLightbox(21)">
+        <img src="frontend/public/screenshots/12-admin.png" alt="User Management" loading="lazy">
+        <div class="gallery-overlay"><span>👥 User Management</span></div>
       </div>
-      <div class="card reveal reveal-delay-4" style="border-color:rgba(255,209,102,0.2);">
-        <div class="card-icon">⛓️</div>
-        <h3 class="card-title">Step 5: Blockchain Diagnostics</h3>
-        <p class="section-desc" style="margin:0 0 12px">Admin runs blockchain diagnostics: check contract deployment, verify signer wallet balance, validate network config, retry failed mints.</p>
-        <div class="demo-area" style="background:rgba(255,79,216,0.03);border-color:rgba(255,79,216,0.1)">⛓️ <strong style="color:var(--neon-pink)">Contract: 0x8F2... valid · Balance: 0.5 MATIC</strong></div>
+      <div class="gallery-item" onclick="openLightbox(22)">
+        <img src="frontend/public/screenshots/13-admin-setup.png" alt="Blockchain Diagnostics" loading="lazy">
+        <div class="gallery-overlay"><span>⛓️ Blockchain Diagnostics</span></div>
       </div>
-      <div class="card reveal reveal-delay-5" style="border-color:rgba(255,209,102,0.2);">
-        <div class="card-icon">🛡️</div>
-        <h3 class="card-title">Step 6: Platform Governance</h3>
-        <p class="section-desc" style="margin:0 0 12px">Full platform oversight: create admins, monitor activity, view analytics, manage platform configuration and security settings.</p>
-        <div class="demo-area" style="background:rgba(0,245,255,0.03);border-color:rgba(0,245,255,0.1)">🏛️ <strong style="color:var(--neon-cyan)">Platform governance active</strong></div>
+      <div class="gallery-item" onclick="openLightbox(23)">
+        <img src="frontend/public/screenshots/12-admin.png" alt="Platform Governance" loading="lazy">
+        <div class="gallery-overlay"><span>🛡️ Platform Governance</span></div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+  <span class="lightbox-nav prev" onclick="navigateLightbox(-1)">&#8249;</span>
+  <span class="lightbox-nav next" onclick="navigateLightbox(1)">&#8250;</span>
+  <img id="lightbox-img" src="" alt="Screenshot">
+</div>
+
 <script>
+const galleryImages = [
+  { src: "frontend/public/screenshots/16-connect-wallet.png", alt: "Connect Wallet" },
+  { src: "frontend/public/screenshots/15-verification.png", alt: "Student Verification" },
+  { src: "frontend/public/screenshots/03-communities.png", alt: "Communities" },
+  { src: "frontend/public/screenshots/04-community-view.png", alt: "Community View" },
+  { src: "frontend/public/screenshots/01-home.png", alt: "Dashboard" },
+  { src: "frontend/public/screenshots/02-dashboard.png", alt: "Dashboard Overview" },
+  { src: "frontend/public/screenshots/10-messages.png", alt: "Messages" },
+  { src: "frontend/public/screenshots/11-certificates.png", alt: "Certificates" },
+  { src: "frontend/public/screenshots/09-connections.png", alt: "Connections" },
+  { src: "frontend/public/screenshots/08-leaderboard.png", alt: "Leaderboard" },
+  { src: "frontend/public/screenshots/07-discover.png", alt: "Discover" },
+  { src: "frontend/public/screenshots/06-marketplace.png", alt: "Marketplace" },
+  { src: "frontend/public/screenshots/16-connect-wallet.png", alt: "Teacher Registration" },
+  { src: "frontend/public/screenshots/14-profile.png", alt: "Teacher Profile" },
+  { src: "frontend/public/screenshots/03-communities.png", alt: "Create Community" },
+  { src: "frontend/public/screenshots/04-community-view.png", alt: "Community Management" },
+  { src: "frontend/public/screenshots/11-certificates.png", alt: "Issue Certificate" },
+  { src: "frontend/public/screenshots/05-servers.png", alt: "Server Channels" },
+  { src: "frontend/public/screenshots/13-admin-setup.png", alt: "Admin Setup" },
+  { src: "frontend/public/screenshots/12-admin.png", alt: "Admin Panel" },
+  { src: "frontend/public/screenshots/12-admin.png", alt: "Teacher Approvals" },
+  { src: "frontend/public/screenshots/12-admin.png", alt: "User Management" },
+  { src: "frontend/public/screenshots/13-admin-setup.png", alt: "Blockchain Diagnostics" },
+  { src: "frontend/public/screenshots/12-admin.png", alt: "Platform Governance" },
+];
+
+let currentImageIndex = 0;
+const lightboxEl = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightbox-img");
+
+function openLightbox(index) {
+  currentImageIndex = index;
+  updateLightbox();
+  lightboxEl.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeLightbox(e) {
+  if (e && e.target !== lightboxEl && e.target.tagName !== "SPAN") return;
+  lightboxEl.classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function navigateLightbox(dir) {
+  currentImageIndex = (currentImageIndex + dir + galleryImages.length) % galleryImages.length;
+  updateLightbox();
+}
+
+function updateLightbox() {
+  const img = galleryImages[currentImageIndex];
+  lightboxImg.src = img.src;
+  lightboxImg.alt = img.alt;
+}
+
+document.addEventListener("keydown", function(e) {
+  if (!lightboxEl.classList.contains("open")) return;
+  if (e.key === "Escape") closeLightbox();
+  if (e.key === "ArrowLeft") navigateLightbox(-1);
+  if (e.key === "ArrowRight") navigateLightbox(1);
+});
+
 function switchRoleTab(tabId) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
-  document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+  document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+  document.getElementById(tabId).classList.add("active");
+  document.querySelector(`[data-tab="${tabId}"]`).classList.add("active");
 }
 </script>
 
