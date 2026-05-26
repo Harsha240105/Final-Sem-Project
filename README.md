@@ -330,6 +330,15 @@ Web3Connect/
 
 ---
 
+## Team
+
+| Name | GitHub | Role |
+|------|--------|------|
+| **Harsha** | [@Harsha240105](https://github.com/Harsha240105) | Lead Developer |
+| **Vivek** | [@vivek032005](https://github.com/vivek032005) | Team Member |
+
+---
+
 ## Contributing
 
 1. Fork the repository
