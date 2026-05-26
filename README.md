@@ -5,6 +5,9 @@
     <a href="https://github.com/Harsha240105/Final-Sem-Project" target="_blank">
       <img src="https://img.shields.io/badge/GitHub-Harsha240105-blue?style=flat&logo=github" alt="GitHub">
     </a>
+    <a href="https://github.com/vivek032005" target="_blank">
+      <img src="https://img.shields.io/badge/Team-vivek032005-purple?style=flat&logo=github" alt="vivek032005">
+    </a>
   </p>
   <p>
     <a href="#features">Features</a> •
