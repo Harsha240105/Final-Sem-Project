@@ -19,6 +19,7 @@ const {
   sendTeacherRejectedSms,
   sendVerificationSuccessSms,
 } = require("../notifications/smsService");
+const { createNotification } = require("./notificationController");
 const {
   normalizeEmail,
   findAccountByEmail,
@@ -193,6 +194,12 @@ const approveTeacher = async (req, res, next) => {
       } else if (teacher.phone) {
         await sendTeacherApprovedSms(teacher.phone, teacher.fullName || teacher.name);
       }
+      await createNotification({
+        userId: teacher._id,
+        message: "Your teacher application has been approved! You can now access the platform.",
+        type: "general",
+        redirectUrl: "/",
+      });
       return res.json({ message: "Teacher approved successfully", data: { id: teacher._id, name: teacher.name } });
     }
 
@@ -215,6 +222,13 @@ const approveTeacher = async (req, res, next) => {
       } else if (teacher.phone) {
         await sendTeacherApprovedSms(teacher.phone, teacher.fullName || teacher.name);
       }
+      const userRecord = await User.findOne({ walletAddress: teacher.walletAddress });
+      await createNotification({
+        userId: userRecord?._id || teacher._id,
+        message: "Your teacher application has been approved! You can now access the platform.",
+        type: "general",
+        redirectUrl: "/",
+      });
       return res.json({ message: "Teacher approved successfully", data: { id: teacher._id, name: teacher.name } });
     }
 
@@ -294,6 +308,12 @@ const rejectTeacher = async (req, res, next) => {
         { walletAddress: teacher.walletAddress },
         { $set: { approvalStatus: "rejected", approved: false } }
       );
+      await createNotification({
+        userId: teacher._id,
+        message: "Your teacher application has been rejected. You can resubmit.",
+        type: "general",
+        redirectUrl: "/verify-teacher",
+      });
     } else if (teacherFromTeacherColl) {
       teacherFromTeacherColl.approvalStatus = "rejected";
       teacherFromTeacherColl.approved = false;
@@ -303,6 +323,13 @@ const rejectTeacher = async (req, res, next) => {
         { walletAddress: teacherFromTeacherColl.walletAddress },
         { $set: { verificationStatus: "rejected", approved: false } }
       );
+      const teacherUser = await User.findOne({ walletAddress: teacherFromTeacherColl.walletAddress });
+      await createNotification({
+        userId: teacherUser?._id || teacherFromTeacherColl._id,
+        message: "Your teacher application has been rejected. You can resubmit.",
+        type: "general",
+        redirectUrl: "/verify-teacher",
+      });
     }
 
     console.log(`[ADMIN] Teacher ${teacherName} (${id}) rejected by admin ${req.user._id}`);
@@ -369,6 +396,13 @@ const approveStudent = async (req, res, next) => {
       } else if (student.phone) {
         await sendVerificationSuccessSms(student.phone, student.fullName || student.name, "student");
       }
+      const userForStudent = await User.findOne({ walletAddress: student.walletAddress });
+      await createNotification({
+        userId: userForStudent?._id || student._id,
+        message: "Your student verification has been approved!",
+        type: "general",
+        redirectUrl: "/",
+      });
       return res.json({ message: "Student approved successfully", data: { id: student._id, name: student.name } });
     }
 
@@ -388,6 +422,12 @@ const approveStudent = async (req, res, next) => {
       } else if (student.phone) {
         await sendVerificationSuccessSms(student.phone, student.fullName || student.name, "student");
       }
+      await createNotification({
+        userId: student._id,
+        message: "Your student verification has been approved!",
+        type: "general",
+        redirectUrl: "/",
+      });
       return res.json({ message: "Student approved successfully", data: { id: student._id, name: student.name } });
     }
 
@@ -415,6 +455,13 @@ const rejectStudent = async (req, res, next) => {
         { walletAddress: student.walletAddress },
         { $set: { verificationStatus: "rejected", verificationError: reason } }
       );
+      const studentUser = await User.findOne({ walletAddress: student.walletAddress });
+      await createNotification({
+        userId: studentUser?._id || student._id,
+        message: `Student verification rejected: ${reason}`,
+        type: "general",
+        redirectUrl: "/verify-student",
+      });
       return res.json({ message: "Student rejected. They can resubmit." });
     }
 
@@ -427,6 +474,12 @@ const rejectStudent = async (req, res, next) => {
         { walletAddress: student.walletAddress },
         { $set: { verificationStatus: "rejected", verificationError: reason } }
       );
+      await createNotification({
+        userId: student._id,
+        message: `Student verification rejected: ${reason}`,
+        type: "general",
+        redirectUrl: "/verify-student",
+      });
       return res.json({ message: "Student rejected. They can resubmit." });
     }
 

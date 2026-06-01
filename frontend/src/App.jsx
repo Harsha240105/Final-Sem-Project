@@ -18,6 +18,7 @@ const AdminPanel = lazy(() => import("./features/admin/AdminPanel"));
 const Dashboard = lazy(() => import("./features/dashboard/Dashboard"));
 const Communities = lazy(() => import("./features/communities/Communities"));
 const CommunityView = lazy(() => import("./features/communities/CommunityView"));
+const CommunityCreate = lazy(() => import("./features/communities/CommunityCreate"));
 const CollaborationHub = lazy(() => import("./features/collaboration/pages/CollaborationHub"));
 const Marketplace = lazy(() => import("./features/marketplace/Marketplace"));
 const Profile = lazy(() => import("./features/profiles/Profile"));
@@ -79,6 +80,11 @@ function AppRoutes() {
             <Route path="/communities/:id" element={
               <MainLayout>
                 <Suspense fallback={<CardSkeleton count={3} />}><CommunityView /></Suspense>
+              </MainLayout>
+            } />
+            <Route path="/communities/create" element={
+              <MainLayout>
+                <Suspense fallback={<CardSkeleton count={4} />}><CommunityCreate /></Suspense>
               </MainLayout>
             } />
             <Route path="/marketplace" element={

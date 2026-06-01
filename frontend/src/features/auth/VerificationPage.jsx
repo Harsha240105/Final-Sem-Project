@@ -201,6 +201,14 @@ function VerificationPage() {
         const submitted = liveStatus?.verificationSubmitted;
 
         if (status === "verified" && liveStatus?.onboardingCompleted) {
+          // JWT is stale — get a fresh one with onboardingCompleted: true
+          try {
+            const result = await completeOnboarding(token);
+            if (result?.token) {
+              localStorage.setItem("token", result.token);
+              login(result.token, null);
+            }
+          } catch { /* continue anyway */ }
           navigate("/", { replace: true });
           return;
         }
@@ -308,13 +316,81 @@ function VerificationPage() {
     const isVerifying = polling || (!aiResult && !polling);
     const status = aiResult?.verificationStatus;
 
+    const submittedContent = () => {
+      if (isVerifying && !status) {
+        return (
+          <>
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-500/20">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-400/30 border-t-cyan-400" />
+            </div>
+            <h2 className="text-xl font-bold text-white">Verification Submitted</h2>
+            <p className="text-sm text-gray-400 mt-2">Your verification is being processed. We'll notify you once it's complete.</p>
+          </>
+        );
+      }
+
+      if (status === "verified") {
+        return (
+          <>
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/20">
+              <span className="text-3xl">✅</span>
+            </div>
+            <h2 className="text-xl font-bold text-emerald-400">Verification Successful!</h2>
+            <p className="text-sm text-gray-400 mt-2">Your identity has been verified successfully.</p>
+            <button onClick={handleComplete}
+              className="mt-6 w-full rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 text-sm font-bold text-white hover:shadow-lg transition">
+              Continue to Dashboard
+            </button>
+          </>
+        );
+      }
+
+      if (status === "rejected" || status === "error") {
+        return (
+          <>
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-500/20">
+              <span className="text-3xl">❌</span>
+            </div>
+            <h2 className="text-xl font-bold text-red-400">Verification Failed</h2>
+            <p className="text-sm text-gray-400 mt-2">
+              {aiResult?.verificationError || "Your details could not be verified. Please try again."}
+            </p>
+            <button onClick={handleRetry}
+              className="mt-6 w-full rounded-xl bg-gradient-to-r from-amber-500 to-red-500 px-6 py-3 text-sm font-bold text-white hover:shadow-lg transition">
+              Retry Verification
+            </button>
+          </>
+        );
+      }
+
+      if (status === "pending_approval" && role === "teacher") {
+        return (
+          <>
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-purple-500/20">
+              <span className="text-3xl">⏳</span>
+            </div>
+            <h2 className="text-xl font-bold text-purple-400">Application Submitted</h2>
+            <p className="text-sm text-gray-400 mt-2">Your application is pending admin approval. You'll be notified once an admin reviews it.</p>
+          </>
+        );
+      }
+
+      return (
+        <>
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-500/20">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-400/30 border-t-cyan-400" />
+          </div>
+          <h2 className="text-xl font-bold text-white">Verification Submitted</h2>
+          <p className="text-sm text-gray-400 mt-2">Your verification is being processed. We'll notify you once it's complete.</p>
+        </>
+      );
+    };
+
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
         className="flex min-h-screen items-center justify-center px-4">
         <div className="w-full max-w-md rounded-xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md p-8 text-center">
-          <div className="text-5xl mb-4">✅</div>
-          <h2 className="text-xl font-bold text-white">Verification Submitted</h2>
-          <p className="text-sm text-gray-400 mt-2">Your verification is being processed. We'll notify you once it's complete.</p>
+          {submittedContent()}
         </div>
       </motion.div>
     );

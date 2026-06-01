@@ -14,6 +14,7 @@ const {
   sendVerificationFailSms,
   sendTeacherPendingApprovalSms,
 } = require("../notifications/smsService");
+const { createNotification } = require("../controllers/notificationController");
 
 const uploadsBase = path.join(__dirname, "..", "uploads");
 
@@ -34,6 +35,12 @@ async function runVerification(userId) {
     } else if (user.phone) {
       await sendVerificationSuccessSms(user.phone, user.fullName || user.name, user.role);
     }
+    await createNotification({
+      userId: user._id,
+      message: `Your ${user.role} account has been verified successfully.`,
+      type: "general",
+      redirectUrl: "/",
+    });
     return {
       success: true,
       verified: true,
@@ -56,6 +63,12 @@ async function runVerification(userId) {
     } else if (user.phone) {
       await sendTeacherPendingApprovalSms(user.phone, user.fullName || user.name);
     }
+    await createNotification({
+      userId: user._id,
+      message: "Your teacher application has been submitted and is pending admin approval.",
+      type: "general",
+      redirectUrl: "/",
+    });
     return {
       success: true,
       verified: false,
@@ -163,6 +176,12 @@ async function handleEmailNameMismatch(user, matchResult) {
       emailTarget
     );
   }
+  await createNotification({
+    userId: user._id,
+    message: `Verification rejected: ${reason}`,
+    type: "general",
+    redirectUrl: `/verify-${user.role}`,
+  });
 }
 
 async function handleVerificationSuccess(user, matchResult) {
@@ -195,6 +214,13 @@ async function handleVerificationSuccess(user, matchResult) {
       console.log(`[VERIFY] 📱 Success SMS sent to ${user.countryCode} ${user.phone}`);
     }
   }
+
+  await createNotification({
+    userId: user._id,
+    message: `Your ${user.role} account has been verified successfully!`,
+    type: "general",
+    redirectUrl: "/",
+  });
 
   return { verified: true };
 }
@@ -231,6 +257,13 @@ async function handleVerificationFailure(user, matchResult) {
       console.log(`[VERIFY] 📱 Rejection SMS sent to ${user.countryCode} ${user.phone}`);
     }
   }
+
+  await createNotification({
+    userId: user._id,
+    message: `Verification failed: ${reason}`,
+    type: "general",
+    redirectUrl: `/verify-${user.role}`,
+  });
 
   return { verified: false };
 }

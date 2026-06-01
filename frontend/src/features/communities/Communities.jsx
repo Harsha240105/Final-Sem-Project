@@ -75,12 +75,14 @@ function Communities() {
             className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] pl-10 pr-4 py-2.5 text-sm text-white outline-none focus:border-cyan-500/40 transition"
           />
         </div>
-        <button
-          onClick={() => navigate("/communities/create")}
-          className="shrink-0 rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-cyan-400 transition"
-        >
-          + Create
-        </button>
+        {(user?.role === "teacher" || user?.role === "community_manager") && (
+          <button
+            onClick={() => navigate("/communities/create")}
+            className="shrink-0 rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-cyan-400 transition"
+          >
+            + Create
+          </button>
+        )}
       </div>
 
       {/* Category pills */}
