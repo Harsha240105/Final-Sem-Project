@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const Message = require("../database/models/Message");
+const Message = require("../../database/models/Message");
 
 const voiceRooms = new Map();
 

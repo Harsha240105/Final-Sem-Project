@@ -1,8 +1,8 @@
-const User = require("../../database/models/User");
-const Student = require("../../database/models/Student");
-const Teacher = require("../../database/models/Teacher");
-const AdminUser = require("../../database/models/AdminUser");
-const Admin = require("../../database/models/Admin");
+const User = require("../../../database/models/User");
+const Student = require("../../../database/models/Student");
+const Teacher = require("../../../database/models/Teacher");
+const AdminUser = require("../../../database/models/AdminUser");
+const Admin = require("../../../database/models/Admin");
 
 const ROLE_MODEL_MAP = {
   student: Student,

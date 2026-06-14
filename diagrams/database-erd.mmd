@@ -1,0 +1,271 @@
+erDiagram
+    %% ── CORE USER SYSTEM ──
+    User {
+        ObjectId _id PK
+        string walletAddress UK
+        string role "student|teacher|admin|community_manager"
+        string email UK
+        string name
+        string did
+        boolean isVerified
+        boolean kycApproved
+        date lastLogin
+    }
+
+    Student {
+        ObjectId _id PK
+        ObjectId userId FK
+        string walletAddress UK
+        string name
+        string department
+        string studentId
+        boolean kycApproved
+        boolean isVerified
+    }
+
+    Teacher {
+        ObjectId _id PK
+        ObjectId userId FK
+        string walletAddress UK
+        string name
+        string collegeEmail
+        string employeeId
+        string approvalStatus "pending|approved|rejected"
+        ObjectId managedCommunity FK "nullable"
+    }
+
+    AdminUser {
+        ObjectId _id PK
+        string walletAddress UK
+        string email
+        string name
+        ObjectId organisationId FK
+    }
+
+    Organisation {
+        ObjectId _id PK
+        string name
+        string domain
+        ObjectId adminId FK
+    }
+
+    DeletedUser {
+        ObjectId _id PK
+        ObjectId originalUserId
+        string walletAddress
+        string reason
+        date deletedAt
+    }
+
+    %% ── WALLET AUTH ──
+    Nonce {
+        ObjectId _id PK
+        string walletAddress
+        string nonce
+        date expiresAt
+    }
+
+    %% ── COMMUNITY & TASKS ──
+    Community {
+        ObjectId _id PK
+        string name
+        string description
+        ObjectId creatorId FK
+        string status "active|completing|archived"
+        string privacy "open|approval|invite"
+        array categories
+        array tags
+    }
+
+    Task {
+        ObjectId _id PK
+        string title
+        ObjectId communityId FK
+        ObjectId createdBy FK
+        date dueDate
+        array completedBy
+        object certificateIssuance
+    }
+
+    Submission {
+        ObjectId _id PK
+        ObjectId taskId FK
+        ObjectId studentId FK
+        array files
+        array links
+        string notes
+        int version
+        string status "pending|reviewed|approved|rejected"
+        string feedback
+    }
+
+    %% ── CERTIFICATES & NFT ──
+    Certificate {
+        ObjectId _id PK
+        ObjectId userId FK
+        ObjectId communityId FK
+        ObjectId taskId FK
+        string tokenId
+        string transactionHash
+        string contractAddress
+        string tokenURI
+        string status "issued|claimed|completed|failed|tx_submitted"
+        date mintedAt
+    }
+
+    NFTCertificate {
+        ObjectId _id PK
+        ObjectId recipientId FK
+        string type "Job|Event|Project"
+        string tokenId
+        string metadataURI
+        string status
+    }
+
+    NFTJobQueue {
+        ObjectId _id PK
+        ObjectId certificateId FK
+        ObjectId userId FK
+        string stage "pending|generating_metadata|uploading_ipfs|minting|confirming|completed|failed|retrying"
+        object pipelineSteps
+        array errorLogs
+        boolean locked
+        int retryCount
+    }
+
+    %% ── SOCIAL GRAPH ──
+    Follow {
+        ObjectId _id PK
+        ObjectId follower FK "User._id"
+        ObjectId following FK "User._id"
+        date createdAt
+    }
+
+    FriendRequest {
+        ObjectId _id PK
+        ObjectId sender FK "User._id"
+        ObjectId recipient FK "User._id"
+        string status "pending|accepted|rejected|blocked"
+    }
+
+    %% ── MESSAGING ──
+    Conversation {
+        ObjectId _id PK
+        array participants
+        string lastMessage
+        date lastMessageAt
+        array pinnedMessages
+    }
+
+    Message {
+        ObjectId _id PK
+        ObjectId conversationId FK
+        ObjectId senderId FK
+        string content
+        array attachments
+        array reactions
+        ObjectId replyTo "nullable"
+        array readBy
+        date editedAt
+    }
+
+    %% ── SERVERS (DISCORD-LIKE) ──
+    Server {
+        ObjectId _id PK
+        string name
+        ObjectId ownerId FK
+        array channels
+        array members
+        array inviteCodes
+        string image
+    }
+
+    ServerMessage {
+        ObjectId _id PK
+        ObjectId serverId FK
+        ObjectId channelId
+        ObjectId senderId FK
+        string content
+        array attachments
+        array reactions
+        date editedAt
+    }
+
+    %% ── COLLABORATION CANVAS ──
+    Canvas {
+        ObjectId _id PK
+        string name
+        ObjectId ownerId FK
+        array nodes
+        array edges
+        object viewport
+        array collaborators
+    }
+
+    CollaborationRoom {
+        ObjectId _id PK
+        ObjectId marketplacePostId FK
+        array channels
+        array files
+        array tasks
+    }
+
+    %% ── MARKETPLACE ──
+    Marketplace {
+        ObjectId _id PK
+        string title
+        string postType "looking_for_dev|designer|open_collaboration|research_project|community_recruitment"
+        ObjectId authorId FK
+        array requiredRoles
+        array participants
+        array collaborators
+        array comments
+        array showcaseMedia
+        string status "open|closed|in_progress"
+    }
+
+    %% ── NOTIFICATIONS ──
+    Notification {
+        ObjectId _id PK
+        ObjectId recipientId FK
+        ObjectId senderId FK
+        string type "community_joined|task_assigned|task_completed|certificate_issued|general"
+        string message
+        ObjectId referenceId
+        string referenceModel
+        boolean isRead
+    }
+
+    %% ── RELATIONSHIPS ──
+    User ||--o| Student : "has (legacy)"
+    User ||--o| Teacher : "has (legacy)"
+    User ||--o| AdminUser : "is one"
+    AdminUser ||--o| Organisation : "manages"
+
+    User ||--o{ Community : "creates"
+    Community ||--o{ Task : "contains"
+    Task ||--o{ Submission : "receives"
+    User ||--o{ Submission : "submits"
+
+    User ||--o{ Certificate : "owns"
+    Community ||--o{ Certificate : "awarded for"
+    Task ||--o{ Certificate : "earned from"
+    Certificate ||--|| NFTJobQueue : "queued as"
+
+    User ||--o{ Follow : "follows (follower)"
+    User ||--o{ Follow : "followed by (following)"
+    User ||--o{ FriendRequest : "sends"
+    User ||--o{ FriendRequest : "receives"
+
+    Conversation ||--o{ Message : "contains"
+    User ||--o{ Message : "writes"
+
+    User ||--o{ Server : "owns"
+    Server ||--o{ ServerMessage : "contains"
+    User ||--o{ ServerMessage : "writes"
+
+    User ||--o{ Canvas : "owns"
+    Marketplace ||--o{ CollaborationRoom : "linked to"
+
+    User ||--o{ Notification : "receives"
+    User ||--o{ Notification : "triggers"

@@ -2,8 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const { body, validationResult } = require("express-validator");
-const Server = require("../../database/models/Server");
-const ServerMessage = require("../../database/models/ServerMessage");
+const Server = require("../../../database/models/Server");
+const ServerMessage = require("../../../database/models/ServerMessage");
 const { authMiddleware } = require("../middleware/auth.middleware");
 
 const router = express.Router();

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const User = require("../../database/models/User");
-const Follow = require("../../database/models/Follow");
+const User = require("../../../database/models/User");
+const Follow = require("../../../database/models/Follow");
 const { findUserByAnyId } = require("../utils/userSync");
 
 function toIdString(value) {

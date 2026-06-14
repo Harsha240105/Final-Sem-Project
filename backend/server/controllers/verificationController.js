@@ -1,5 +1,5 @@
-const User = require("../../database/models/User");
-const Teacher = require("../../database/models/Teacher");
+const User = require("../../../database/models/User");
+const Teacher = require("../../../database/models/Teacher");
 const { findUserByAnyId } = require("../utils/userSync");
 const { runVerification } = require("../verification/verificationEngine");
 

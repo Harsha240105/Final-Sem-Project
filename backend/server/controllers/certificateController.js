@@ -1,13 +1,13 @@
-const User = require("../../database/models/User");
-const Student = require("../../database/models/Student");
-const Teacher = require("../../database/models/Teacher");
-const Community = require("../../database/models/Community");
-const Certificate = require("../../database/models/Certificate");
-const NFTJobQueue = require("../../database/models/NFTJobQueue");
+const User = require("../../../database/models/User");
+const Student = require("../../../database/models/Student");
+const Teacher = require("../../../database/models/Teacher");
+const Community = require("../../../database/models/Community");
+const Certificate = require("../../../database/models/Certificate");
+const NFTJobQueue = require("../../../database/models/NFTJobQueue");
 const { findUserByRoleAndId, findUserByAnyId } = require("../utils/userSync");
-const { verifyCertificateOnChain } = require("../../blockchain/nftService");
-const { CONTRACT_ADDRESS } = require("../../blockchain/contractAddress");
-const { uploadCertificateToIPFS } = require("../../blockchain/ipfsService");
+const { verifyCertificateOnChain } = require("../../services/blockchain/nftService");
+const { CONTRACT_ADDRESS } = require("../../services/blockchain/contractAddress");
+const { uploadCertificateToIPFS } = require("../../services/blockchain/ipfsService");
 const { generateCertificate } = require("../utils/certificateGenerator");
 const { createNotification } = require("./notificationController");
 

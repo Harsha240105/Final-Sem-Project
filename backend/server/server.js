@@ -11,9 +11,9 @@ const morgan = require("morgan");
 const mongoose = require("mongoose");
 const rateLimit = require("express-rate-limit");
 
-const { connectDB, getMongoConnectionStatus } = require("../database/db");
-const Notification = require("../database/models/Notification");
-const ServerMessage = require("../database/models/ServerMessage");
+const { connectDB, getMongoConnectionStatus } = require("../../database/db");
+const Notification = require("../../database/models/Notification");
+const ServerMessage = require("../../database/models/ServerMessage");
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin.routes");
 const marketplaceRoutes = require("./routes/marketplace.routes");
@@ -59,7 +59,7 @@ app.set("io", io);
 setupSocket(io);
 
 // Start NFT mint queue processor
-const { setSocketIO, startQueueProcessor } = require("../blockchain/nftQueueProcessor");
+const { setSocketIO, startQueueProcessor } = require("../services/blockchain/nftQueueProcessor");
 setSocketIO(io);
 startQueueProcessor();
 

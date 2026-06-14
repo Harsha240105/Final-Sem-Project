@@ -1,5 +1,5 @@
-const Marketplace = require("../../database/models/Marketplace");
-const CollaborationRoom = require("../../database/models/CollaborationRoom");
+const Marketplace = require("../../../database/models/Marketplace");
+const CollaborationRoom = require("../../../database/models/CollaborationRoom");
 const mongoose = require("mongoose");
 
 const POST_TYPES = [

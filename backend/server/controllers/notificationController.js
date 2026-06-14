@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Notification = require("../../database/models/Notification");
+const Notification = require("../../../database/models/Notification");
 
 /**
  * Get all notifications for the logged-in user

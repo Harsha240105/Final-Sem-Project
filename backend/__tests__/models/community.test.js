@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Community = require("../../database/models/Community");
+const Community = require("../../../database/models/Community");
 
 describe("Community Model", () => {
   it("should have required fields defined in schema", () => {

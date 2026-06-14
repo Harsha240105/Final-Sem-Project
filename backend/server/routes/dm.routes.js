@@ -1,11 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const { body, validationResult } = require("express-validator");
-const Message = require("../../database/models/Message");
-const FriendRequest = require("../../database/models/FriendRequest");
-const Conversation = require("../../database/models/Conversation");
-const Follow = require("../../database/models/Follow");
-const User = require("../../database/models/User");
+const Message = require("../../../database/models/Message");
+const FriendRequest = require("../../../database/models/FriendRequest");
+const Conversation = require("../../../database/models/Conversation");
+const Follow = require("../../../database/models/Follow");
+const User = require("../../../database/models/User");
 const { authMiddleware } = require("../middleware/auth.middleware");
 const { uploadChat, classifyMime } = require("../middleware/upload");
 

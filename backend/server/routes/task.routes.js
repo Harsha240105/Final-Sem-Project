@@ -6,7 +6,7 @@ const fs = require("fs");
 const router = express.Router();
 const { authMiddleware } = require("../middleware/auth.middleware");
 const { authorizeRoles } = require("../middleware/role.middleware");
-const Submission = require("../../database/models/Submission");
+const Submission = require("../../../database/models/Submission");
 const {
   createTask,
   getTasksByCommunity,
@@ -92,7 +92,7 @@ router.post("/upload/:taskId", authMiddleware, upload.single("file"), uploadTask
 router.post("/upload-multiple/:taskId", authMiddleware, upload.array("files", 50), async (req, res) => {
   try {
     const { taskId } = req.params;
-    const Task = require("../../database/models/task.model");
+    const Task = require("../../../database/models/task.model");
     const task = await Task.findById(taskId);
     if (!task) return res.status(404).json({ error: "Task not found" });
     const userId = req.user._id || req.user.id;
@@ -125,7 +125,7 @@ router.post("/:taskId/submit", authMiddleware, upload.array("files", 10), async 
     const { taskId } = req.params;
     const { links, notes, isFinal } = req.body;
     if (!mongoose.Types.ObjectId.isValid(taskId)) return res.status(400).json({ error: "Invalid task ID" });
-    const Task = require("../../database/models/task.model");
+    const Task = require("../../../database/models/task.model");
     const task = await Task.findById(taskId);
     if (!task) return res.status(404).json({ error: "Task not found" });
     const userId = req.user._id || req.user.id;
@@ -164,7 +164,7 @@ router.get("/:taskId/submissions", authMiddleware, async (req, res) => {
   try {
     const { taskId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(taskId)) return res.status(400).json({ error: "Invalid task ID" });
-    const Task = require("../../database/models/task.model");
+    const Task = require("../../../database/models/task.model");
     const task = await Task.findById(taskId);
     if (!task) return res.status(404).json({ error: "Task not found" });
     const submissions = await Submission.find({ task: taskId })

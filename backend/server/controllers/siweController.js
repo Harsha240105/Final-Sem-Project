@@ -1,11 +1,11 @@
 const { ethers } = require("ethers");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const User = require("../../database/models/User");
-const Student = require("../../database/models/Student");
-const Teacher = require("../../database/models/Teacher");
-const AdminUser = require("../../database/models/AdminUser");
-const Nonce = require("../../database/models/Nonce");
+const User = require("../../../database/models/User");
+const Student = require("../../../database/models/Student");
+const Teacher = require("../../../database/models/Teacher");
+const AdminUser = require("../../../database/models/AdminUser");
+const Nonce = require("../../../database/models/Nonce");
 const { generateDID } = require("../utils/didGenerator");
 
 if (!process.env.JWT_SECRET) {

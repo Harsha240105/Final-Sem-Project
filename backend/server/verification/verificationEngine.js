@@ -1,6 +1,6 @@
 const path = require("path");
 const fs = require("fs");
-const User = require("../../database/models/User");
+const User = require("../../../database/models/User");
 const { runOcr } = require("./ocrEngine");
 const { verifyFormData } = require("./matchingEngine");
 const {

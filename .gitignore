@@ -22,10 +22,20 @@ Thumbs.db
 .vscode/
 .idea/
 
-frontend/dist/
-
 # Uploaded files (generated at runtime)
 backend/server/uploads/
 
 # Generated screenshots (dev server captures)
 /screenshots/
+
+# Blockchain artifacts
+blockchain/node_modules/
+blockchain/artifacts/
+blockchain/cache/
+
+# Diagram generated output (keep source .mmd files only)
+diagrams/*.png
+
+# Environment overrides (local dev overrides)
+.env.local
+.env.*.local

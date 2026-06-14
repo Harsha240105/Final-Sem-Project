@@ -1,0 +1,84 @@
+erDiagram
+    User {
+        string walletAddress
+        string role
+    }
+    Student {
+        string userId
+    }
+    Teacher {
+        string userId
+    }
+    AdminUser {
+        string userId
+    }
+    Organisation {
+        string adminId
+    }
+    Community {
+        string creatorId
+    }
+    Task {
+        string communityId
+        string createdBy
+    }
+    Submission {
+        string taskId
+        string studentId
+    }
+    Certificate {
+        string userId
+        string communityId
+        string taskId
+    }
+    NFTJobQueue {
+        string certificateId
+        string userId
+    }
+    Follow {
+        string follower
+        string following
+    }
+    FriendRequest {
+        string sender
+        string recipient
+    }
+    Conversation {
+        string participants
+    }
+    Message {
+        string conversationId
+        string senderId
+    }
+    Server {
+        string ownerId
+    }
+    ServerMessage {
+        string serverId
+        string senderId
+    }
+    Canvas {
+        string ownerId
+    }
+    Marketplace {
+        string authorId
+    }
+    CollaborationRoom {
+        string marketplacePostId
+    }
+    Notification {
+        string recipientId
+        string senderId
+    }
+
+    User ||--o| Student : has
+    User ||--o| Teacher : has
+    User ||--o| AdminUser : is
+    AdminUser ||--o| Organisation : manages
+    User ||--o{ Community : creates
+    Community ||--o{ Task : contains
+    Task ||--o{ Submission : receives
+    User ||--o{ Certificate : owns
+    Certificate ||--|| NFTJobQueue : queued
+    Conversation ||--o{ Message : contains
+    Server ||--o{ ServerMessage : contains

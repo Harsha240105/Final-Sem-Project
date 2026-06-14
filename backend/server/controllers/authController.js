@@ -1,9 +1,9 @@
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
-const Student = require("../../database/models/Student");
-const Teacher = require("../../database/models/Teacher");
-const AdminUser = require("../../database/models/AdminUser");
-const User = require("../../database/models/User");
+const Student = require("../../../database/models/Student");
+const Teacher = require("../../../database/models/Teacher");
+const AdminUser = require("../../../database/models/AdminUser");
+const User = require("../../../database/models/User");
 const { syncLegacyUserRecord } = require("../utils/userSync");
 
 if (!process.env.JWT_SECRET) {

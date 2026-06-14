@@ -8,7 +8,7 @@ const {
   getUserProfileWithFollowStatus,
   discoverUsers,
 } = require("../controllers/connectionController");
-const Follow = require("../../database/models/Follow");
+const Follow = require("../../../database/models/Follow");
 
 const router = express.Router();
 

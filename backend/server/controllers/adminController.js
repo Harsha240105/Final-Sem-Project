@@ -1,14 +1,14 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
-const User = require("../../database/models/User");
+const User = require("../../../database/models/User");
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const AdminUser = require("../../database/models/AdminUser");
-const Admin = require("../../database/models/Admin");
-const Teacher = require("../../database/models/Teacher");
-const Student = require("../../database/models/Student");
-const Organisation = require("../../database/models/Organisation");
+const AdminUser = require("../../../database/models/AdminUser");
+const Admin = require("../../../database/models/Admin");
+const Teacher = require("../../../database/models/Teacher");
+const Student = require("../../../database/models/Student");
+const Organisation = require("../../../database/models/Organisation");
 const {
   sendTeacherApprovedEmail,
   sendTeacherRejectedEmail,

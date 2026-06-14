@@ -1,4 +1,4 @@
-const Canvas = require("../../database/models/Canvas");
+const Canvas = require("../../../database/models/Canvas");
 
 function parseAuthHeader(req) {
   const token = req.headers.authorization?.split(" ")[1];

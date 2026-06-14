@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
-const User = require("../../database/models/User");
-const Student = require("../../database/models/Student");
-const Teacher = require("../../database/models/Teacher");
-const Follow = require("../../database/models/Follow");
-const Conversation = require("../../database/models/Conversation");
+const User = require("../../../database/models/User");
+const Student = require("../../../database/models/Student");
+const Teacher = require("../../../database/models/Teacher");
+const Follow = require("../../../database/models/Follow");
+const Conversation = require("../../../database/models/Conversation");
 const { findUserByAnyId } = require("../utils/userSync");
 
 const ALLOWED_DISCOVERY_ROLES = ["student", "teacher", "community_manager"];

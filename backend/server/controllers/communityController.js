@@ -1,5 +1,5 @@
-const Community = require("../../database/models/Community");
-const User = require("../../database/models/User");
+const Community = require("../../../database/models/Community");
+const User = require("../../../database/models/User");
 const mongoose = require("mongoose");
 const { getModelByRole, findUserByAnyId, syncLegacyUserRecord } = require("../utils/userSync");
 
@@ -835,10 +835,10 @@ const getCommunityStats = async (req, res) => {
       .select("members collaborations resources activityLog status completionType archivedAt createdAt")
       .lean();
     if (!community) return res.status(404).json({ error: "Community not found" });
-    const Task = require("../../database/models/task.model");
+    const Task = require("../../../database/models/task.model");
     const totalTasks = await Task.countDocuments({ community_id: req.params.id });
     const completedTasks = await Task.countDocuments({ community_id: req.params.id, completed_status: true });
-    const Submission = require("../../database/models/Submission");
+    const Submission = require("../../../database/models/Submission");
     const totalSubmissions = await Submission.countDocuments({ community: req.params.id });
     const approvedSubmissions = await Submission.countDocuments({ community: req.params.id, status: "approved" });
     res.json({

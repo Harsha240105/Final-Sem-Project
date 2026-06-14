@@ -2,11 +2,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const router = express.Router();
 const { authMiddleware } = require("../middleware/auth.middleware");
-const Task = require("../../database/models/task.model");
-const Community = require("../../database/models/Community");
-const Certificate = require("../../database/models/Certificate");
-const NFTJobQueue = require("../../database/models/NFTJobQueue");
-const { uploadCertificateToIPFS } = require("../../blockchain/ipfsService");
+const Task = require("../../../database/models/task.model");
+const Community = require("../../../database/models/Community");
+const Certificate = require("../../../database/models/Certificate");
+const NFTJobQueue = require("../../../database/models/NFTJobQueue");
+const { uploadCertificateToIPFS } = require("../../services/blockchain/ipfsService");
 const {
   mintCertificate,
   getWalletInfo,
@@ -15,9 +15,9 @@ const {
   getDetailedBlockchainDiagnostics,
   verifyCertificateOnChain,
   getTransactionHistory,
-} = require("../../blockchain/nftService");
-const { enqueueMintJob, getJobStatus, getTransactionState } = require("../../blockchain/nftQueueProcessor");
-const { isMintDuplicate } = require("../../blockchain/duplicateGuard");
+} = require("../../services/blockchain/nftService");
+const { enqueueMintJob, getJobStatus, getTransactionState } = require("../../services/blockchain/nftQueueProcessor");
+const { isMintDuplicate } = require("../../services/blockchain/duplicateGuard");
 const { findUserByAnyId } = require("../utils/userSync");
 
 function getCertificateRecipientRoles() {
@@ -260,7 +260,7 @@ router.post("/retry", authMiddleware, async (req, res) => {
     const { jobId } = req.body;
     if (!jobId) return res.status(400).json({ error: "jobId is required" });
 
-    const { retryFailedJob } = require("../../blockchain/nftQueueProcessor");
+    const { retryFailedJob } = require("../../services/blockchain/nftQueueProcessor");
     const job = await retryFailedJob(jobId);
     res.json({ success: true, status: job.status });
   } catch (err) {
