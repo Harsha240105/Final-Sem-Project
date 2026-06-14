@@ -375,6 +375,29 @@ db.getCollectionInfos().map(c => ({
 
 ---
 
+## Auto-Sync System
+
+The learning hub (`viva-web3connect/index.html`) and root landing page (`index.html`) are auto-generated from a single data source.
+
+### How it works
+
+1. Edit **`technologies.json** — the single source of truth for all modules, tech stack, flow steps, and project tree
+2. Push to GitHub
+3. GitHub Actions runs `node build.js` → regenerates **both** HTML files
+4. `viva-web3connect/` is deployed to GitHub Pages
+
+To add or update a technology/module, just modify `technologies.json` and push. Both index files stay in sync automatically.
+
+### File structure
+
+| File | Purpose |
+|------|---------|
+| `technologies.json` | Edit this — all data lives here |
+| `build.js` | Reads JSON, generates both HTML files |
+| `index.html` | Root landing page (auto-generated) |
+| `viva-web3connect/index.html` | Full learning hub (auto-generated) |
+| `.github/workflows/deploy.yml` | Runs build + deploys to Pages |
+
 ## Contributing
 
 1. Fork the repository

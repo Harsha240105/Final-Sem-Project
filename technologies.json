@@ -1,0 +1,633 @@
+{
+  "project": {
+    "name": "Web3Connect",
+    "tagline": "Blockchain Enabled Virtual Campus Platform",
+    "description": "Interactive learning hub showing how Frontend, Backend, Database, and Blockchain work together from root to deployment."
+  },
+  "heroStats": [
+    { "num": "11", "label": "Learning Modules" },
+    { "num": "22", "label": "Technologies" },
+    { "num": "50+", "label": "API Endpoints" },
+    { "num": "19", "label": "DB Models" }
+  ],
+  "nodes": [
+    {
+      "id": "frontend",
+      "icon": "🎨",
+      "title": "Frontend",
+      "short": "React 19 SPA with wagmi wallet",
+      "connectsTo": ["backend"],
+      "connectsVia": "REST API (Axios) · Socket.IO Client",
+      "sections": [
+        {
+          "title": "What is it?",
+          "icon": "💡",
+          "content": "The frontend is the client-side React SPA users interact with. Built with React 19 and Vite 7, it provides modern UI with wallet integration via wagmi."
+        },
+        {
+          "title": "How it connects",
+          "icon": "🔗",
+          "isConnector": true,
+          "connections": [
+            { "from": "React Component", "to": "Express Controller", "via": "Axios HTTP POST /api/auth/wallet-login" },
+            { "from": "wagmi/viem", "to": "Blockchain (Polygon)", "via": "ethers.js RPC calls" },
+            { "from": "Socket.IO Client", "to": "Socket.IO Server", "via": "WebSocket ws://localhost:5001" }
+          ]
+        },
+        {
+          "title": "Why is it used?",
+          "icon": "❓",
+          "content": "SPA architecture gives instant navigation, rich UX, and seamless wallet connections. React's component model and ecosystem make complex UIs manageable."
+        },
+        {
+          "title": "Tech Stack",
+          "icon": "📦",
+          "content": "React 19 · Vite 7.3 · Tailwind CSS 3.4 · React Router 7.8 · Axios 1.7 · TanStack Query 5 · Framer Motion 12 · wagmi 3.6 · viem 2.48 · Socket.IO Client 4.8"
+        },
+        {
+          "title": "Data Flow: Login Request",
+          "icon": "📊",
+          "flow": [
+            { "num": 1, "text": "User clicks 'Sign in with MetaMask'" },
+            { "num": 2, "text": "wagmi calls MetaMask to sign SIWE message" },
+            { "num": 3, "text": "Axios POST to Express /api/auth/wallet-login" },
+            { "num": 4, "text": "Express verifies signature via ethers.js" },
+            { "num": 5, "text": "JWT returned → stored in localStorage" },
+            { "num": 6, "text": "React updates auth context → redirects to dashboard" }
+          ]
+        },
+        {
+          "title": "Code: wagmi + Axios",
+          "icon": "💻",
+          "code": "import { createConfig, http } from \"wagmi\";\nimport { polygonAmoy } from \"wagmi/chains\";\nimport { metaMask } from \"wagmi/connectors\";\nimport axios from \"axios\";\n\nconst config = createConfig({\n  chains: [polygonAmoy],\n  transports: { [polygonAmoy.id]: http() },\n  connectors: [metaMask()],\n});\n\nconst api = axios.create({ baseURL: \"http://localhost:5001/api\" });\n\nasync function login() {\n  const { data } = await api.get(\"/auth/nonce\");\n  const signature = await signMessage({ message: data.nonce });\n  const res = await api.post(\"/auth/wallet-login\", {\n    walletAddress: account.address,\n    signature,\n    message: data.nonce,\n    role: \"student\",\n  });\n  localStorage.setItem(\"token\", res.data.token);\n}"
+        },
+        {
+          "title": "Viva Questions",
+          "icon": "🎤",
+          "qa": [
+            { "q": "How does React communicate with Express?", "a": "Through Axios HTTP client. Axios sends REST API calls (GET/POST/PUT/DELETE) to the Express backend running on port 5001. The backend returns JSON responses which React uses to update UI." },
+            { "q": "How does the frontend connect to blockchain?", "a": "Using wagmi library (built on viem/ethers.js). wagmi manages wallet connections (MetaMask), signs transactions, and reads contract data. The frontend never holds private keys." },
+            { "q": "What happens when a user signs in?", "a": "1) Frontend requests a nonce from backend 2) User signs the nonce with MetaMask 3) Backend verifies the signature using ethers.verifyMessage() 4) JWT token issued 5) Frontend stores token and redirects." },
+            { "q": "How is Socket.IO used in the frontend?", "a": "The Socket.IO client connects to the same Express server. It emits events (send-message, typing) and listens for events (new-message, user-typing). This enables real-time chat without polling." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "backend",
+      "icon": "⚙️",
+      "title": "Backend",
+      "short": "Express.js REST + Socket.IO",
+      "connectsTo": ["frontend", "database", "blockchain"],
+      "connectsVia": "Express routes · Mongoose ODM · ethers.js",
+      "sections": [
+        {
+          "title": "What is it?",
+          "icon": "💡",
+          "content": "Express server handling business logic, auth, file uploads, and blockchain interactions. Serves REST APIs with 16 route files (50+ endpoints)."
+        },
+        {
+          "title": "How it connects",
+          "icon": "🔗",
+          "isConnector": true,
+          "connections": [
+            { "from": "Express Router", "to": "Mongoose Model", "via": "Model.find() / .save() / .populate()" },
+            { "from": "Express Controller", "to": "Blockchain Contract", "via": "ethers.Contract.mintCertificate()" },
+            { "from": "Socket.IO Server", "to": "Redis/Memory", "via": "in-memory event broadcasting" }
+          ]
+        },
+        {
+          "title": "Request Lifecycle",
+          "icon": "📊",
+          "flow": [
+            { "num": 1, "text": "HTTP request arrives at Express" },
+            { "num": 2, "text": "Middleware: CORS → Logger → Rate Limiter → Auth" },
+            { "num": 3, "text": "Route matched → Controller function" },
+            { "num": 4, "text": "Controller calls Mongoose model (DB) or ethers (Blockchain)" },
+            { "num": 5, "text": "JSON response sent back to frontend" }
+          ]
+        },
+        {
+          "title": "Code: Route + Controller",
+          "icon": "💻",
+          "code": "const express = require(\"express\");\nconst router = express.Router();\nconst User = require(\"../../models/User\");\nconst jwt = require(\"jsonwebtoken\");\n\nrouter.post(\"/wallet-login\", async (req, res) => {\n  const { walletAddress, signature, message, role } = req.body;\n  const recovered = ethers.verifyMessage(message, signature);\n  if (recovered !== walletAddress.toLowerCase())\n    return res.status(401).json({ error: \"Signature mismatch\" });\n\n  let user = await User.findOne({ walletAddress });\n  if (!user) return res.status(404).json({ error: \"Not registered\" });\n\n  const token = jwt.sign(\n    { id: user._id, role: user.role },\n    process.env.JWT_SECRET,\n    { expiresIn: \"7d\" }\n  );\n  res.json({ token, user });\n});"
+        },
+        {
+          "title": "Viva Questions",
+          "icon": "🎤",
+          "qa": [
+            { "q": "How does backend connect to MongoDB?", "a": "Via Mongoose ODM. The connectDB() function calls mongoose.connect(MONGO_URI) with DNS retry logic. Mongoose provides schema validation, population (JOINs), and middleware hooks." },
+            { "q": "How does backend connect to blockchain?", "a": "Using ethers.js library. The backend creates an ethers.Wallet from the server's private key, connects to Polygon RPC, and calls the CertificateNFT contract to mint NFTs." },
+            { "q": "What middleware does Express use?", "a": "CORS (cross-origin), Helmet (security headers), Morgan (request logging), express-rate-limit (100 req/min), express-validator (input validation), and custom JWT auth middleware." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "database",
+      "icon": "🗄️",
+      "title": "Database",
+      "short": "MongoDB Atlas + 19 Mongoose models",
+      "connectsTo": ["backend"],
+      "connectsVia": "Mongoose ODM",
+      "sections": [
+        {
+          "title": "What is it?",
+          "icon": "💡",
+          "content": "MongoDB Atlas (cloud NoSQL database) with 19 Mongoose schemas. Stores users, communities, tasks, certificates, messages, and blockchain job queues."
+        },
+        {
+          "title": "How it connects",
+          "icon": "🔗",
+          "isConnector": true,
+          "connections": [
+            { "from": "Express Controller", "to": "MongoDB Collection", "via": "Mongoose Model.find() / .save()" },
+            { "from": "NFT Queue Processor", "to": "MongoDB Job Queue", "via": "findOneAndUpdate atomic lock" }
+          ]
+        },
+        {
+          "title": "Key Collections",
+          "icon": "📊",
+          "flow": [
+            { "num": 1, "text": "users — User profiles with wallet addresses, roles, verification status" },
+            { "num": 2, "text": "communities — Groups with members, tasks, collaboration rooms" },
+            { "num": 3, "text": "tasks — Assignments with submissions, due dates, NFT rewards" },
+            { "num": 4, "text": "certificates — NFT metadata with IPFS URIs, tx hashes, token IDs" },
+            { "num": 5, "text": "messages — DMs, group chats, server channels, voice messages" }
+          ]
+        },
+        {
+          "title": "Code: Mongoose Model",
+          "icon": "💻",
+          "code": "const mongoose = require(\"mongoose\");\nconst CommunitySchema = new mongoose.Schema({\n  name: { type: String, required: true, trim: true },\n  description: { type: String, default: \"\" },\n  createdBy: { type: mongoose.Types.ObjectId, ref: \"User\" },\n  members: [{ type: mongoose.Types.ObjectId, ref: \"User\" }],\n  tasks: [{ type: mongoose.Types.ObjectId, ref: \"Task\" }],\n  privacy: { type: String, enum: [\"public\",\"private\"], default: \"public\" },\n}, { timestamps: true });\n\nmodule.exports = mongoose.model(\"Community\", CommunitySchema);"
+        },
+        {
+          "title": "Viva Questions",
+          "icon": "🎤",
+          "qa": [
+            { "q": "How does Mongoose connect Express to MongoDB?", "a": "Mongoose acts as an ODM (Object Document Mapper). Express controllers call Model.find() which Mongoose translates to MongoDB queries. Results return as JavaScript objects." },
+            { "q": "What are Mongoose references vs embedded docs?", "a": "Refs (ObjectId) store references to other documents — Mongoose .populate() resolves them (like SQL JOINs). Embedded docs store sub-documents directly within parent docs." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blockchain",
+      "icon": "⛓️",
+      "title": "Blockchain",
+      "short": "Polygon Amoy + Solidity",
+      "connectsTo": ["backend", "nft"],
+      "connectsVia": "ethers.js · Smart Contract ABI",
+      "sections": [
+        {
+          "title": "What is it?",
+          "icon": "💡",
+          "content": "Polygon Amoy testnet (chain ID 80002) with a Solidity smart contract (CertificateNFT) that mints ERC-721 soulbound tokens."
+        },
+        {
+          "title": "How it connects",
+          "icon": "🔗",
+          "isConnector": true,
+          "connections": [
+            { "from": "Backend ethers.Wallet", "to": "CertificateNFT Contract", "via": "contract.mintCertificate(student, tokenURI)" },
+            { "from": "Smart Contract Event", "to": "MongoDB Record", "via": "tx.wait() → receipt → save to DB" }
+          ]
+        },
+        {
+          "title": "Data Flow: Minting",
+          "icon": "📊",
+          "flow": [
+            { "num": 1, "text": "Student completes community tasks" },
+            { "num": 2, "text": "Backend generates certificate image (node-canvas)" },
+            { "num": 3, "text": "Image uploaded to IPFS via Pinata" },
+            { "num": 4, "text": "Metadata JSON uploaded to IPFS" },
+            { "num": 5, "text": "Backend calls CertificateNFT.mintCertificate()" },
+            { "num": 6, "text": "Transaction mined on Polygon Amoy → NFT exists on-chain" }
+          ]
+        },
+        {
+          "title": "Code: Smart Contract",
+          "icon": "💻",
+          "code": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\nimport \"@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol\";\nimport \"@openzeppelin/contracts/access/Ownable.sol\";\n\ncontract CertificateNFT is ERC721URIStorage, Ownable {\n    uint256 private _tokenIdCounter;\n    event CertificateMinted(address indexed student, uint256 tokenId, string uri);\n\n    constructor() ERC721(\"Web3Connect Certificate\", \"W3CERT\") Ownable(msg.sender) {}\n\n    function mintCertificate(address student, string memory uri)\n        public onlyOwner returns (uint256)\n    {\n        _tokenIdCounter++;\n        uint256 id = _tokenIdCounter;\n        _safeMint(student, id);\n        _setTokenURI(id, uri);\n        emit CertificateMinted(student, id, uri);\n        return id;\n    }\n    function transferFrom(...) override pure { revert(\"Soulbound\"); }\n}"
+        },
+        {
+          "title": "Viva Questions",
+          "icon": "🎤",
+          "qa": [
+            { "q": "How does the backend talk to the blockchain?", "a": "The backend has an ethers.Wallet with the server's private key. It creates a Contract instance using the deployed contract's ABI and address. Calling contract.mintCertificate() submits a transaction signed by the server wallet." },
+            { "q": "What is the difference between blockchain and database?", "a": "Database: centralized, mutable, fast CRUD. Blockchain: decentralized, immutable, trustless. Web3Connect uses BOTH — MongoDB for app data, blockchain for certificate authenticity." },
+            { "q": "What is Polygon Amoy and why use a testnet?", "a": "Polygon Amoy is a test network (testnet) for Polygon where MATIC tokens are free. It's used for development before deploying to mainnet (real money). Chain ID: 80002." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nft",
+      "icon": "🏆",
+      "title": "NFT Certificates",
+      "short": "ERC-721 Soulbound Tokens",
+      "connectsTo": ["blockchain", "ipfs", "database"],
+      "connectsVia": "Smart contract · IPFS URIs",
+      "sections": [
+        {
+          "title": "What is it?",
+          "icon": "💡",
+          "content": "Soulbound NFT certificates minted when students complete community tasks. Each is an ERC-721 token with metadata on IPFS and a visual certificate image."
+        },
+        {
+          "title": "Minting Pipeline",
+          "icon": "📊",
+          "flow": [
+            { "num": 1, "text": "Generate HD certificate (3200x2200px) via node-canvas" },
+            { "num": 2, "text": "Upload image to IPFS via Pinata API" },
+            { "num": 3, "text": "Create ERC-721 metadata JSON with image URI" },
+            { "num": 4, "text": "Upload metadata JSON to IPFS" },
+            { "num": 5, "text": "Call CertificateNFT.mintCertificate() on Polygon Amoy" },
+            { "num": 6, "text": "Save record (txHash, tokenId, URIs) in MongoDB" }
+          ]
+        },
+        {
+          "title": "Code: Minting Service",
+          "icon": "💻",
+          "code": "async function mintCertificate(studentAddress, tokenURI) {\n  const provider = new ethers.JsonRpcProvider(process.env.POLYGON_RPC_URL);\n  const wallet = new ethers.Wallet(process.env.WALLET_PRIVATE_KEY, provider);\n  const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, wallet);\n\n  const tx = await contract.mintCertificate(studentAddress, tokenURI);\n  const receipt = await tx.wait();\n\n  return {\n    txHash: receipt.hash,\n    tokenId: receipt.logs[0].topics[3],\n  };\n}"
+        },
+        {
+          "title": "Viva Questions",
+          "icon": "🎤",
+          "qa": [
+            { "q": "How does the NFT get from the contract to the user's wallet?", "a": "The contract.mintCertificate() function calls _safeMint(student, tokenId), which creates the token and assigns ownership to the student's wallet address. The student sees it in MetaMask." },
+            { "q": "What makes an NFT 'soulbound'?", "a": "The contract overrides transferFrom(), safeTransferFrom(), and approve() to always revert. This means the NFT can never be transferred — it stays with the original owner forever." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ipfs",
+      "icon": "📡",
+      "title": "IPFS Storage",
+      "short": "Decentralized file storage via Pinata",
+      "connectsTo": ["nft", "backend"],
+      "connectsVia": "Pinata API · IPFS Gateway",
+      "sections": [
+        {
+          "title": "What is it?",
+          "icon": "💡",
+          "content": "IPFS (InterPlanetary File System) is a decentralized P2P file protocol. Files are addressed by content hash (CID). Pinata is a pinning service that ensures files stay available."
+        },
+        {
+          "title": "Why both IPFS and MongoDB?",
+          "icon": "❓",
+          "content": "MongoDB stores app data (what can change). IPFS stores certificate images and metadata (must be immutable). The NFT's tokenURI points to IPFS — if the content changes, the CID hash changes, proving tampering."
+        },
+        {
+          "title": "Code: Pinata Upload",
+          "icon": "💻",
+          "code": "async function uploadToIPFS(filePath) {\n  const FormData = require(\"form-data\");\n  const fs = require(\"fs\");\n  const form = new FormData();\n  form.append(\"file\", fs.createReadStream(filePath));\n\n  const res = await axios.post(\n    \"https://api.pinata.cloud/pinning/pinFileToIPFS\",\n    form,\n    { headers: {\n        ...form.getHeaders(),\n        pinata_api_key: process.env.PINATA_API_KEY,\n        pinata_secret_api_key: process.env.PINATA_SECRET_KEY,\n      },\n      maxBodyLength: Infinity,\n    }\n  );\n  return `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`;\n}"
+        },
+        {
+          "title": "Viva Questions",
+          "icon": "🎤",
+          "qa": [
+            { "q": "Why use IPFS alongside MongoDB?", "a": "MongoDB holds dynamic app data (profiles, messages). IPFS holds immutable certificate assets — if someone alters the image, the CID changes, proving authenticity. The blockchain stores the IPFS hash." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "auth",
+      "icon": "🔐",
+      "title": "Authentication",
+      "short": "JWT + SIWE (Wallet Auth)",
+      "connectsTo": ["frontend", "backend", "database"],
+      "connectsVia": "JWT · SIWE Protocol",
+      "sections": [
+        {
+          "title": "What is it?",
+          "icon": "💡",
+          "content": "Two auth methods: JWT (email/password) and SIWE (Sign-In with Ethereum wallet). JWT tokens expire in 7 days and carry user role in payload."
+        },
+        {
+          "title": "SIWE Flow",
+          "icon": "📊",
+          "flow": [
+            { "num": 1, "text": "Frontend requests nonce from GET /api/auth/nonce" },
+            { "num": 2, "text": "User signs the nonce with MetaMask private key" },
+            { "num": 3, "text": "POST /api/auth/wallet-login with (address, signature, message)" },
+            { "num": 4, "text": "Backend calls ethers.verifyMessage(message, signature)" },
+            { "num": 5, "text": "Recovered address must match walletAddress in request" },
+            { "num": 6, "text": "JWT generated and returned → frontend stores it" }
+          ]
+        },
+        {
+          "title": "Code: Auth Middleware",
+          "icon": "💻",
+          "code": "function authMiddleware(req, res, next) {\n  const header = req.headers.authorization;\n  if (!header?.startsWith(\"Bearer \"))\n    return res.status(401).json({ error: \"No token\" });\n\n  try {\n    req.user = jwt.verify(header.split(\" \")[1], process.env.JWT_SECRET);\n    next();\n  } catch {\n    res.status(401).json({ error: \"Invalid token\" });\n  }\n}\n\nrouter.post(\"/community\", authMiddleware, async (req, res) => {\n  // req.user.id, req.user.role available\n});"
+        },
+        {
+          "title": "Viva Questions",
+          "icon": "🎤",
+          "qa": [
+            { "q": "How does SIWE work step by step?", "a": "1) Server generates a one-time nonce (random hex) 2) Client asks MetaMask to sign it 3) Server recovers the signer's address via ethers.verifyMessage() 4) If it matches the claimed wallet → authenticated." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "apis",
+      "icon": "🌐",
+      "title": "APIs",
+      "short": "16 routes, 50+ endpoints",
+      "connectsTo": ["frontend", "backend", "database", "blockchain"],
+      "connectsVia": "Express Router · HTTP",
+      "sections": [
+        {
+          "title": "API Groups",
+          "icon": "📊",
+          "flow": [
+            { "num": "A", "text": "Auth — register, login, wallet-login, SIWE, profile" },
+            { "num": "B", "text": "Communities — CRUD, join/leave, members, settings" },
+            { "num": "C", "text": "Tasks — create, submit, grade, complete, issue certificates" },
+            { "num": "D", "text": "Blockchain — mint NFT, check status, diagnose, retry" },
+            { "num": "E", "text": "Certificates — list, verify on-chain, sync" },
+            { "num": "F", "text": "Messaging — conversations, DMs, servers, channels" }
+          ]
+        },
+        {
+          "title": "Viva Questions",
+          "icon": "🎤",
+          "qa": [
+            { "q": "How do routes connect frontend to database?", "a": "Frontend calls Axios GET /api/communities → Express matches to router → Controller queries Community.find() → Mongoose returns documents → JSON response sent back." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "realtime",
+      "icon": "💬",
+      "title": "Real-Time",
+      "short": "Socket.IO + WebRTC",
+      "connectsTo": ["frontend", "backend"],
+      "connectsVia": "WebSocket · Socket.IO",
+      "sections": [
+        {
+          "title": "What is it?",
+          "icon": "💡",
+          "content": "Socket.IO enables bidirectional real-time communication. Features: DMs, typing indicators, read receipts, server channels, voice messages, WebRTC calls, collaboration canvas."
+        },
+        {
+          "title": "Code: Socket.IO Server",
+          "icon": "💻",
+          "code": "const { Server } = require(\"socket.io\");\nconst io = new Server(httpServer, {\n  cors: { origin: \"http://localhost:5173\" },\n  pingInterval: 25000,\n  pingTimeout: 20000,\n});\n\nio.on(\"connection\", (socket) => {\n  socket.on(\"send-message\", async (data) => {\n    const msg = await Message.create(data);\n    io.to(data.conversationId).emit(\"new-message\", msg);\n  });\n\n  socket.on(\"typing\", ({ conversationId, userId }) => {\n    socket.to(conversationId).emit(\"user-typing\", { userId });\n  });\n});"
+        },
+        {
+          "title": "Viva Questions",
+          "icon": "🎤",
+          "qa": [
+            { "q": "How is Socket.IO different from HTTP?", "a": "HTTP is request-response (client asks, server answers). Socket.IO maintains a persistent connection where either side can push data anytime — essential for chat, notifications, live cursors." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deployment",
+      "icon": "🚀",
+      "title": "Deployment",
+      "short": "Frontend + Backend + Blockchain",
+      "connectsTo": ["frontend", "backend", "database", "blockchain", "ipfs"],
+      "connectsVia": "GitHub Pages · Render · MongoDB Atlas",
+      "sections": [
+        {
+          "title": "Deployment Architecture",
+          "icon": "📊",
+          "flow": [
+            { "num": 1, "text": "Frontend → GitHub Pages (static build: npm run build)" },
+            { "num": 2, "text": "Backend → Render/Railway/Fly.io (Node.js Express)" },
+            { "num": 3, "text": "Database → MongoDB Atlas (already cloud-hosted)" },
+            { "num": 4, "text": "Blockchain → Polygon Amoy testnet (already deployed)" },
+            { "num": 5, "text": "IPFS → Pinata (already cloud-hosted)" }
+          ]
+        },
+        {
+          "title": "Viva Questions",
+          "icon": "🎤",
+          "qa": [
+            { "q": "How do all pieces communicate in production?", "a": "Frontend (GitHub Pages) makes API calls to Backend (Render) via HTTPS. Backend connects to MongoDB Atlas and Polygon Amoy. Wallet interactions (MetaMask) happen client-side connecting directly to Polygon." }
+          ]
+        }
+      ]
+    }
+  ],
+  "flowSteps": [
+    { "icon": "👤", "title": "1. Student Joins Community", "desc": "Student finds a community via the dashboard, clicks Join. Frontend sends POST /api/communities/:id/join with the JWT token." },
+    { "icon": "📋", "title": "2. Admin Creates Tasks", "desc": "Community admin creates tasks with deadlines. Tasks stored in MongoDB with references to community ID. Students can view tasks in the community page." },
+    { "icon": "✅", "title": "3. Student Submits Work", "desc": "Student uploads files, adds notes, marks task as complete. Backend validates submission, stores files via Multer, updates task status in MongoDB." },
+    { "icon": "📸", "title": "4. Certificate Image Generated", "desc": "Backend generates a 3200x2200px certificate using node-canvas. Certificate includes student name, community name, date, and unique serial number." },
+    { "icon": "📡", "title": "5. Upload to IPFS via Pinata", "desc": "Certificate image sent to Pinata API. Returns an IPFS CID. Then metadata JSON (name, description, image URI) is also uploaded to IPFS." },
+    { "icon": "⛓️", "title": "6. NFT Minted on Polygon", "desc": "Backend calls CertificateNFT.mintCertificate() on Polygon Amoy. The smart contract assigns token ownership to the student's wallet address." },
+    { "icon": "🗄️", "title": "7. Record Saved in MongoDB", "desc": "Transaction hash, token ID, IPFS URIs saved to MongoDB. Student can view their NFT certificate in the dashboard → Certificates tab." },
+    { "icon": "🔍", "title": "8. Anyone Can Verify On-Chain", "desc": "Certificate page shows a 'Verify on Explorer' link → opens Polygonscan showing the mint transaction. The NFT is permanently linked to the student's wallet." }
+  ],
+  "techStack": [
+    { "n": "React 19", "v": "^19.1", "cat": "Frontend" },
+    { "n": "Vite 7", "v": "^7.3", "cat": "Frontend" },
+    { "n": "Tailwind CSS", "v": "^3.4", "cat": "Frontend" },
+    { "n": "React Router", "v": "^7.8", "cat": "Frontend" },
+    { "n": "Axios", "v": "^1.7", "cat": "Frontend" },
+    { "n": "TanStack Query", "v": "^5", "cat": "Frontend" },
+    { "n": "Framer Motion", "v": "^12", "cat": "Frontend" },
+    { "n": "wagmi", "v": "^3.6", "cat": "Frontend/Web3" },
+    { "n": "viem", "v": "^2.48", "cat": "Frontend/Web3" },
+    { "n": "Node.js", "v": "^22", "cat": "Backend" },
+    { "n": "Express", "v": "^4.19", "cat": "Backend" },
+    { "n": "JWT", "v": "^9", "cat": "Backend" },
+    { "n": "bcrypt", "v": "^6", "cat": "Backend" },
+    { "n": "Multer", "v": "^2", "cat": "Backend" },
+    { "n": "Socket.IO", "v": "^4.8", "cat": "Realtime" },
+    { "n": "MongoDB", "v": "Atlas 8", "cat": "Database" },
+    { "n": "Mongoose", "v": "^9.7", "cat": "Database" },
+    { "n": "Redis", "v": "optional", "cat": "Database" },
+    { "n": "Solidity", "v": "^0.8.20", "cat": "Blockchain" },
+    { "n": "Hardhat", "v": "^2.22", "cat": "Blockchain" },
+    { "n": "OpenZeppelin", "v": "^5", "cat": "Blockchain" },
+    { "n": "ethers.js", "v": "^6.16", "cat": "Blockchain/Web3" },
+    { "n": "Polygon Amoy", "v": "Chain 80002", "cat": "Blockchain" },
+    { "n": "IPFS", "v": "Pinata", "cat": "Storage" },
+    { "n": "Canvas", "v": "node-canvas", "cat": "Generation" },
+    { "n": "Tesseract.js", "v": "^5", "cat": "OCR" }
+  ],
+  "treeData": {
+    "name": "Blockchain Enabled Virtual Campus Platform", "type": "dir", "icon": "📦",
+    "children": [
+      {
+        "name": "backend", "type": "dir", "icon": "⚙️",
+        "children": [
+          {
+            "name": "server/", "type": "dir", "icon": "📁",
+            "children": [
+              { "name": "server.js", "type": "file", "icon": "📄", "badge": "Entry" },
+              {
+                "name": "controllers/", "type": "dir", "icon": "📁",
+                "children": [
+                  { "name": "authController.js", "type": "file", "icon": "📄" },
+                  { "name": "siweController.js", "type": "file", "icon": "📄", "badge": "Wallet Auth" },
+                  { "name": "communityController.js", "type": "file", "icon": "📄" },
+                  { "name": "taskController.js", "type": "file", "icon": "📄" },
+                  { "name": "certificateController.js", "type": "file", "icon": "📄", "badge": "NFT" },
+                  { "name": "blockchainController.js", "type": "file", "icon": "📄", "badge": "Web3" },
+                  { "name": "messageController.js", "type": "file", "icon": "📄" }
+                ]
+              },
+              {
+                "name": "middleware/", "type": "dir", "icon": "📁",
+                "children": [
+                  { "name": "auth.middleware.js", "type": "file", "icon": "📄", "badge": "JWT" },
+                  { "name": "upload.middleware.js", "type": "file", "icon": "📄" }
+                ]
+              },
+              {
+                "name": "routes/", "type": "dir", "icon": "📁", "badge": "16 routes",
+                "children": [
+                  { "name": "auth.js", "type": "file", "icon": "📄" },
+                  { "name": "community.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "task.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "blockchain.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "certificate.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "user.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "admin.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "marketplace.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "notification.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "connection.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "dm.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "canvas.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "verification.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "network.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "server.routes.js", "type": "file", "icon": "📄" },
+                  { "name": "social.routes.js", "type": "file", "icon": "📄" }
+                ]
+              },
+              {
+                "name": "services/", "type": "dir", "icon": "📁",
+                "children": [
+                  { "name": "nftQueueProcessor.js", "type": "file", "icon": "📄", "badge": "Queue" },
+                  {
+                    "name": "blockchain/", "type": "dir", "icon": "📁", "badge": "Web3",
+                    "children": [
+                      { "name": "CertificateNFT.json", "type": "file", "icon": "📄", "badge": "ABI" },
+                      { "name": "contractAddress.json", "type": "file", "icon": "📄" },
+                      { "name": "mintService.js", "type": "file", "icon": "📄" },
+                      { "name": "ipfsService.js", "type": "file", "icon": "📄" }
+                    ]
+                  },
+                  { "name": "certificateGenerator.js", "type": "file", "icon": "📄", "badge": "Canvas" },
+                  { "name": "ocrService.js", "type": "file", "icon": "📄", "badge": "Tesseract" }
+                ]
+              },
+              {
+                "name": "utils/", "type": "dir", "icon": "📁",
+                "children": [
+                  { "name": "didGenerator.js", "type": "file", "icon": "📄" }
+                ]
+              },
+              { "name": "uploads/", "type": "dir", "icon": "📁", "badge": "Multer" },
+              { "name": "socket.js", "type": "file", "icon": "📄", "badge": "Socket.IO" },
+              { "name": ".env", "type": "file", "icon": "🔒" },
+              { "name": "package.json", "type": "file", "icon": "📄" }
+            ]
+          },
+          {
+            "name": "contracts/", "type": "dir", "icon": "📁", "badge": "Solidity",
+            "children": [
+              { "name": "CertificateNFT.sol", "type": "file", "icon": "📄" },
+              { "name": "hardhat.config.js", "type": "file", "icon": "📄" },
+              {
+                "name": "scripts/", "type": "dir", "icon": "📁",
+                "children": [
+                  { "name": "deploy.js", "type": "file", "icon": "📄" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "frontend", "type": "dir", "icon": "🎨",
+        "children": [
+          {
+            "name": "src/", "type": "dir", "icon": "📁",
+            "children": [
+              { "name": "App.jsx", "type": "file", "icon": "📄" },
+              { "name": "main.jsx", "type": "file", "icon": "📄" },
+              {
+                "name": "features/", "type": "dir", "icon": "📁", "badge": "Modules",
+                "children": [
+                  { "name": "auth/", "type": "dir", "icon": "📁" },
+                  { "name": "dashboard/", "type": "dir", "icon": "📁" },
+                  { "name": "communities/", "type": "dir", "icon": "📁" },
+                  { "name": "tasks/", "type": "dir", "icon": "📁" },
+                  { "name": "certificates/", "type": "dir", "icon": "📁" },
+                  { "name": "messaging/", "type": "dir", "icon": "📁" }
+                ]
+              },
+              {
+                "name": "shared/", "type": "dir", "icon": "📁",
+                "children": [
+                  { "name": "components/", "type": "dir", "icon": "📁" },
+                  { "name": "services/", "type": "dir", "icon": "📁" },
+                  { "name": "hooks/", "type": "dir", "icon": "📁" },
+                  { "name": "context/", "type": "dir", "icon": "📁" }
+                ]
+              },
+              { "name": "styles/", "type": "dir", "icon": "📁" }
+            ]
+          },
+          { "name": "vite.config.js", "type": "file", "icon": "📄" },
+          { "name": "package.json", "type": "file", "icon": "📄" }
+        ]
+      },
+      {
+        "name": "database", "type": "dir", "icon": "🗄️", "badge": "19 Models",
+        "children": [
+          { "name": "db.js", "type": "file", "icon": "📄", "badge": "Connection" },
+          {
+            "name": "models/", "type": "dir", "icon": "📁",
+            "children": [
+              { "name": "User.js", "type": "file", "icon": "📄" },
+              { "name": "Student.js", "type": "file", "icon": "📄" },
+              { "name": "Teacher.js", "type": "file", "icon": "📄" },
+              { "name": "AdminUser.js", "type": "file", "icon": "📄" },
+              { "name": "Nonce.js", "type": "file", "icon": "📄" },
+              { "name": "Community.js", "type": "file", "icon": "📄" },
+              { "name": "Task.js", "type": "file", "icon": "📄" },
+              { "name": "Certificate.js", "type": "file", "icon": "📄" },
+              { "name": "NFTCertificate.js", "type": "file", "icon": "📄" },
+              { "name": "Message.js", "type": "file", "icon": "📄" },
+              { "name": "Conversation.js", "type": "file", "icon": "📄" },
+              { "name": "Notification.js", "type": "file", "icon": "📄" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "blockchain", "type": "dir", "icon": "⛓️",
+        "children": [
+          {
+            "name": "ignition/", "type": "dir", "icon": "📁",
+            "children": [
+              {
+                "name": "modules/", "type": "dir", "icon": "📁",
+                "children": [
+                  { "name": "CertificateNFT.js", "type": "file", "icon": "📄" }
+                ]
+              }
+            ]
+          },
+          { "name": "test/", "type": "dir", "icon": "📁" },
+          { "name": "hardhat.config.js", "type": "file", "icon": "📄" }
+        ]
+      },
+      { "name": "viva-web3connect", "type": "dir", "icon": "📖", "badge": "You are here", "badgeClass": "green" },
+      { "name": ".gitignore", "type": "file", "icon": "📄" },
+      { "name": "README.md", "type": "file", "icon": "📄" }
+    ]
+  }
+}
