@@ -4,6 +4,9 @@ const Student = require("../../../database/models/Student");
 const Teacher = require("../../../database/models/Teacher");
 const Follow = require("../../../database/models/Follow");
 const Conversation = require("../../../database/models/Conversation");
+const Community = require("../../../database/models/Community");
+const Task = require("../../../database/models/task.model");
+const Certificate = require("../../../database/models/Certificate");
 const { findUserByAnyId } = require("../utils/userSync");
 
 const ALLOWED_DISCOVERY_ROLES = ["student", "teacher", "community_manager"];
@@ -210,7 +213,7 @@ async function getConnectionOverview(req, res) {
     const mutualCount = followers.filter((follower) => follower.isFollowing).length;
 
     const discoveryFilter = {
-      _id: { $nin: [new mongoose.Types.ObjectId(viewerId), ...followingIds.map((id) => new mongoose.Types.ObjectId(id))] },
+      _id: { $nin: [viewerId, ...followingIds] },
       role: { $in: ALLOWED_DISCOVERY_ROLES },
     };
 
@@ -573,8 +576,8 @@ async function getDashboardStats(req, res) {
     const mutualCount = await Follow.aggregate([
       {
         $match: {
-          follower: new mongoose.Types.ObjectId(viewerId),
-          following: { $in: filteredFollowers.map((id) => new mongoose.Types.ObjectId(id)) },
+          follower: viewerId,
+          following: { $in: filteredFollowers },
         },
       },
       { $count: "count" },
@@ -608,11 +611,24 @@ async function getDashboardStats(req, res) {
     });
     const recentFollowing = [...dedupRecentFollowing.values()].slice(0, 5);
 
+    const userCommunityIds = await Community.find({ members: viewerId }).distinct("_id");
+    const [communitiesCount, pendingTasksCount, certificatesCount] = await Promise.all([
+      Community.countDocuments({ members: viewerId }),
+      Task.countDocuments({
+        "completedBy.userId": { $ne: viewerId },
+        community_id: { $in: userCommunityIds },
+      }),
+      Certificate.countDocuments({ userId: viewerId }),
+    ]);
+
     return res.json({
       stats: {
         followers: followerCount,
         following: followingCount,
         mutual: mutualCount.length > 0 ? mutualCount[0].count : 0,
+        communities: communitiesCount,
+        tasks: pendingTasksCount,
+        certificates: certificatesCount,
       },
       recentFollowers: recentFollowers.map((f) => normalizePublicUser(f.follower, { isFollower: true })),
       recentFollowing: recentFollowing.map((f) => normalizePublicUser(f.following, { isFollowing: true })),

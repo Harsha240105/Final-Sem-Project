@@ -57,9 +57,9 @@ router.get("/conversations", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
     const msgs = await Message.aggregate([
-      { $match: { $or: [{ sender: new mongoose.Types.ObjectId(userId) }, { receiver: new mongoose.Types.ObjectId(userId) }], deleted: false } },
+      { $match: { $or: [{ sender: userId }, { receiver: userId }], deleted: false } },
       { $sort: { createdAt: -1 } },
-      { $group: { _id: { $cond: [{ $eq: ["$sender", new mongoose.Types.ObjectId(userId)] }, "$receiver", "$sender"] }, lastMessage: { $first: "$$ROOT" }, unread: { $sum: { $cond: [{ $and: [{ $eq: ["$receiver", new mongoose.Types.ObjectId(userId)] }, { $eq: ["$read", false] }] }, 1, 0] } } } },
+      { $group: { _id: { $cond: [{ $eq: ["$sender", userId] }, "$receiver", "$sender"] }, lastMessage: { $first: "$$ROOT" }, unread: { $sum: { $cond: [{ $and: [{ $eq: ["$receiver", userId] }, { $eq: ["$read", false] }] }, 1, 0] } } } },
       { $lookup: { from: "users", localField: "_id", foreignField: "_id", as: "user" } },
       { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
       { $project: { "user.password": 0, "user.nftCertificates": 0 } },

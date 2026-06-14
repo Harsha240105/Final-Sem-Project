@@ -327,8 +327,41 @@ Web3Connect/
 │   ├── CertificateNFT.sol    # Solidity contract
 │   ├── hardhat.config.js
 │   └── scripts/deploy.js
+├── scripts/
+│   └── cleanup-db.js         # DB maintenance: remove self-follows, drop empty collections, purge stale nonces
 ├── index.html                # Project showcase page
 └── README.md
+```
+
+---
+
+## Database Maintenance
+
+Run the cleanup script to remove self-follow records, empty collections, and stale authentication nonces:
+
+```bash
+node scripts/cleanup-db.js
+```
+
+### What it does
+
+| Action | Details |
+|--------|---------|
+| **Remove self-follows** | Deletes any `follows` documents where `follower === following` (should be blocked by the app, but legacy records may exist) |
+| **Drop empty collections** | Drops collections with 0 documents: `teachers`, `admin`, `servermessages`, `marketplaces`, `nftcertificates` |
+| **Purge stale nonces** | Deletes `nonces` older than 24 hours (SIWE auth nonces that accumulate over time) |
+
+For manual inspection via `mongosh`:
+
+```js
+// Check for self-follows
+db.follows.countDocuments({ $expr: { $eq: ["$follower", "$following"] } })
+
+// Check collection sizes
+db.getCollectionInfos().map(c => ({
+  name: c.name,
+  count: db.getCollection(c.name).estimatedDocumentCount()
+}))
 ```
 
 ---

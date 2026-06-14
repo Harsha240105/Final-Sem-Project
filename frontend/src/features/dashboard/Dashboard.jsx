@@ -53,15 +53,25 @@ function Dashboard() {
     }
   }, []);
 
-  useEffect(() => { fetchStats(); }, [fetchStats]);
+  useEffect(() => {
+    fetchStats();
+    const onDashboardUpdate = () => fetchStats();
+    const onCertUpdate = () => fetchStats();
+    window.addEventListener("dashboard-updated", onDashboardUpdate);
+    window.addEventListener("certificates-updated", onCertUpdate);
+    return () => {
+      window.removeEventListener("dashboard-updated", onDashboardUpdate);
+      window.removeEventListener("certificates-updated", onCertUpdate);
+    };
+  }, [fetchStats]);
 
   const statValues = connectionStats ? {
     followers: connectionStats.followers,
     following: connectionStats.following,
     mutual: connectionStats.mutual,
-    communities: "—",
-    tasks: "—",
-    certificates: "—",
+    communities: connectionStats.communities ?? "—",
+    tasks: connectionStats.tasks ?? "—",
+    certificates: connectionStats.certificates ?? "—",
   } : {};
 
   return (

@@ -39,3 +39,6 @@ diagrams/*.png
 # Environment overrides (local dev overrides)
 .env.local
 .env.*.local
+
+# Server error logs
+server.err

@@ -3,6 +3,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UserPlus, UserCheck, Loader2, Check } from "lucide-react";
 import { useFollow } from "./FollowContext";
 import { useToast } from "../hooks/useToast";
+import { useAuth } from "../hooks/useAuth";
+
+function getCurrentUserId() {
+  try {
+    const t = localStorage.getItem("token");
+    if (!t) return null;
+    return JSON.parse(atob(t.split(".")[1])).id;
+  } catch {
+    return null;
+  }
+}
 
 const SIZE_CLASSES = {
   sm: "px-2.5 py-1 text-xs gap-1",
@@ -33,6 +44,7 @@ export default function FollowButton({
   className = "",
   compact = false,
 }) {
+  const { user: currentUser } = useAuth();
   const { isFollowing: checkFollowing, isMutual: checkMutual, follow, unfollow } = useFollow();
   const following = checkFollowing(userId);
   const isStateMutual = propIsMutual ?? checkMutual(userId);
@@ -42,6 +54,9 @@ export default function FollowButton({
   const [showSuccess, setShowSuccess] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [ripples, setRipples] = useState([]);
+
+  const selfId = currentUser?.id || getCurrentUserId();
+  const isSelf = !userId || (selfId && String(userId) === String(selfId));
 
   const showUnfollowHover = following && isHovered && !loading && !showSuccess;
   const state = !following ? "follow" : isStateMutual ? "mutual" : "following";
@@ -139,6 +154,8 @@ export default function FollowButton({
   };
 
   const displayKey = loading ? "loading" : showSuccess ? "success" : showUnfollowHover ? "unfollow" : state;
+
+  if (isSelf) return null;
 
   return (
     <motion.button

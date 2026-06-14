@@ -19,12 +19,14 @@ export function FollowProvider({ children }) {
   const [followerIds, setFollowerIds] = useState(new Set());
   const [version, setVersion] = useState(0);
   const loadingRef = useRef(false);
+  const fetchVersionRef = useRef(0);
 
   const loadFollowState = useCallback(async () => {
     const token = getToken();
     if (!token) return;
     if (loadingRef.current) return;
     loadingRef.current = true;
+    const fetchVersion = fetchVersionRef.current;
     try {
       const data = await getConnectionsOverview(token);
       const following = new Set(
@@ -33,8 +35,10 @@ export function FollowProvider({ children }) {
       const followers = new Set(
         (data.followers || []).map((u) => u._id || u.id).filter(Boolean)
       );
-      setFollowingIds(following);
-      setFollowerIds(followers);
+      if (fetchVersion === fetchVersionRef.current) {
+        setFollowingIds(following);
+        setFollowerIds(followers);
+      }
     } catch {
       /* silent */
     } finally {
@@ -111,6 +115,7 @@ export function FollowProvider({ children }) {
   const follow = useCallback(async (targetUserId) => {
     const token = getToken();
     if (!token) throw new Error("Not authenticated");
+    fetchVersionRef.current++;
     setFollowingIds((prev) => new Set(prev).add(targetUserId));
     try {
       await followStudent(targetUserId, token);
@@ -129,6 +134,7 @@ export function FollowProvider({ children }) {
   const unfollow = useCallback(async (targetUserId) => {
     const token = getToken();
     if (!token) throw new Error("Not authenticated");
+    fetchVersionRef.current++;
     setFollowingIds((prev) => {
       const next = new Set(prev);
       next.delete(targetUserId);
