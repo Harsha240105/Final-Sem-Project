@@ -2,7 +2,7 @@
   <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=700&size=32&duration=2500&pause=500&color=00F5FF&center=true&vCenter=true&width=500&lines=%E2%97%88+Web3Connect;Blockchain+Virtual+Campus;NFT+Certificates+on+Polygon" alt="Web3Connect" />
   <p><strong>Blockchain Enabled Virtual Campus Platform</strong></p>
   <p>
-    <a href="https://harsha240105.github.io/Final-Sem-Project/viva-web3connect/">
+    <a href="https://harsha240105.github.io/Final-Sem-Project/">
       <img src="https://img.shields.io/badge/%F0%9F%9A%80_Live_Demo-7B61FF?style=for-the-badge&logo=github" alt="Live Demo">
     </a>
     <a href="#tech-stack">
@@ -48,7 +48,7 @@ Wagmi        JWT        Mongoose    ERC-721 Soulbound
 
 Experience the full interactive learning hub — no install required.
 
-👉 **[Launch the Learning Hub](https://harsha240105.github.io/Final-Sem-Project/viva-web3connect/)**
+👉 **[Launch the Learning Hub](https://harsha240105.github.io/Final-Sem-Project/)**
 
 | What you can do | Details |
 |----------------|---------|
