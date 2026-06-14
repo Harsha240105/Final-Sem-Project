@@ -1,56 +1,124 @@
 <div align="center">
-  <h1>◈ Web3Connect</h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=700&size=32&duration=2500&pause=500&color=00F5FF&center=true&vCenter=true&width=500&lines=%E2%97%88+Web3Connect;Blockchain+Virtual+Campus;NFT+Certificates+on+Polygon" alt="Web3Connect" />
   <p><strong>Blockchain Enabled Virtual Campus Platform</strong></p>
   <p>
-    <a href="https://github.com/Harsha240105/Final-Sem-Project" target="_blank">
-      <img src="https://img.shields.io/badge/GitHub-Harsha240105-blue?style=flat&logo=github" alt="GitHub">
+    <a href="https://harsha240105.github.io/Final-Sem-Project/viva-web3connect/">
+      <img src="https://img.shields.io/badge/%F0%9F%9A%80_Live_Demo-7B61FF?style=for-the-badge&logo=github" alt="Live Demo">
     </a>
-    <a href="https://github.com/vivek032005" target="_blank">
-      <img src="https://img.shields.io/badge/Team-vivek032005-purple?style=flat&logo=github" alt="vivek032005">
+    <a href="#tech-stack">
+      <img src="https://img.shields.io/badge/%F0%9F%9B%A0%EF%B8%8F_Tech_Stack-00F5FF?style=for-the-badge" alt="Tech Stack">
+    </a>
+    <a href="#installation">
+      <img src="https://img.shields.io/badge/%F0%9F%93%A6_Setup-FF4FD8?style=for-the-badge" alt="Setup">
     </a>
   </p>
   <p>
-    <a href="#features">Features</a> •
-    <a href="#tech-stack">Tech Stack</a> •
-    <a href="#architecture">Architecture</a> •
-    <a href="#installation">Installation</a> •
-    <a href="#api-reference">API Reference</a> •
-    <a href="#smart-contract">Smart Contract</a>
+    <img src="https://img.shields.io/github/stars/Harsha240105/Final-Sem-Project?style=flat-square&logo=github&color=FFD166">
+    <img src="https://img.shields.io/github/forks/Harsha240105/Final-Sem-Project?style=flat-square&logo=github&color=00FFA3">
+    <img src="https://img.shields.io/github/last-commit/Harsha240105/Final-Sem-Project?style=flat-square&logo=github&color=00F5FF">
+    <img src="https://img.shields.io/github/license/Harsha240105/Final-Sem-Project?style=flat-square&color=7B61FF">
   </p>
 </div>
 
 ---
 
-Web3Connect is a decentralized platform where **students**, **teachers**, and **communities** collaborate, complete tasks, and earn **blockchain-backed NFT certificates** minted on the **Polygon Amoy testnet**.
+## 🎬 What Is Web3Connect?
 
-- 🔗 **Wallet-based login** (MetaMask, WalletConnect, Coinbase Wallet)
-- 🎓 **NFT certificates** — soulbound ERC-721 tokens via IPFS
-- 💬 **Real-time chat** (DM, group, server channels, voice/video)
-- 🕸️ **Social graph** — follow, discover, leaderboards, force-graph
-- 🤖 **AI-powered student ID verification** (OCR + matching engine)
-- 🛡️ **Role-based access** — Student, Teacher, Admin, Community Manager
+A decentralized platform where **students**, **teachers**, and **communities** collaborate, complete tasks, and earn **blockchain-backed NFT certificates** minted on the **Polygon Amoy testnet**.
 
----
+```
+Frontend ←→ Backend ←→ Database ←→ Blockchain
+React 19     Express    MongoDB     Polygon Amoy
+Wagmi        JWT        Mongoose    ERC-721 Soulbound
+```
 
-## Features
+### ✨ Core Features
 
-| Area | Details |
-|------|---------|
-| **Dashboard** | Real-time overview of tasks, communities, NFT certificates, notifications, and connection stats |
-| **Communities** | Join, create, and manage academic communities with tasks, collaborations, and member management |
-| **Connections Hub** | Follow/unfollow users with a live interactive connection map (react-force-graph) |
-| **NFT Certificates** | Earn and verify blockchain-based certificates minted on Polygon Amoy testnet |
-| **Marketplace** | Job, event, project listings with NFT reward capabilities |
-| **Messaging** | Real-time direct messages, group chat, and Discord-like server channels |
-| **Wallet Integration** | Connect MetaMask, Coinbase Wallet, or WalletConnect for certificate minting |
-| **Real-Time Updates** | Socket.IO for live messaging, typing indicators, read receipts, and notifications |
-| **AI Verification** | Tesseract.js OCR for student ID verification with 85% similarity threshold |
-| **Teacher Verification** | Document upload, admin approval workflow, email/SMS notifications |
-| **Admin Panel** | Platform governance, teacher/student approval, blockchain diagnostics |
+| Layer | Feature | Why It Matters |
+|-------|---------|---------------|
+| 🎨 **Frontend** | Real-time dashboard, wallet login (MetaMask), interactive force-graph | 60 FPS experience via React 19 + Vite 7 |
+| ⚙️ **Backend** | 50+ API endpoints, Socket.IO real-time chat, JWT auth | Handles 100 req/min with rate limiting |
+| 🗄️ **Database** | MongoDB Atlas, 19 Mongoose models, atomic job queues | Cloud-native, auto-scaled |
+| ⛓️ **Blockchain** | ERC-721 soulbound NFT certificates, IPFS storage | Immutable, verifiable, student-owned |
+| 🤖 **AI** | Tesseract.js OCR for student ID verification | 85% similarity threshold matching |
 
 ---
 
-## Tech Stack
+## 🚀 Live Demo
+
+Experience the full interactive learning hub — no install required.
+
+👉 **[Launch the Learning Hub](https://harsha240105.github.io/Final-Sem-Project/viva-web3connect/)**
+
+| What you can do | Details |
+|----------------|---------|
+| 🖱️ Click modules | Explore 11 learning modules with detailed explanations |
+| 🧠 Take quizzes | Random knowledge quiz with 10 questions per round |
+| 🎤 Viva prep | 25+ viva questions with reveal answers |
+| 🔍 Search | Filter modules by name/keyword |
+| 📱 Responsive | Works on mobile, tablet, desktop |
+
+---
+
+## 🏗️ System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    PRESENTATION LAYER                            │
+│        React 19 SPA · Tailwind CSS · Framer Motion              │
+│        22 Pages · 20+ Components · 5 Context Providers          │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │ HTTP / WebSocket
+┌───────────────────────────▼─────────────────────────────────────┐
+│                       API LAYER                                  │
+│        Express.js · 16 Route Files · 50+ Endpoints              │
+│        JWT Middleware · Socket.IO · Rate Limited                 │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+              ┌─────────────┼─────────────┐
+              │             │             │
+┌─────────────▼─────┐ ┌────▼──────────┐ ┌▼──────────────┐
+│   DATA LAYER      │ │ BLOCKCHAIN    │ │ STORAGE       │
+│   MongoDB Atlas   │ │ Polygon Amoy  │ │ IPFS / Pinata │
+│   19 Models       │ │ Solidity      │ │ Decentralized │
+│   Mongoose ODM    │ │ ERC-721       │ │ Content Addr. │
+└───────────────────┘ └───────────────┘ └───────────────┘
+```
+
+**Data Flow:**
+```
+User Action → React Component → API Service → Express Controller
+  → Business Logic → MongoDB / IPFS / Blockchain → Response
+```
+
+---
+
+## ⚙️ How It Works (Core Loop)
+
+```javascript
+// Simplified: certificate minting pipeline
+async function mintCertificate(studentWallet, taskId) {
+  // 1. Generate HD certificate image (3200×2200px)
+  const imagePath = await generateCertificateImage(studentWallet, taskId);
+
+  // 2. Upload to IPFS via Pinata
+  const imageURI = await uploadToIPFS(imagePath);
+
+  // 3. Create ERC-721 metadata
+  const metadata = { name: "Web3Connect Certificate", image: imageURI };
+  const metadataURI = await uploadToIPFS(metadata);
+
+  // 4. Mint soulbound NFT on Polygon Amoy
+  const tx = await certificateContract.mintCertificate(studentWallet, metadataURI);
+
+  // 5. Persist on-chain receipt to MongoDB
+  await Certificate.create({ student: studentWallet, txHash: tx.hash, tokenURI: metadataURI });
+}
+```
+
+---
+
+## 🛠️ Built With
 
 ### Frontend
 | Technology | Version | Purpose |
@@ -94,80 +162,64 @@ Web3Connect is a decentralized platform where **students**, **teachers**, and **
 
 ---
 
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                  PRESENTATION LAYER                      │
-│      React 19 SPA · Tailwind CSS · Framer Motion        │
-│      22 Pages · 20+ Components · 5 Context Providers    │
-└────────────────────────┬────────────────────────────────┘
-                         │ HTTP / WebSocket
-┌────────────────────────▼────────────────────────────────┐
-│                     API LAYER                            │
-│      Express.js · 16 Route Files · 50+ Endpoints        │
-│      JWT Middleware · Socket.IO Events · Rate Limited    │
-└────────────────────────┬────────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────────┐
-│                     DATA LAYER                           │
-│      MongoDB · 19 Models · Mongoose ODM · Atlas Cloud   │
-└────────────────────────┬────────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────────┐
-│                  BLOCKCHAIN LAYER                        │
-│   Polygon Amoy Testnet · ERC-721 Soulbound NFT          │
-│   IPFS (Pinata) · Ethers.js · OpenZeppelin              │
-└─────────────────────────────────────────────────────────┘
-```
-
-### Data Flow
-
-```
-User Action → React Component → API Service → Express Controller → Business Logic → MongoDB / IPFS / Blockchain → Response
-```
-
----
-
-## Installation
+## 📦 Getting Started
 
 ### Prerequisites
-
 - Node.js >= 18
-- MongoDB (local or Atlas)
-- MetaMask browser extension
+- MongoDB (local or [Atlas](https://www.mongodb.com/atlas))
+- [MetaMask](https://metamask.io/) browser extension
 - Polygon Amoy testnet ETH ([faucet](https://faucet.polygon.technology/))
 
-### Backend Setup
+### Installation
 
 ```bash
+# Clone the repo
+git clone https://github.com/Harsha240105/Final-Sem-Project.git
+cd Final-Sem-Project
+
+# Backend setup
 cd backend
 npm install
 cp .env.example .env
 # Edit .env with your credentials
 npm start
-```
 
-### Frontend Setup
-
-```bash
+# Frontend setup (new terminal)
 cd frontend
 npm install
 cp .env.example .env
 npm run dev
-```
 
-### Smart Contract Deployment
-
-```bash
+# Smart contract deployment
 cd smart-contract
 npm install
 npx hardhat run scripts/deploy.js --network polygonAmoy
 ```
 
+### Environment Variables
+
+**Backend** (`backend/.env`):
+```env
+MONGO_URI=mongodb+srv://your-connection-string
+JWT_SECRET=your-super-secret-jwt-key
+PORT=5001
+CORS_ORIGIN=http://localhost:5173,http://127.0.0.1:5173
+ADMIN_SECRET=your-admin-setup-secret
+INFURA_URL=https://polygon-amoy.infura.io/v3/your-project-id
+WALLET_PRIVATE_KEY=your-wallet-private-key
+CONTRACT_ADDRESS=0xYourDeployedContractAddress
+IPFS_PINATA_JWT=your-pinata-jwt-token
+```
+
+**Frontend** (`frontend/.env`):
+```env
+VITE_API_BASE_URL=http://localhost:5001/api
+VITE_API_TIMEOUT_MS=15000
+```
+
 ---
 
-## API Reference
+## 📡 API Reference
 
 ### Authentication
 | Method | Endpoint | Description |
@@ -252,7 +304,7 @@ npx hardhat run scripts/deploy.js --network polygonAmoy
 
 ---
 
-## User Roles
+## 👥 User Roles
 
 | Role | Capabilities |
 |------|-------------|
@@ -263,7 +315,7 @@ npx hardhat run scripts/deploy.js --network polygonAmoy
 
 ---
 
-## Smart Contract
+## ⛓️ Smart Contract
 
 The `CertificateNFT` contract is deployed on **Polygon Amoy Testnet** (Chain ID: 80002).
 
@@ -272,41 +324,20 @@ The `CertificateNFT` contract is deployed on **Polygon Amoy Testnet** (Chain ID:
 - **Features**: `mintCertificate(address student, string tokenURI)`, `totalSupply()`, `locked(uint256 tokenId)`
 - **Storage**: Certificate images and metadata stored on **IPFS via Pinata**
 
-### Minting Pipeline (6 Steps)
+### Minting Pipeline
 
-1. **Generate** HD certificate image (3200×2200px) using node-canvas
-2. **Upload** image to IPFS via Pinata
-3. **Create** ERC-721 metadata JSON
-4. **Upload** metadata to IPFS
-5. **Mint** soulbound NFT on Polygon Amoy via ethers.js
-6. **Persist** certificate record to MongoDB
-
----
-
-## Environment Variables
-
-### Backend (`backend/.env`)
-```env
-MONGO_URI=mongodb+srv://your-connection-string
-JWT_SECRET=your-super-secret-jwt-key
-PORT=5001
-CORS_ORIGIN=http://localhost:5173,http://127.0.0.1:5173
-ADMIN_SECRET=your-admin-setup-secret
-INFURA_URL=https://polygon-amoy.infura.io/v3/your-project-id
-WALLET_PRIVATE_KEY=your-wallet-private-key
-CONTRACT_ADDRESS=0xYourDeployedContractAddress
-IPFS_PINATA_JWT=your-pinata-jwt-token
 ```
-
-### Frontend (`frontend/.env`)
-```env
-VITE_API_BASE_URL=http://localhost:5001/api
-VITE_API_TIMEOUT_MS=15000
+1. Generate HD certificate image (3200×2200px) via node-canvas
+2. Upload image to IPFS via Pinata
+3. Create ERC-721 metadata JSON
+4. Upload metadata to IPFS
+5. Mint soulbound NFT on Polygon Amoy via ethers.js
+6. Persist certificate record to MongoDB
 ```
 
 ---
 
-## Project Structure
+## 🗂️ Project Structure
 
 ```
 Web3Connect/
@@ -328,45 +359,50 @@ Web3Connect/
 │   ├── hardhat.config.js
 │   └── scripts/deploy.js
 ├── scripts/
-│   └── cleanup-db.js         # DB maintenance: remove self-follows, drop empty collections, purge stale nonces
-├── index.html                # Project showcase page
-└── README.md
+│   └── cleanup-db.js         # DB maintenance
+├── technologies.json          # Data source for auto-generated pages
+├── build.js                   # Generates index.html pages from JSON
+├── index.html                 # Root landing page (auto-generated)
+└── viva-web3connect/          # Learning hub (auto-generated, deployed to Pages)
+    └── index.html
 ```
 
 ---
 
-## Database Maintenance
+## 🔄 Auto-Sync System
 
-Run the cleanup script to remove self-follow records, empty collections, and stale authentication nonces:
+Both `index.html` (root) and `viva-web3connect/index.html` (learning hub) are **auto-generated** from a single data source.
+
+```
+Edit technologies.json → Push to GitHub
+  → GitHub Actions runs node build.js
+  → Both index.html files regenerate
+  → viva-web3connect/ deploys to GitHub Pages
+```
+
+To add a new technology or module, just edit `technologies.json` and push. Everything stays in sync.
+
+| File | Purpose |
+|------|---------|
+| `technologies.json` | Single source of truth — edit this |
+| `build.js` | Reads JSON, generates both HTML files |
+| `index.html` | Root landing page (auto-generated) |
+| `viva-web3connect/index.html` | Full learning hub (auto-generated) |
+| `.github/workflows/deploy.yml` | Runs build + deploys to Pages |
+
+---
+
+## 🧹 Database Maintenance
 
 ```bash
 node scripts/cleanup-db.js
 ```
 
-### What it does
-
-| Action | Details |
-|--------|---------|
-| **Remove self-follows** | Deletes any `follows` documents where `follower === following` (should be blocked by the app, but legacy records may exist) |
-| **Drop empty collections** | Drops collections with 0 documents: `teachers`, `admin`, `servermessages`, `marketplaces`, `nftcertificates` |
-| **Purge stale nonces** | Deletes `nonces` older than 24 hours (SIWE auth nonces that accumulate over time) |
-
-For manual inspection via `mongosh`:
-
-```js
-// Check for self-follows
-db.follows.countDocuments({ $expr: { $eq: ["$follower", "$following"] } })
-
-// Check collection sizes
-db.getCollectionInfos().map(c => ({
-  name: c.name,
-  count: db.getCollection(c.name).estimatedDocumentCount()
-}))
-```
+Removes self-follows, drops empty collections, and purges stale authentication nonces (>24h).
 
 ---
 
-## Team
+## 👥 Team
 
 | Name | GitHub | Role |
 |------|--------|------|
@@ -375,48 +411,19 @@ db.getCollectionInfos().map(c => ({
 
 ---
 
-## Auto-Sync System
-
-The learning hub (`viva-web3connect/index.html`) and root landing page (`index.html`) are auto-generated from a single data source.
-
-### How it works
-
-1. Edit **`technologies.json** — the single source of truth for all modules, tech stack, flow steps, and project tree
-2. Push to GitHub
-3. GitHub Actions runs `node build.js` → regenerates **both** HTML files
-4. `viva-web3connect/` is deployed to GitHub Pages
-
-To add or update a technology/module, just modify `technologies.json` and push. Both index files stay in sync automatically.
-
-### File structure
-
-| File | Purpose |
-|------|---------|
-| `technologies.json` | Edit this — all data lives here |
-| `build.js` | Reads JSON, generates both HTML files |
-| `index.html` | Root landing page (auto-generated) |
-| `viva-web3connect/index.html` | Full learning hub (auto-generated) |
-| `.github/workflows/deploy.yml` | Runs build + deploys to Pages |
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
+## 📜 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
 <div align="center">
+  <a href="https://github.com/Harsha240105/Final-Sem-Project">
+    <img src="https://img.shields.io/badge/%E2%97%88_Web3Connect-030712?style=for-the-badge&logo=github&logoColor=00F5FF" alt="Web3Connect">
+  </a>
   <p>
-    <a href="https://github.com/Harsha240105/Final-Sem-Project" target="_blank">
-      <img src="https://img.shields.io/badge/View_on_GitHub-Harsha240105-blue?style=for-the-badge&logo=github" alt="GitHub">
-    </a>
+    <sub>Built with React 19 · Node.js · Express · MongoDB · Solidity · Polygon · IPFS · Socket.IO</sub>
   </p>
-  <p>Built with React 19 · Node.js · Express · MongoDB · Solidity · Polygon · IPFS · Socket.IO</p>
+  <img src="https://img.shields.io/github/last-commit/Harsha240105/Final-Sem-Project?style=flat-square&color=7B61FF">
+  <img src="https://img.shields.io/github/stars/Harsha240105/Final-Sem-Project?style=flat-square&color=FFD166">
 </div>
