@@ -30,11 +30,10 @@ const NFTCertificateSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-NFTCertificateSchema.pre("save", function (next) {
+NFTCertificateSchema.pre("save", async function () {
   if (!this.publicId) {
     this.publicId = `NFT-MKT-${nanoid(6).toUpperCase()}`;
   }
-  next();
 });
 
 module.exports = mongoose.model("NFTCertificate", NFTCertificateSchema);

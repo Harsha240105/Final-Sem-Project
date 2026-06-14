@@ -74,12 +74,11 @@ StudentSchema.index({ communities: 1 });
 StudentSchema.index({ "nftCertificates.certificateId": 1 });
 StudentSchema.index({ createdAt: -1 });
 
-StudentSchema.pre("save", function (next) {
+StudentSchema.pre("save", async function () {
   if (!this.publicId) {
     const year = new Date().getFullYear();
     this.publicId = `STU-${year}-${nanoid(6).toUpperCase()}`;
   }
-  next();
 });
 
 module.exports = mongoose.model("Student", StudentSchema);

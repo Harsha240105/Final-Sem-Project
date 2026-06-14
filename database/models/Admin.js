@@ -30,12 +30,11 @@ const AdminSchema = new mongoose.Schema(
 
 AdminSchema.index({ createdAt: 1 });
 
-AdminSchema.pre("save", function (next) {
+AdminSchema.pre("save", async function () {
   if (!this.publicId) {
     const year = new Date().getFullYear();
     this.publicId = `TEACH-${year}-${nanoid(6).toUpperCase()}`;
   }
-  next();
 });
 
 module.exports = mongoose.model("Admin", AdminSchema);

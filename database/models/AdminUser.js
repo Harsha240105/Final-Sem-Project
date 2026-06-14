@@ -68,12 +68,11 @@ AdminUserSchema.index({ communities: 1 });
 AdminUserSchema.index({ "nftCertificates.certificateId": 1 });
 AdminUserSchema.index({ createdAt: -1 });
 
-AdminUserSchema.pre("save", function (next) {
+AdminUserSchema.pre("save", async function () {
   if (!this.publicId) {
     const year = new Date().getFullYear();
     this.publicId = `ADMIN-${year}-${nanoid(6).toUpperCase()}`;
   }
-  next();
 });
 
 module.exports = mongoose.model("AdminUser", AdminUserSchema);

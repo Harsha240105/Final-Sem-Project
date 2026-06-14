@@ -595,8 +595,10 @@ async function walletLogin(req, res) {
     const token = generateToken(user);
     res.json({ success: true, token, user: formatUserResponse(user) });
   } catch (err) {
-    console.error("walletLogin error:", err);
-    res.status(500).json({ error: "Authentication failed" });
+    console.error("walletLogin error:", err.message, "\nStack:", err.stack ? err.stack.split("\n").slice(0,5).join("\n") : "no stack", "\nFull err:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
+    const detail = process.env.NODE_ENV === "production" ? "Authentication failed" : err.message;
+    const stackLines = (err.stack || "").split("\n").slice(0,3).join(" | ");
+    res.status(500).json({ error: `[walletLogin] ${detail}`, debug: err.message, stack: stackLines });
   }
 }
 

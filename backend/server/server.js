@@ -8,10 +8,9 @@ const { Server: SocketIOServer } = require("socket.io");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
-const mongoose = require("mongoose");
 const rateLimit = require("express-rate-limit");
 
-const { connectDB, getMongoConnectionStatus } = require("../../database/db");
+const { connectDB, getMongoConnectionStatus, mongoose } = require("../../database/db");
 const Notification = require("../../database/models/Notification");
 const ServerMessage = require("../../database/models/ServerMessage");
 const authRoutes = require("./routes/auth");
@@ -165,15 +164,24 @@ app.use("/api", (req, res, next) => {
     return next();
   }
 
-  if (mongoose.connection.readyState === 1) {
+  if (getMongoConnectionStatus().connected) {
     return next();
   }
 
-  console.error(`[DB GUARD] Blocking ${req.method} ${req.originalUrl} because DB is not connected`);
-  return res.status(503).json({
-    error: "Database unavailable. Please try again in a moment.",
-    code: "DB_UNAVAILABLE",
-  });
+  (async () => {
+    for (let i = 0; i < 20; i++) {
+      await new Promise(r => setTimeout(r, 500));
+      if (getMongoConnectionStatus().connected) {
+        return next();
+      }
+    }
+
+    console.error(`[DB GUARD] Blocking ${req.method} ${req.originalUrl} because DB is not connected`);
+    return res.status(503).json({
+      error: "Database unavailable. Please try again in a moment.",
+      code: "DB_UNAVAILABLE",
+    });
+  })();
 });
 
 app.use("/api/auth", authRoutes);

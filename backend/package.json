@@ -31,7 +31,8 @@
     "socket.io": "^4.8.3",
     "string-similarity": "^4.0.4",
     "tesseract.js": "^7.0.0",
-    "twilio": "^6.0.2"
+    "twilio": "^6.0.2",
+    "web3connect": "file:.."
   },
   "devDependencies": {
     "jest": "^29.7.0",

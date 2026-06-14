@@ -153,12 +153,11 @@ communitySchema.index({ createdAt: -1 });
 communitySchema.index({ members: 1 });
 communitySchema.index({ createdBy: 1 });
 
-communitySchema.pre("save", function (next) {
+communitySchema.pre("save", async function () {
   if (!this.publicId) {
     const year = new Date().getFullYear();
     this.publicId = `COM-${year}-${nanoid(6).toUpperCase()}`;
   }
-  next();
 });
 
 module.exports = mongoose.model("Community", communitySchema);

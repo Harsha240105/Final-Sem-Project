@@ -101,8 +101,21 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     const normalizedError = normalizeApiError(error);
+    const config = error.config;
+
+    if (error.response?.status === 503 && config && !config._retryCount) {
+      config._retryCount = 0;
+    }
+
+    if (error.response?.status === 503 && config && config._retryCount < 3) {
+      config._retryCount = (config._retryCount || 0) + 1;
+      const delay = config._retryCount * 2000;
+      console.warn(`[API Retry ${config._retryCount}/3] ${config.method.toUpperCase()} ${config.url} in ${delay}ms`);
+      await new Promise(r => setTimeout(r, delay));
+      return apiClient(config);
+    }
 
     if (normalizedError.response) {
       console.error("API Error:", normalizedError.response.status, normalizedError.response.data);

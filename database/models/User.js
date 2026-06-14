@@ -119,12 +119,11 @@ UserSchema.index({ "nftCertificates.certificateId": 1 });
 UserSchema.index({ "nftCertificates.communityId": 1 });
 UserSchema.index({ teacherProfileId: 1 }, { sparse: true });
 
-UserSchema.pre("save", function (next) {
+UserSchema.pre("save", async function () {
   if (!this.publicId) {
     const year = new Date().getFullYear();
     this.publicId = `USR-${year}-${nanoid(6).toUpperCase()}`;
   }
-  next();
 });
 
 module.exports = mongoose.model("User", UserSchema);

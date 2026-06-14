@@ -103,12 +103,11 @@ MarketplaceSchema.index({ status: 1, createdAt: -1 });
 MarketplaceSchema.index({ skills: 1 });
 MarketplaceSchema.index({ community: 1 });
 
-MarketplaceSchema.pre("save", function (next) {
+MarketplaceSchema.pre("save", async function () {
   if (!this.publicId) {
     this.publicId = `COLLAB-${nanoid(8).toUpperCase()}`;
   }
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports = mongoose.model("Marketplace", MarketplaceSchema);

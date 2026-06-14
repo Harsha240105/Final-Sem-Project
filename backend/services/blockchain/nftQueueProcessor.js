@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const NFTJobQueue = require("../../../database/models/NFTJobQueue");
 const Certificate = require("../../../database/models/Certificate");
 const Community = require("../../../database/models/Community");
@@ -38,6 +39,7 @@ function emitFailed(userId, jobId, error) {
 
 async function processQueue() {
   if (!io) return;
+  if (mongoose.connection.readyState !== 1) return;
 
   const available = MAX_CONCURRENT - activeJobs.size;
   if (available <= 0) return;

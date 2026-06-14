@@ -25,7 +25,8 @@
     "react-signature-canvas": "^1.1.0-alpha.2",
     "socket.io-client": "^4.8.3",
     "viem": "^2.48.11",
-    "wagmi": "^3.6.10"
+    "wagmi": "^3.6.10",
+    "web3connect": "file:.."
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

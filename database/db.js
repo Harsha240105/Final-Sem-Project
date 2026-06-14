@@ -231,4 +231,4 @@ async function connectDB(options = {}) {
   console.log(`[Mongo] Ready state: ${mongoose.connection.readyState}`);
 }
 
-module.exports = { connectDB, getMongoConnectionStatus, classifyMongoError };
+module.exports = { connectDB, getMongoConnectionStatus, classifyMongoError, mongoose };

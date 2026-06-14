@@ -4,6 +4,7 @@ import { AuthProvider } from "./shared/components/AuthContext";
 import { SocketProvider } from "./shared/services/SocketContext";
 import { FollowProvider } from "./shared/components/FollowContext";
 import ErrorBoundary from "./shared/components/ErrorBoundary";
+import DbGuard from "./shared/components/DbGuard";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import OnboardingGuard from "./features/auth/OnboardingGuard";
 import MainLayout from "./shared/layouts/MainLayout";
@@ -154,13 +155,15 @@ function AppRoutes() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <SocketProvider>
-          <FollowProvider>
-            <AppRoutes />
-          </FollowProvider>
-        </SocketProvider>
-      </AuthProvider>
+      <DbGuard>
+        <AuthProvider>
+          <SocketProvider>
+            <FollowProvider>
+              <AppRoutes />
+            </FollowProvider>
+          </SocketProvider>
+        </AuthProvider>
+      </DbGuard>
     </ErrorBoundary>
   );
 }

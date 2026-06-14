@@ -55,34 +55,45 @@ function Login() {
     if (isConnected && address) setWalletAddress(address);
   }, [isConnected, address]);
 
+  const doWalletCheck = useCallback(async () => {
+    if (!address) return;
+    setChecking(true);
+    try {
+      const response = await checkWallet(address.toLowerCase());
+      if (response?.exists) {
+        setExistingUser(response.user);
+        setStep(tab === "login" ? "welcome-back" : "exists");
+      } else {
+        setStep(tab === "login" ? "not-found" : "register");
+      }
+    } catch (err) {
+      if (err?.response?.status === 503) {
+        setStep("db-unavailable");
+      } else {
+        setStep(tab === "login" ? "not-found" : "register");
+      }
+    } finally {
+      setChecking(false);
+    }
+  }, [address, tab]);
+
   // Auto-check wallet when already connected on page load.
   // Without this, a user with an already-connected wallet sees "Connect Wallet"
   // and clicking it triggers a disconnect/reconnect cycle that can cause race conditions.
   useEffect(() => {
     if (!mounted || !isConnected || !address || initialCheckDone.current) return;
     initialCheckDone.current = true;
-    const doCheck = async () => {
-      setChecking(true);
-      try {
-        const response = await checkWallet(address.toLowerCase());
-        if (response?.exists) {
-          setExistingUser(response.user);
-          setStep(tab === "login" ? "welcome-back" : "exists");
-        } else {
-          setStep(tab === "login" ? "not-found" : "register");
-        }
-      } catch {
-        setStep(tab === "login" ? "not-found" : "register");
-      } finally {
-        setChecking(false);
-      }
-    };
-    doCheck();
-  }, [mounted, isConnected, address]);
+    doWalletCheck();
+  }, [mounted, isConnected, address, doWalletCheck]);
 
   const shortenAddress = (addr) => {
     if (!addr) return "";
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
+  const retryWalletCheck = () => {
+    initialCheckDone.current = false;
+    doWalletCheck();
   };
 
   const resetFlow = () => {
@@ -113,8 +124,12 @@ function Login() {
         setStep(tab === "login" ? "not-found" : "register");
       }
     } catch (err) {
-      addToast(err?.response?.data?.error || err?.message || "Failed to check wallet", "error");
-      setStep(tab === "login" ? "not-found" : "register");
+      if (err?.response?.status === 503) {
+        setStep("db-unavailable");
+      } else {
+        addToast(err?.response?.data?.error || err?.message || "Failed to check wallet", "error");
+        setStep(tab === "login" ? "not-found" : "register");
+      }
     } finally {
       setChecking(false);
     }
@@ -347,6 +362,19 @@ function Login() {
                         <p className="text-center text-[10px] text-gray-500">
                           Not you? <button onClick={() => switchTab("register")} className="text-cyan-400 hover:underline">Create new account</button>
                         </p>
+                      </div>
+                    )}
+
+                    {step === "db-unavailable" && (
+                      <div className="space-y-4 text-center py-4">
+                        <div className="text-4xl mb-2">⏳</div>
+                        <h2 className="text-base font-bold text-white">Database Unavailable</h2>
+                        <p className="text-sm text-gray-400">The database is still starting up. Please wait a moment and try again.</p>
+                        <motion.button onClick={retryWalletCheck}
+                          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                          className="cyber-btn w-full rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/20 transition">
+                          Try Again
+                        </motion.button>
                       </div>
                     )}
 

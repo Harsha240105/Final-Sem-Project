@@ -88,12 +88,11 @@ TeacherSchema.index({ communities: 1 });
 TeacherSchema.index({ "nftCertificates.certificateId": 1 });
 TeacherSchema.index({ createdAt: -1 });
 
-TeacherSchema.pre("save", function (next) {
+TeacherSchema.pre("save", async function () {
   if (!this.publicId) {
     const year = new Date().getFullYear();
     this.publicId = `TEACH-${year}-${nanoid(6).toUpperCase()}`;
   }
-  next();
 });
 
 module.exports = mongoose.model("Teacher", TeacherSchema);
