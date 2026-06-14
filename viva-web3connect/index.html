@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web3Connect — Interactive Learning Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-primary:#030712;
+  --bg-secondary:#07111F;
+  --bg-card:rgba(15,20,35,0.7);
+  --neon-cyan:#00F5FF;
+  --neon-purple:#7B61FF;
+  --neon-pink:#FF4FD8;
+  --neon-green:#00FFA3;
+  --neon-yellow:#FFD166;
+  --neon-red:#FF4D6D;
+  --neon-blue:#3B82F6;
+  --text-primary:#F1F5F9;
+  --text-secondary:#94A3B8;
+  --text-muted:#64748B;
+  --glass-border:rgba(123,97,255,0.15);
+  --glass-bg:rgba(15,20,35,0.7);
+  --font-display:'Orbitron',monospace;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius:16px;
+  --radius-sm:8px;
+  --radius-lg:24px;
+  --shadow-glow:0 0 40px rgba(123,97,255,0.3);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-body);
+  background:var(--bg-primary);
+  color:var(--text-primary);
+  line-height:1.7;
+  overflow-x:hidden;
+  min-height:100vh;
+}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg-primary)}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--neon-purple),var(--neon-cyan));border-radius:4px}
+
+#particles-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(3,7,18,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--glass-border);
+  padding:0 2rem;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.nav-logo{
+  font-family:var(--font-display);font-size:1.25rem;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  font-weight:700;
+}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{
+  color:var(--text-secondary);text-decoration:none;font-size:0.875rem;
+  transition:color 0.3s;cursor:pointer;
+}
+.nav-links a:hover{color:var(--neon-cyan)}
+.viva-btn{
+  background:linear-gradient(135deg,var(--neon-purple),var(--neon-pink));
+  border:none;color:#fff;padding:0.5rem 1.25rem;border-radius:var(--radius-sm);
+  font-family:var(--font-body);font-weight:600;font-size:0.875rem;
+  cursor:pointer;transition:transform 0.3s,box-shadow 0.3s;
+}
+.viva-btn:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(123,97,255,0.5)}
+.mobile-toggle{display:none;background:none;border:none;color:var(--text-primary);font-size:1.5rem;cursor:pointer}
+
+/* HERO */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:6rem 2rem 4rem;
+}
+.hero-badge{
+  display:inline-block;padding:0.4rem 1.2rem;
+  border:1px solid var(--glass-border);border-radius:100px;
+  font-size:0.8rem;color:var(--neon-cyan);margin-bottom:1.5rem;
+  background:rgba(0,245,255,0.05);
+}
+.hero h1{
+  font-family:var(--font-display);font-size:clamp(2rem,6vw,4.5rem);
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple),var(--neon-pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  line-height:1.1;margin-bottom:1.5rem;
+}
+.hero p{
+  font-size:clamp(1rem,2vw,1.25rem);color:var(--text-secondary);
+  max-width:700px;margin-bottom:2.5rem;
+}
+.hero-stats{display:flex;gap:3rem;flex-wrap:wrap;justify-content:center}
+.hero-stat{text-align:center}
+.hero-stat .num{
+  font-family:var(--font-display);font-size:2.5rem;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-stat .label{font-size:0.85rem;color:var(--text-muted);margin-top:0.25rem}
+
+/* SECTION TITLES */
+.section-title{
+  text-align:center;margin-bottom:3rem;position:relative;z-index:1;
+}
+.section-title h2{
+  font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.5rem);
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:0.75rem;
+}
+.section-title p{color:var(--text-secondary);max-width:600px;margin:0 auto}
+
+/* ROADMAP */
+#roadmap{
+  position:relative;z-index:1;padding:4rem 2rem;
+  background:linear-gradient(180deg,transparent,var(--bg-secondary),transparent);
+}
+.roadmap-container{
+  max-width:1200px;margin:0 auto;position:relative;
+}
+.roadmap-svg{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:0;
+}
+.roadmap-svg path,.roadmap-svg line{
+  stroke:url(#lineGrad);stroke-width:2;fill:none;
+  stroke-dasharray:8,4;animation:dashMove 1s linear infinite;
+}
+@keyframes dashMove{to{stroke-dashoffset:-24}}
+
+.nodes-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1rem;position:relative;z-index:1;
+}
+.node-card{
+  background:var(--glass-bg);border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:1.5rem;cursor:pointer;
+  transition:all 0.4s cubic-bezier(0.4,0,0.2,1);
+  position:relative;overflow:hidden;text-align:center;
+  backdrop-filter:blur(10px);
+}
+.node-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-purple));
+  transform:scaleX(0);transform-origin:left;transition:transform 0.4s;
+}
+.node-card:hover::before{transform:scaleX(1)}
+.node-card:hover{
+  border-color:var(--neon-purple);transform:translateY(-4px);
+  box-shadow:0 0 30px rgba(123,97,255,0.2);
+}
+.node-card .icon{
+  font-size:2rem;margin-bottom:0.75rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.node-card h3{
+  font-size:1rem;font-weight:600;margin-bottom:0.5rem;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.node-card p{font-size:0.8rem;color:var(--text-muted);line-height:1.4}
+
+/* SIDE PANEL */
+.panel-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.7);z-index:200;
+  opacity:0;pointer-events:none;transition:opacity 0.4s;
+}
+.panel-overlay.active{opacity:1;pointer-events:all}
+.panel{
+  position:fixed;top:0;right:0;width:min(90vw,600px);height:100%;
+  background:var(--bg-primary);border-left:1px solid var(--glass-border);
+  z-index:201;overflow-y:auto;padding:2rem;
+  transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  backdrop-filter:blur(20px);
+}
+.panel.open{transform:translateX(0)}
+.panel-close{
+  position:absolute;top:1rem;right:1rem;background:none;border:none;
+  color:var(--text-secondary);font-size:1.5rem;cursor:pointer;
+  transition:color 0.3s;
+}
+.panel-close:hover{color:var(--neon-cyan)}
+.panel h2{
+  font-family:var(--font-display);font-size:1.5rem;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:1.5rem;padding-right:2rem;
+}
+.panel-section{margin-bottom:2rem}
+.panel-section h3{
+  font-size:1rem;color:var(--neon-cyan);margin-bottom:0.75rem;
+  font-weight:600;display:flex;align-items:center;gap:0.5rem;
+}
+.panel-section h3 .tag{
+  font-size:0.65rem;background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.2);
+  padding:0.15rem 0.5rem;border-radius:4px;font-family:var(--font-mono);
+}
+.panel-section p{color:var(--text-secondary);font-size:0.9rem;line-height:1.7}
+.panel-section ul{list-style:none;padding:0}
+.panel-section ul li{
+  padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);
+  color:var(--text-secondary);font-size:0.9rem;
+  display:flex;align-items:flex-start;gap:0.5rem;
+}
+.panel-section ul li::before{content:'▸';color:var(--neon-purple);flex-shrink:0}
+.code-block{
+  background:rgba(0,0,0,0.5);border:1px solid var(--glass-border);
+  border-radius:var(--radius-sm);padding:1rem;margin:0.75rem 0;
+  font-family:var(--font-mono);font-size:0.8rem;color:var(--neon-green);
+  overflow-x:auto;white-space:pre-wrap;word-break:break-all;
+}
+.flow-box{
+  background:rgba(0,245,255,0.05);border:1px solid rgba(0,245,255,0.15);
+  border-radius:var(--radius-sm);padding:1rem;margin:0.75rem 0;
+}
+.flow-box .step{
+  display:flex;align-items:center;gap:1rem;padding:0.5rem 0;
+  color:var(--text-secondary);font-size:0.85rem;
+}
+.flow-box .step .arrow{color:var(--neon-purple);font-size:1.2rem}
+.flow-box .step .num{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;font-weight:700;color:#fff;flex-shrink:0;
+}
+.qa-item{
+  background:rgba(123,97,255,0.05);border:1px solid rgba(123,97,255,0.15);
+  border-radius:var(--radius-sm);padding:1rem;margin:0.75rem 0;
+  cursor:pointer;transition:all 0.3s;
+}
+.qa-item:hover{border-color:var(--neon-purple)}
+.qa-item .q{color:var(--neon-yellow);font-weight:600;font-size:0.9rem}
+.qa-item .a{
+  color:var(--text-secondary);font-size:0.85rem;margin-top:0.5rem;
+  display:none;
+}
+.qa-item.open .a{display:block}
+.qa-item .toggle{color:var(--neon-cyan);font-size:0.8rem;margin-left:0.5rem}
+
+/* COMPLETE FLOW */
+#complete-flow{
+  position:relative;z-index:1;padding:4rem 2rem;
+  background:linear-gradient(180deg,transparent,var(--bg-secondary));
+}
+.flow-steps{
+  max-width:800px;margin:0 auto;position:relative;
+}
+.flow-steps::before{
+  content:'';position:absolute;left:28px;top:0;bottom:0;
+  width:2px;background:linear-gradient(180deg,var(--neon-cyan),var(--neon-purple),var(--neon-pink));
+}
+.flow-step{
+  display:flex;align-items:flex-start;gap:1.5rem;padding:1.5rem 0;position:relative;
+}
+.flow-step .dot{
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.25rem;flex-shrink:0;z-index:1;
+  box-shadow:0 0 20px rgba(123,97,255,0.3);
+}
+.flow-step .content h4{font-size:1rem;color:var(--text-primary);margin-bottom:0.3rem}
+.flow-step .content p{font-size:0.85rem;color:var(--text-secondary);line-height:1.5}
+
+/* VIVA MODAL */
+.viva-modal{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.85);z-index:300;
+  display:none;align-items:center;justify-content:center;padding:2rem;
+}
+.viva-modal.active{display:flex}
+.viva-card{
+  background:var(--bg-primary);border:1px solid var(--glass-border);
+  border-radius:var(--radius-lg);padding:2.5rem;
+  max-width:600px;width:100%;max-height:80vh;overflow-y:auto;
+  position:relative;box-shadow:var(--shadow-glow);
+}
+.viva-card h2{
+  font-family:var(--font-display);font-size:1.25rem;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:1rem;
+}
+.viva-card .question{
+  font-size:1.1rem;color:var(--text-primary);margin:2rem 0 1rem;
+  padding:1.5rem;background:rgba(123,97,255,0.05);
+  border:1px solid rgba(123,97,255,0.15);border-radius:var(--radius);
+}
+.viva-card .answer{
+  color:var(--text-secondary);font-size:0.9rem;line-height:1.7;
+  display:none;margin-bottom:1.5rem;padding:1rem;
+  background:rgba(0,245,255,0.05);border-radius:var(--radius-sm);
+  border-left:3px solid var(--neon-cyan);
+}
+.viva-card .answer.show{display:block}
+.viva-btn-group{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.5rem}
+.viva-btn-group button{
+  flex:1;min-width:120px;padding:0.75rem 1.5rem;
+  border:none;border-radius:var(--radius-sm);font-weight:600;
+  cursor:pointer;transition:all 0.3s;font-family:var(--font-body);
+}
+.btn-reveal{background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));color:#fff}
+.btn-reveal:hover{transform:translateY(-2px);box-shadow:0 0 20px rgba(0,245,255,0.3)}
+.btn-next{background:rgba(255,255,255,0.1);color:var(--text-primary);border:1px solid var(--glass-border)!important}
+.btn-next:hover{background:rgba(255,255,255,0.15)}
+.btn-close-viva{
+  position:absolute;top:1rem;right:1rem;background:none;border:none;
+  color:var(--text-secondary);font-size:1.5rem;cursor:pointer;
+}
+.viva-score{
+  text-align:center;padding:1rem;
+  background:rgba(0,255,163,0.05);border-radius:var(--radius-sm);
+  margin-top:1rem;
+}
+.viva-score .num{font-family:var(--font-display);font-size:2rem;color:var(--neon-green)}
+.viva-progress{
+  height:4px;background:rgba(255,255,255,0.1);border-radius:2px;
+  margin-bottom:1.5rem;overflow:hidden;
+}
+.viva-progress .bar{
+  height:100%;background:linear-gradient(90deg,var(--neon-cyan),var(--neon-purple));
+  transition:width 0.5s;border-radius:2px;
+}
+
+/* SEARCH */
+.search-bar{
+  position:relative;z-index:1;max-width:400px;margin:0 auto 3rem;
+}
+.search-bar input{
+  width:100%;padding:0.75rem 1rem 0.75rem 3rem;
+  background:var(--glass-bg);border:1px solid var(--glass-border);
+  border-radius:100px;color:var(--text-primary);font-family:var(--font-body);
+  font-size:0.9rem;outline:none;transition:border-color 0.3s;
+}
+.search-bar input:focus{border-color:var(--neon-cyan)}
+.search-bar .icon{
+  position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);
+  color:var(--text-muted);
+}
+
+/* TECH STACK GRID */
+.tech-stack{
+  position:relative;z-index:1;padding:4rem 2rem;
+}
+.tech-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:1rem;max-width:1000px;margin:0 auto;
+}
+.tech-item{
+  background:var(--glass-bg);border:1px solid var(--glass-border);
+  border-radius:var(--radius-sm);padding:1rem;text-align:center;
+  transition:all 0.3s;backdrop-filter:blur(10px);
+}
+.tech-item:hover{border-color:var(--neon-purple);transform:translateY(-2px)}
+.tech-item .v{
+  font-size:0.7rem;color:var(--neon-cyan);font-family:var(--font-mono);
+  margin-bottom:0.25rem;
+}
+.tech-item .n{font-size:0.85rem;color:var(--text-primary);font-weight:500}
+
+/* FOOTER */
+footer{
+  position:relative;z-index:1;text-align:center;padding:3rem 2rem;
+  border-top:1px solid var(--glass-border);color:var(--text-muted);font-size:0.85rem;
+}
+
+/* ANIMATIONS */
+.fade-in{animation:fadeIn 0.6s ease forwards}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.slide-up{animation:slideUp 0.5s ease forwards}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{padding:0 1rem}
+  .nav-links{display:none;position:absolute;top:64px;left:0;right:0;
+    background:rgba(3,7,18,0.95);flex-direction:column;padding:1rem;
+    border-bottom:1px solid var(--glass-border);
+  }
+  .nav-links.active{display:flex}
+  .mobile-toggle{display:block}
+  .hero{padding:5rem 1rem 3rem}
+  .hero-stats{gap:1.5rem}
+  .nodes-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  .panel{width:100vw;padding:1.25rem}
+  .flow-step .dot{width:44px;height:44px;font-size:1rem}
+  .flow-steps::before{left:22px}
+  .hero-stat .num{font-size:1.8rem}
+}
+@media(max-width:480px){
+  .nodes-grid{grid-template-columns:repeat(2,1fr)}
+  .viva-btn-group{flex-direction:column}
+  .viva-card{padding:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">◈ Web3Connect</div>
+  <div class="mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('active')">☰</div>
+  <div class="nav-links">
+    <a onclick="document.getElementById('roadmap').scrollIntoView({behavior:'smooth'})">Roadmap</a>
+    <a onclick="document.getElementById('complete-flow').scrollIntoView({behavior:'smooth'})">Project Flow</a>
+    <a onclick="document.getElementById('tech-stack').scrollIntoView({behavior:'smooth'})">Tech Stack</a>
+    <button class="viva-btn" onclick="openViva()">🎤 Viva Prep</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🎓 BCA Final Year Project</div>
+  <h1>Web3Connect</h1>
+  <p>Blockchain Enabled Virtual Campus Platform — An interactive learning roadmap to understand the complete architecture, from frontend to blockchain NFT minting.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">11</div><div class="label">Modules</div></div>
+    <div class="hero-stat"><div class="num">22</div><div class="label">Technologies</div></div>
+    <div class="hero-stat"><div class="num">50+</div><div class="label">API Endpoints</div></div>
+    <div class="hero-stat"><div class="num">19</div><div class="label">DB Models</div></div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="section-title fade-in">
+    <h2>🗺 Interactive Roadmap</h2>
+    <p>Click any node to explore detailed explanations, code examples, and viva questions</p>
+  </div>
+  <div class="search-bar">
+    <span class="icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search modules..." oninput="filterNodes(this.value)">
+  </div>
+  <div class="roadmap-container">
+    <div class="nodes-grid" id="nodesGrid"></div>
+  </div>
+</section>
+
+<!-- COMPLETE FLOW -->
+<section id="complete-flow">
+  <div class="section-title fade-in">
+    <h2>🔄 Complete Project Flow</h2>
+    <p>The end-to-end journey of a student earning an NFT certificate</p>
+  </div>
+  <div class="flow-steps" id="flowSteps"></div>
+</section>
+
+<!-- TECH STACK -->
+<section id="tech-stack" class="tech-stack">
+  <div class="section-title fade-in">
+    <h2>⚙️ Technology Stack</h2>
+    <p>All technologies powering Web3Connect</p>
+  </div>
+  <div class="tech-grid" id="techGrid"></div>
+</section>
+
+<!-- SIDE PANEL -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="panel" id="sidePanel">
+  <button class="panel-close" onclick="closePanel()">✕</button>
+  <div id="panelContent"></div>
+</div>
+
+<!-- VIVA MODAL -->
+<div class="viva-modal" id="vivaModal">
+  <div class="viva-card">
+    <button class="btn-close-viva" onclick="closeViva()">✕</button>
+    <h2>🎤 Viva Preparation</h2>
+    <div class="viva-progress"><div class="bar" id="vivaProgress" style="width:0%"></div></div>
+    <div id="vivaScore" style="display:none"></div>
+    <div id="vivaQuestion"></div>
+    <div id="vivaAnswer" class="answer"></div>
+    <div class="viva-btn-group" id="vivaButtons"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>Web3Connect — Blockchain Enabled Virtual Campus Platform • BCA Final Year Project</p>
+</footer>
+
+<script>
+// ========= DATA =========
+const nodes = [
+  {id:"frontend",icon:"🎨",title:"Frontend",short:"React 19 SPA with modern UI",
+   sections:[
+     {title:"What is it?",icon:"💡",
+      content:"The frontend is the client-side application that users interact with in their browser. Built with React 19, it provides a responsive, dynamic single-page application (SPA) experience."},
+     {title:"Why is it used?",icon:"❓",
+      content:"A modern frontend provides a rich user experience with instant navigation, real-time updates, and seamless wallet integration. SPAs eliminate full-page reloads and feel like native apps."},
+     {title:"How Web3Connect uses it?",icon:"🔧",
+      content:"Web3Connect's frontend is a React 19 SPA built with Vite 7.3. It uses Tailwind CSS for styling, React Router for navigation across 22+ pages, and Axios for API communication. Framer Motion handles animations while wagmi manages wallet connections."},
+     {title:"Tech Stack",icon:"📦",
+      content:"React 19 • Vite 7.3 • Tailwind CSS 3.4 • React Router 7.8 • Axios 1.7 • TanStack Query 5 • Framer Motion 12 • wagmi 3.6 • viem 2.48 • Socket.IO Client 4.8"},
+     {title:"Flow Diagram",icon:"📊",
+      content:"",
+      flow:[
+        {text:"User interacts with React Components",num:1},
+        {text:"Components call API Service layer (Axios)",num:2},
+        {text:"API requests sent to Express Backend",num:3},
+        {text:"Backend processes and returns JSON response",num:4},
+        {text:"React updates UI with new data",num:5}
+      ]},
+     {title:"Code Example: wagmi Config",icon:"💻",
+      code:`import { createConfig, http } from "wagmi";
+import { polygonAmoy, polygon } from "wagmi/chains";
+import { metaMask, walletConnect, coinbaseWallet } from "wagmi/connectors";
+
+export const config = createConfig({
+  chains: [polygonAmoy, polygon],
+  transports: {
+    [polygonAmoy.id]: http("https://rpc-amoy.polygon.technology"),
+    [polygon.id]: http("https://polygon-rpc.com"),
+  },
+  connectors: [
+    metaMask(),
+    coinbaseWallet({ appName: "Web3Connect" }),
+    walletConnect({ projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID }),
+  ],
+});`},
+     {title:"Viva Questions",icon:"🎤",
+      qa:[
+        {q:"What is React and why was it chosen?",a:"React is a JavaScript library for building user interfaces. It was chosen for its component-based architecture, virtual DOM for performance, massive ecosystem, and hooks for state management. React 19 brings improved concurrent rendering and server components."},
+        {q:"What is Vite and why use it over Create React App?",a:"Vite is a build tool that offers faster dev server startup via native ES modules and efficient builds via Rollup. It's 10x faster than CRA for development."},
+        {q:"What is TanStack Query used for?",a:"TanStack Query (React Query) manages server state — caching, background refetching, pagination, and optimistic updates. It reduces boilerplate for API data management."},
+        {q:"Explain the component hierarchy in Web3Connect.",a:"The app uses a feature-based structure: shared components (Navbar, Sidebar, GlassCard) at src/shared/, and feature modules (dashboard, communities, messaging) each with their own components, hooks, and services."}
+      ]}
+   ]},
+  {id:"backend",icon:"⚙️",title:"Backend",short:"Express.js REST API server",
+   sections:[
+     {title:"What is it?",icon:"💡",
+      content:"The backend is the server-side application that handles business logic, data processing, authentication, and serves RESTful APIs to the frontend. Built with Node.js and Express."},
+     {title:"Why is it used?",icon:"❓",
+      content:"A backend is essential for secure data processing, user authentication, file uploads, blockchain interaction, and serving APIs. Express provides a lightweight, flexible framework for building REST APIs."},
+     {title:"How Web3Connect uses it?",icon:"🔧",
+      content:"The Express server listens on port 5001 (configurable), uses Helmet for security, Morgan for logging, and rate limiting (100 req/min global, 30 req/hr for uploads). It mounts 16 route files covering auth, communities, tasks, blockchain, certificates, messaging, and more."},
+     {title:"Tech Stack",icon:"📦",
+      content:"Node.js 22 • Express 4.19 • JWT • bcrypt 6 • Multer 2 • Helmet 7 • Morgan • express-rate-limit 8 • express-validator 7 • dotenv"},
+     {title:"Request Lifecycle",icon:"📊",
+      content:"",
+      flow:[
+        {text:"Frontend sends HTTP request",num:1},
+        {text:"Express matches the route (e.g., /api/communities)",num:2},
+        {text:"Middleware executes (auth, validation, rate limit)",num:3},
+        {text:"Controller handles business logic",num:4},
+        {text:"Database queries / Blockchain calls execute",num:5},
+        {text:"JSON response sent back to frontend",num:6}
+      ]},
+     {title:"Code Example: Server Setup",icon:"💻",
+      code:`const express = require("express");
+const http = require("http");
+const { Server: SocketIOServer } = require("socket.io");
+const cors = require("cors");
+const helmet = require("helmet");
+
+const app = express();
+const server = http.createServer(app);
+const io = new SocketIOServer(server, { cors: { origin: "*" } });
+
+app.use(helmet());
+app.use(cors({ origin: ["http://localhost:5173"] }));
+app.use(express.json({ limit: "50mb" }));
+
+app.use("/api/auth", authRoutes);
+app.use("/api/communities", communityRoutes);
+
+server.listen(5001, () => console.log("Server running on port 5001"));`},
+     {title:"Viva Questions",icon:"🎤",
+      qa:[
+        {q:"What is Express.js and its key features?",a:"Express is a minimal Node.js web framework providing routing, middleware support, template engines, and error handling. It's unopinionated and flexible."},
+        {q:"Explain middleware in Express.",a:"Middleware functions execute during the request-response cycle. They can modify req/res objects, end the request, or call next(). Examples: auth middleware, error handler, logger, rate limiter."},
+        {q:"How does the server handle errors?",a:"Express has centralized error handling via (err, req, res, next) middleware. The server also uses try-catch in controllers and a global error handler."},
+        {q:"What is the purpose of rate limiting?",a:"Rate limiting prevents abuse by limiting requests per time window. Web3Connect uses 100 req/min globally, 100/15min for auth, and 30/hour for uploads."}
+      ]}
+   ]},
+  {id:"database",icon:"🗄️",title:"Database",short:"MongoDB Atlas with Mongoose",
+   sections:[
+     {title:"What is it?",icon:"💡",
+      content:"MongoDB is a NoSQL document database that stores data in flexible, JSON-like documents. Mongoose is an ODM (Object Document Mapper) that provides schema validation and query building."},
+     {title:"Why is it used?",icon:"❓",
+      content:"MongoDB's flexible schema suits rapidly evolvingfeatures. Documents map naturally to JavaScript objects. Mongoose provides schema validation, middleware, and population for references."},
+     {title:"How Web3Connect uses it?",icon:"🔧",
+      content:"Web3Connect has 19 Mongoose models (User, Student, Teacher, Community, Task, Certificate, Message, etc.) in a MongoDB Atlas cluster. The database stores user profiles, community data, task submissions, chat messages, NFT certificate records, and blockchain job queues."},
+     {title:"Collections Overview",icon:"📊",
+      content:"",
+      flow:[
+        {text:"Users — Student, Teacher, Admin accounts with wallet addresses",num:1},
+        {text:"Communities — Groups with members, tasks, and collaboration rooms",num:2},
+        {text:"Tasks — Assignments with submissions, due dates, and NFT rewards",num:3},
+        {text:"Certificates — NFT certificate records with IPFS URIs and tx hashes",num:4},
+        {text:"Messages — DMs, group chats, server channels, voice messages",num:5}
+      ]},
+     {title:"Code Example: Mongoose Model",icon:"💻",
+      code:`const mongoose = require("mongoose");
+
+const CommunitySchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  description: { type: String, default: "" },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
+}, { timestamps: true });
+
+module.exports = mongoose.model("Community", CommunitySchema);`},
+     {title:"Viva Questions",icon:"🎤",
+      qa:[
+        {q:"Why MongoDB over SQL?",a:"MongoDB offers flexible schema (no migrations), native JSON documents matching JS objects, horizontal scaling via sharding, and faster development velocity for projects with evolving schemas."},
+        {q:"What is Mongoose and its benefits?",a:"Mongoose is a MongoDB ODM providing schema validation, middleware (pre/post hooks), population (JOIN-like), virtuals, and type casting."},
+        {q:"How are relationships handled?",a:"Using ObjectId references and mongoose Population. Example: Community has createdBy ref to User. populate('createdBy') replaces the ID with the full user document."},
+        {q:"Explain the database connection flow.",a:"mongoose.connect(MONGO_URI) with retry logic. Connection pooling (max 10), socket timeout 45s, server selection timeout 10s. Uses fail-open mode — server starts without DB initially."}
+      ]}
+   ]},
+  {id:"auth",icon:"🔐",title:"Authentication",short:"JWT + Wallet (SIWE)",
+   sections:[
+     {title:"What is it?",icon:"💡",
+      content:"Authentication verifies user identity. Web3Connect uses two methods: JWT-based email/password auth and SIWE (Sign-In with Ethereum) for wallet-based auth."},
+     {title:"Why is it used?",icon:"❓",
+      content:"Authentication secures the platform by ensuring only authorized users access protected resources. JWT provides stateless auth. Wallet auth enables blockchain interactions like NFT minting."},
+     {title:"How Web3Connect uses it?",icon:"🔧",
+      content:"Users can register as Student or Teacher (pending admin approval). Login generates a JWT token stored client-side. SIWE flow: backend generates a nonce, user signs it with MetaMask, backend verifies the signature and issues a JWT. Admin role has separate setup flow with ADMIN_SECRET."},
+     {title:"Auth Flow",icon:"📊",
+      content:"",
+      flow:[
+        {text:"User submits credentials (email/password or wallet signature)",num:1},
+        {text:"Backend validates credentials (bcrypt compare or SIWE verify)",num:2},
+        {text:"JWT token generated with user role and ID payload",num:3},
+        {text:"Token stored client-side (localStorage/context)",num:4},
+        {text:"All subsequent API requests include Authorization: Bearer <token>",num:5}
+      ]},
+     {title:"Code Example: Auth Middleware",icon:"💻",
+      code:`const jwt = require("jsonwebtoken");
+
+function authMiddleware(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "No token provided" });
+  }
+  try {
+    const decoded = jwt.verify(header.split(" ")[1], process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+}`},
+     {title:"Viva Questions",icon:"🎤",
+      qa:[
+        {q:"What is JWT and how does it work?",a:"JSON Web Token is a stateless auth token with three parts: header, payload, signature. The server signs it with a secret; clients send it with requests; the server verifies the signature without database lookups."},
+        {q:"What is SIWE (Sign-In with Ethereum)?",a:"SIWE allows users to authenticate using their Ethereum wallet. The server sends a nonce, user signs it with their private key (via MetaMask), and the server recovers the address from the signature to verify identity."},
+        {q:"How is role-based access handled?",a:"The JWT payload includes the user role (student/teacher/admin). Middleware functions check req.user.role against allowed roles for each route."},
+        {q:"Why use bcrypt for passwords?",a:"bcrypt is a slow hashing algorithm designed to resist brute-force attacks. It includes a salt automatically and the cost factor can be increased as hardware improves."}
+      ]}
+   ]},
+  {id:"apis",icon:"🌐",title:"APIs",short:"16 route files, 50+ endpoints",
+   sections:[
+     {title:"What is it?",icon:"💡",
+      content:"RESTful APIs are the communication layer between frontend and backend. Each endpoint represents a specific resource or action. Web3Connect has 16 route files with 50+ endpoints."},
+     {title:"Why is it used?",icon:"❓",
+      content:"APIs provide a structured, consistent way for the frontend to interact with backend services. RESTful design makes endpoints predictable and easy to document."},
+     {title:"Major API Groups",icon:"📊",
+      content:"",
+      flow:[
+        {text:"Auth APIs — register, login, wallet-login, SIWE nonce/verify, profile, reset-password",num:"A"},
+        {text:"Community APIs — CRUD communities, join/leave, assign-manager, leaderboard",num:"B"},
+        {text:"Task APIs — create tasks, submit, complete, upload files, issue certificates",num:"C"},
+        {text:"Blockchain APIs — mint NFT, check status, diagnose, retry failed mint",num:"D"},
+        {text:"Certificate APIs — list user certs, verify on-chain, sync with blockchain",num:"E"},
+        {text:"Messaging APIs — conversations, DMs, servers, channels, voice messages",num:"F"},
+        {text:"User APIs — profile CRUD, wallet management, delete account",num:"G"}
+      ]},
+     {title:"Code Example: Route Definition",icon:"💻",
+      code:`const express = require("express");
+const router = express.Router();
+const { authMiddleware } = require("../middleware/auth.middleware");
+const { body, validationResult } = require("express-validator");
+
+router.get("/", authMiddleware, async (req, res) => {
+  try {
+    const communities = await Community.find();
+    res.json(communities);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/", authMiddleware, [
+  body("name").notEmpty().trim(),
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  // create community logic
+});`},
+     {title:"Viva Questions",icon:"🎤",
+      qa:[
+        {q:"What is REST API?",a:"REST (Representational State Transfer) is an architectural style using HTTP methods (GET, POST, PUT, DELETE) to perform CRUD operations on resources identified by URLs."},
+        {q:"How does request validation work?",a:"Using express-validator middleware. Routes define validation chains with body('field').notEmpty().trim(). Errors are caught and returned as 400 responses."},
+        {q:"Explain the blockchain API endpoints.",a:"POST /mint — mints NFT certificate; GET /status — checks blockchain connection; GET /diagnose — runs diagnostics; POST /retry-certificate — retries failed mint jobs."},
+        {q:"How are file uploads handled?",a:"Using Multer middleware. Upload destinations are organized by type: avatars/, certificates/, communities/, ids/, signatures/, tasks/, chat/."}
+      ]}
+   ]},
+  {id:"blockchain",icon:"⛓️",title:"Blockchain",short:"Polygon Amoy + Smart Contracts",
+   sections:[
+     {title:"What is it?",icon:"💡",
+      content:"Blockchain is a decentralized, immutable ledger. Web3Connect uses the Polygon Amoy testnet (chain ID 80002) to deploy smart contracts that issue soulbound NFT certificates."},
+     {title:"Why is it used?",icon:"❓",
+      content:"Blockchain ensures certificate authenticity and tamper-proof verification. Anyone can verify a certificate on-chain without relying on a central authority. Smart contracts automate minting."},
+     {title:"How Web3Connect uses it?",icon:"🔧",
+      content:"The CertificateNFT Solidity contract inherits OpenZeppelin's ERC721URIStorage and Ownable. The contract is deployed on Polygon Amoy. Only the contract owner (server wallet) can mint certificates. The contract permanently disables transfers (soulbound — ERC-5192)."},
+     {title:"Blockchain Flow",icon:"📊",
+      content:"",
+      flow:[
+        {text:"User connects wallet via MetaMask (wagmi)",num:1},
+        {text:"User completes tasks and earns certificate",num:2},
+        {text:"Backend calls mintCertificate() on the smart contract",num:3},
+        {text:"Transaction submitted to Polygon Amoy testnet",num:4},
+        {text:"NFT minted — transaction hash stored in MongoDB",num:5}
+      ]},
+     {title:"Code Example: Smart Contract",icon:"💻",
+      code:`// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract CertificateNFT is ERC721URIStorage, Ownable {
+    uint256 private _tokenIdCounter;
+
+    event CertificateMinted(
+        address indexed student,
+        uint256 indexed tokenId,
+        string tokenURI
+    );
+
+    constructor() ERC721("Web3Connect Certificate", "W3CERT") Ownable(msg.sender) {}
+
+    function mintCertificate(
+        address student,
+        string memory tokenURI
+    ) public onlyOwner returns (uint256) {
+        require(student != address(0), "Invalid address");
+        require(bytes(tokenURI).length > 0, "URI required");
+        _tokenIdCounter++;
+        uint256 newTokenId = _tokenIdCounter;
+        _safeMint(student, newTokenId);
+        _setTokenURI(newTokenId, tokenURI);
+        emit CertificateMinted(student, newTokenId, tokenURI);
+        return newTokenId;
+    }
+
+    function totalSupply() public view returns (uint256) {
+        return _tokenIdCounter;
+    }
+
+    // Soulbound: block all transfers
+    function transferFrom(...) public pure override { revert("Soulbound"); }
+    function safeTransferFrom(...) public pure override { revert("Soulbound"); }
+    function approve(...) public pure override { revert("Soulbound"); }
+    function locked(uint256) public pure returns (bool) { return true; }
+}`},
+     {title:"Viva Questions",icon:"🎤",
+      qa:[
+        {q:"What is blockchain in simple terms?",a:"A blockchain is a distributed, immutable ledger where data is stored in blocks linked cryptographically. Each participant (node) maintains a copy, ensuring transparency and tamper-resistance."},
+        {q:"What is Polygon Amoy and why was it chosen?",a:"Polygon Amoy is the testnet for Polygon (chain ID 80002). Chosen because it's Ethereum-compatible (EVM), offers low fees, fast transactions, and MATIC test tokens are free from faucets."},
+        {q:"What is a smart contract?",a:"A smart contract is self-executing code deployed on a blockchain. It automatically enforces rules when conditions are met. Our CertificateNFT contract mints NFTs when called by the owner."},
+        {q:"What is ERC-721 and ERC-5192?",a:"ERC-721 is the NFT standard (unique tokens). ERC-5192 extends it to make tokens soulbound (non-transferable). Our contract overrides transferFrom, approve, safeTransferFrom to always revert."},
+        {q:"What is the difference between blockchain and database?",a:"A database is centralized, mutable, and controlled by an admin. A blockchain is decentralized, immutable, and governed by consensus. Databases are fast for CRUD; blockchains provide trust without intermediaries."}
+      ]}
+   ]},
+  {id:"nft",icon:"🏆",title:"NFT Certificates",short:"ERC-721 Soulbound Tokens",
+   sections:[
+     {title:"What is it?",icon:"💡",
+      content:"NFT (Non-Fungible Token) certificates are unique digital assets minted on the blockchain. Each certificate represents an achievement and is permanently linked to the recipient's wallet."},
+     {title:"Why is it used?",icon:"❓",
+      content:"NFT certificates are tamper-proof, publicly verifiable, and owned by the student forever. Traditional PDF certificates can be forged; blockchain certificates can be verified on-chain by anyone."},
+     {title:"How Web3Connect uses it?",icon:"🔧",
+      content:"When a student completes tasks in a community, the system generates a certificate image (3200x2200px using node-canvas), uploads it to IPFS, creates metadata JSON, uploads that to IPFS, then calls the smart contract to mint the NFT. The minting pipeline has 6 steps with duplicate prevention via SHA-256 issuance keys."},
+     {title:"Minting Pipeline",icon:"📊",
+      content:"",
+      flow:[
+        {text:"Generate HD certificate image (3200x2200px) using node-canvas",num:1},
+        {text:"Upload certificate image to IPFS via Pinata",num:2},
+        {text:"Create ERC-721 metadata JSON (name, description, image URI)",num:3},
+        {text:"Upload metadata JSON to IPFS",num:4},
+        {text:"Call mintCertificate() on the Polygon Amoy smart contract",num:5},
+        {text:"Save certificate record (txHash, tokenId, URIs) to MongoDB",num:6}
+      ]},
+     {title:"Code Example: Minting Service",icon:"💻",
+      code:`const { ethers } = require("ethers");
+const contractABI = require("./contractABI.json");
+const { CONTRACT_ADDRESS } = require("./contractAddress");
+
+const provider = new ethers.JsonRpcProvider(
+  "https://rpc-amoy.polygon.technology"
+);
+
+async function mintCertificate(studentAddress, tokenURI) {
+  const wallet = new ethers.Wallet(privateKey, provider);
+  const contract = new ethers.Contract(
+    CONTRACT_ADDRESS, contractABI, wallet
+  );
+  const tx = await contract.mintCertificate(studentAddress, tokenURI);
+  const receipt = await tx.wait();
+  return { txHash: receipt.hash, tokenId: receipt.logs[0].topics[3] };
+}`},
+     {title:"Viva Questions",icon:"🎤",
+      qa:[
+        {q:"What is an NFT?",a:"NFT (Non-Fungible Token) is a unique digital asset on a blockchain. Unlike cryptocurrencies (fungible), each NFT is one-of-a-kind and cannot be exchanged 1:1."},
+        {q:"What are Soulbound NFTs?",a:"Soulbound NFTs are non-transferable tokens that stay with the original owner forever. Like academic degrees, they represent achievements bound to an individual."},
+        {q:"Describe the complete minting pipeline.",a:"1) Generate certificate image with node-canvas → 2) Upload image to IPFS → 3) Create metadata JSON → 4) Upload metadata to IPFS → 5) Call smart contract mint function → 6) Save record to MongoDB."},
+        {q:"How are duplicate mints prevented?",a:"Using a deterministic SHA-256 hash key from userId + communityId + taskId, plus a MongoDB distributed lock (2-minute TTL) via findOneAndUpdate."}
+      ]}
+   ]},
+  {id:"ipfs",icon:"📡",title:"IPFS Storage",short:"Decentralized file storage via Pinata",
+   sections:[
+     {title:"What is it?",icon:"💡",
+      content:"IPFS (InterPlanetary File System) is a decentralized, peer-to-peer protocol for storing and sharing files. Instead of location-based addressing (HTTP URLs), it uses content-based addressing (CID hashes)."},
+     {title:"Why is it used?",icon:"❓",
+      content:"IPFS ensures certificate images and metadata are permanently available without relying on a central server. The content hash in the NFT metadata links to immutable data — if the file changes, the hash changes."},
+     {title:"How Web3Connect uses it?",icon:"🔧",
+      content:"Web3Connect uses Pinata (a pinning service) to upload certificate images and metadata JSON to IPFS. The service uses axios to POST multipart form data to Pinata's API with API key authentication. It has a fallback chain of 4 IPFS gateways for reading (Pinata, ipfs.io, Cloudflare, w3s.link)."},
+     {title:"IPFS Flow",icon:"📊",
+      content:"",
+      flow:[
+        {text:"Certificate image is generated by node-canvas",num:1},
+        {text:"Image sent to Pinata API (pinning service)",num:2},
+        {text:"Pinata uploads to IPFS network and returns CID hash",num:3},
+        {text:"Metadata JSON (with image URI) uploaded to IPFS",num:4},
+        {text:"Metadata URI passed to smart contract for minting",num:5}
+      ]},
+     {title:"Code Example: IPFS Upload",icon:"💻",
+      code:`const axios = require("axios");
+const FormData = require("form-data");
+const fs = require("fs");
+
+async function uploadCertificateToIPFS(imagePath) {
+  const form = new FormData();
+  form.append("file", fs.createReadStream(imagePath));
+
+  const response = await axios.post(
+    "https://api.pinata.cloud/pinning/pinFileToIPFS",
+    form,
+    {
+      headers: {
+        ...form.getHeaders(),
+        pinata_api_key: process.env.PINATA_API_KEY,
+        pinata_secret_api_key: process.env.PINATA_SECRET_KEY,
+      },
+      maxBodyLength: Infinity,
+    }
+  );
+  return \`https://gateway.pinata.cloud/ipfs/\${response.data.IpfsHash}\`;
+}`},
+     {title:"Viva Questions",icon:"🎤",
+      qa:[
+        {q:"What is IPFS?",a:"IPFS is a decentralized file system where files are addressed by their content (CID hash) rather than location (URL). Files are distributed across a peer-to-peer network."},
+        {q:"What is Pinata and why use it?",a:"Pinata is an IPFS pinning service that ensures your files remain available on IPFS. It provides HTTP APIs for upload with API key auth, and a dedicated gateway for fast retrieval."},
+        {q:"How does content-addressing work?",a:"Files are hashed using SHA-256 to produce a unique Content Identifier (CID). If even one byte changes, the CID changes — ensuring immutability and verifiability."},
+        {q:"What happens if Pinata goes down?",a:"IPFS is decentralized — files pinned by other nodes remain accessible. Web3Connect has 4 fallback gateways: Pinata, ipfs.io, Cloudflare-IPFS, and w3s.link."}
+      ]}
+   ]},
+  {id:"ocr",icon:"👁️",title:"OCR Verification",short:"Tesseract.js ID verification",
+   sections:[
+     {title:"What is it?",icon:"💡",
+      content:"OCR (Optical Character Recognition) extracts text from images. Web3Connect uses Tesseract.js to read text from uploaded student ID documents for automated identity verification."},
+     {title:"Why is it used?",icon:"❓",
+      content:"OCR automates student identity verification, reducing manual admin work. The system extracts name, date, and ID number from uploaded documents and compares them against registration data."},
+     {title:"How Web3Connect uses it?",icon:"🔧",
+      content:"The OCR engine pre-processes images using node-canvas (resize, grayscale), runs Tesseract.js with English language, normalizes extracted text, and extracts fields. The matching engine compares extracted name/fields against user-provided data using string-similarity with an 85% threshold."},
+     {title:"OCR Flow",icon:"📊",
+      content:"",
+      flow:[
+        {text:"Student uploads ID document (PNG/JPG)",num:1},
+        {text:"Image pre-processed (resize, enhance contrast)",num:2},
+        {text:"Tesseract.js extracts text from image",num:3},
+        {text:"Text normalized and key fields extracted (name, ID)",num:4},
+        {text:"Extracted data compared against registration info",num:5},
+        {text:"Match above 85% threshold → verified",num:6}
+      ]},
+     {title:"Code Example: OCR Engine",icon:"💻",
+      code:`const Tesseract = require("tesseract.js");
+const { createCanvas, loadImage } = require("canvas");
+
+async function runOcr(imagePath) {
+  const image = await loadImage(imagePath);
+  const canvas = createCanvas(image.width, image.height);
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(image, 0, 0);
+
+  const { data } = await Tesseract.recognize(
+    canvas.toBuffer("image/png"),
+    "eng"
+  );
+  return extractFields(data.text);
+}
+
+function normalizeText(text) {
+  return text.replace(/[^\\w\\s]/g, " ")
+    .replace(/\\s+/g, " ").trim().toLowerCase();
+}
+
+function extractFields(rawText) {
+  const cleaned = rawText.replace(/\\n/g, " ").replace(/\\s+/g, " ");
+  // Extract name, date, ID number using regex patterns
+  return { name: extractName(cleaned), /* ... */ };
+}`},
+     {title:"Viva Questions",icon:"🎤",
+      qa:[
+        {q:"What is Tesseract.js?",a:"Tesseract.js is a JavaScript library that runs Google's Tesseract OCR engine in the browser or Node.js. It supports 100+ languages and can extract text from images."},
+        {q:"How is text similarity calculated?",a:"Using the string-similarity npm package. It compares the extracted name against the registered name and returns a score between 0 and 1. A threshold of 0.85 (85%) is required for verification."},
+        {q:"What pre-processing is done on images?",a:"Images are loaded with node-canvas, optionally resized, and converted to grayscale to improve OCR accuracy. This reduces noise and improves text extraction."},
+        {q:"What happens after verification?",a:"On success: email notification sent, user role activated. On failure: notification sent with reason. Admin can manually review and approve/reject."}
+      ]}
+   ]},
+  {id:"realtime",icon:"💬",title:"Real-Time",short:"Socket.IO + WebRTC",
+   sections:[
+     {title:"What is it?",icon:"💡",
+      content:"Real-time communication enables instant messaging, live notifications, typing indicators, and collaborative features without page refreshes. Web3Connect uses Socket.IO for WebSocket-based communication."},
+     {title:"Why is it used?",icon:"❓",
+      content:"Real-time is essential for chat applications, live notifications, collaborative editing, and presence indicators. Socket.IO provides reliable bidirectional communication with fallback transports."},
+     {title:"How Web3Connect uses it?",icon:"🔧",
+      content:"Socket.IO server runs on the same HTTP server as Express. Features: direct messaging with typing indicators and read receipts, server channels (Discord-like), voice messages (WebM), presence indicators, WebRTC for video/voice calls, and collaboration canvas with real-time cursor positions."},
+     {title:"Real-Time Flow",icon:"📊",
+      content:"",
+      flow:[
+        {text:"User A sends a message or joins a room",num:1},
+        {text:"Socket.IO client emits event to server",num:2},
+        {text:"Server processes and broadcasts to relevant clients",num:3},
+        {text:"User B receives event and UI updates instantly",num:4}
+      ]},
+     {title:"Code Example: Socket.IO Setup",icon:"💻",
+      code:`// Server-side
+const { Server } = require("socket.io");
+const io = new Server(httpServer, {
+  cors: { origin: "http://localhost:5173" },
+  pingInterval: 25000,
+  pingTimeout: 20000,
+  maxHttpBufferSize: 5e6,
+});
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("send-message", async (data) => {
+    const message = await Message.create(data);
+    io.to(data.conversationId).emit("new-message", message);
+  });
+
+  socket.on("typing", ({ conversationId, userId }) => {
+    socket.to(conversationId).emit("user-typing", { userId });
+  });
+});
+
+// Client-side
+import { io } from "socket.io-client";
+const socket = io("http://localhost:5001");
+socket.emit("send-message", { text: "Hello!", conversationId: "..." });`},
+     {title:"Viva Questions",icon:"🎤",
+      qa:[
+        {q:"What is Socket.IO?",a:"Socket.IO is a library for real-time bidirectional communication. It uses WebSocket with HTTP long-polling fallback, auto-reconnection, and room-based broadcasting."},
+        {q:"How is it different from WebSocket alone?",a:"Socket.IO adds auto-reconnection, fallback transports, rooms/namespaces, acknowledgements, and a simpler API on top of native WebSocket."},
+        {q:"What real-time features does Web3Connect support?",a:"Direct messaging, typing indicators, read receipts, server channels, voice messages, WebRTC video/voice calls, presence indicators, and collaborative canvas with real-time cursor sync."},
+        {q:"How are voice messages handled?",a:"Voice is recorded client-side using MediaRecorder API, uploaded as WebM files via Multer, and the message includes the file URL for playback."}
+      ]}
+   ]},
+  {id:"deployment",icon:"🚀",title:"Deployment",short:"Frontend + Backend + Blockchain",
+   sections:[
+     {title:"What is it?",icon:"💡",
+      content:"Deployment is the process of making the application accessible to users. Web3Connect's deployment spans frontend hosting, backend hosting, database cloud, and blockchain testnet."},
+     {title:"Why is it needed?",icon:"❓",
+      content:"Deployment makes the platform available to real users. Each component (frontend, backend, database, blockchain) is deployed to appropriate platforms optimized for its needs."},
+     {title:"How Web3Connect is deployed?",icon:"🔧",
+      content:"Frontend: Built with Vite and deployed to Vercel/Netlify. Backend: Node.js/Express deployed to Render/Railway with environment variables. Database: MongoDB Atlas cluster. Blockchain: Smart contract deployed on Polygon Amoy testnet via Hardhat or Remix IDE."},
+     {title:"Deployment Architecture",icon:"📊",
+      content:"",
+      flow:[
+        {text:"Frontend (Vite build) → Vercel / Netlify / IPFS",num:1},
+        {text:"Backend (Node.js/Express) → Render / Railway / AWS",num:2},
+        {text:"Database (MongoDB) → MongoDB Atlas (cloud)",num:3},
+        {text:"Blockchain (Smart Contract) → Polygon Amoy Testnet",num:4},
+        {text:"File Storage (Images) → IPFS via Pinata",num:5}
+      ]},
+     {title:"Environment Variables",icon:"💻",
+      code:`# Backend .env
+MONGO_URI=mongodb+srv://<user>:<pass>@cluster0.xxxxx.mongodb.net/web3connect
+JWT_SECRET=your-super-secret-jwt-key
+PORT=5001
+CORS_ORIGIN=http://localhost:5173,http://127.0.0.1:5173
+POLYGON_RPC_URL=https://rpc-amoy.polygon.technology
+WALLET_PRIVATE_KEY=your-wallet-private-key
+CONTRACT_ADDRESS=0xYourDeployedContractAddress
+PINATA_API_KEY=your-pinata-api-key
+PINATA_SECRET_KEY=your-pinata-secret-key
+
+# Frontend .env
+VITE_API_BASE_URL=http://localhost:5001/api
+VITE_API_TIMEOUT_MS=15000`},
+     {title:"Viva Questions",icon:"🎤",
+      qa:[
+        {q:"How is the frontend deployed?",a:"Vite builds the project into static files (dist/). These are deployed to Vercel or Netlify which provide CDN, HTTPS, and automatic builds from git."},
+        {q:"How is the backend deployed?",a:"The Express server is deployed to Render or Railway as a Node.js web service. Environment variables are configured in the platform's dashboard."},
+        {q:"What is MongoDB Atlas?",a:"MongoDB Atlas is a fully-managed cloud database service. It handles backups, scaling, and monitoring automatically. Web3Connect uses a free M0 cluster."},
+        {q:"How is the smart contract deployed?",a:"Using Hardhat deploy script: npx hardhat run scripts/deploy.js --network polygonAmoy. The contract address is then set in the backend .env as CONTRACT_ADDRESS."}
+      ]}
+   ]}
+];
+
+const flowSteps = [
+  {icon:"👤",title:"Student Login",desc:"User connects wallet (MetaMask) or logs in via email/password through the React frontend."},
+  {icon:"🔐",title:"JWT Authentication",desc:"Backend validates credentials, generates a JWT token. For wallet users, SIWE flow verifies the signature."},
+  {icon:"👥",title:"Join Community",desc:"Authenticated user browses communities, joins one, and gains access to tasks and discussions."},
+  {icon:"✅",title:"Complete Tasks",desc:"User views assigned tasks, submits work (file uploads), and marks tasks as complete."},
+  {icon:"👁️",title:"OCR Verification",desc:"Teachers/students submit ID documents. Tesseract.js extracts text and matching engine verifies identity (85% threshold)."},
+  {icon:"🗄️",title:"Store Data in MongoDB",desc:"All user data, community records, task submissions, and chat messages are persisted in MongoDB Atlas."},
+  {icon:"📡",title:"Upload Certificate to IPFS",desc:"System generates a certificate image via node-canvas, uploads it and metadata JSON to Pinata/IPFS."},
+  {icon:"⛓️",title:"Mint NFT on Polygon",desc:"Backend calls the CertificateNFT smart contract on Polygon Amoy to mint a soulbound NFT."},
+  {icon:"🏆",title:"View NFT Certificate",desc:"Student can view their NFT certificate in the profile, verify it on-chain, and share the verification link."}
+];
+
+const techStack = [
+  {name:"React",ver:"19.2",cat:"Frontend"},
+  {name:"Vite",ver:"7.3",cat:"Frontend"},
+  {name:"Tailwind CSS",ver:"3.4",cat:"Frontend"},
+  {name:"Framer Motion",ver:"12.34",cat:"Frontend"},
+  {name:"React Router",ver:"7.8",cat:"Frontend"},
+  {name:"wagmi",ver:"3.6",cat:"Frontend"},
+  {name:"viem",ver:"2.48",cat:"Frontend"},
+  {name:"TanStack Query",ver:"5.100",cat:"Frontend"},
+  {name:"Node.js",ver:"22",cat:"Backend"},
+  {name:"Express",ver:"4.19",cat:"Backend"},
+  {name:"MongoDB",ver:"Atlas",cat:"Database"},
+  {name:"Mongoose",ver:"8.23",cat:"Database"},
+  {name:"Socket.IO",ver:"4.8",cat:"Real-Time"},
+  {name:"JWT",ver:"9.0",cat:"Auth"},
+  {name:"ethers.js",ver:"6.16",cat:"Blockchain"},
+  {name:"Solidity",ver:"0.8.20",cat:"Blockchain"},
+  {name:"Hardhat",ver:"Toolbox",cat:"Blockchain"},
+  {name:"Polygon Amoy",ver:"80002",cat:"Blockchain"},
+  {name:"IPFS / Pinata",ver:"-",cat:"Storage"},
+  {name:"Tesseract.js",ver:"7.0",cat:"OCR"},
+  {name:"OpenZeppelin",ver:"-",cat:"Blockchain"},
+  {name:"Multer",ver:"2.0",cat:"Backend"}
+];
+
+const vivaQuestions = [
+  {q:"What is React and why was it chosen for Web3Connect?",a:"React is a JavaScript library for building user interfaces using reusable components. It was chosen for its virtual DOM (fast rendering), component-based architecture, rich ecosystem, React 19's concurrent features, and hooks for state management."},
+  {q:"Why MongoDB was chosen over SQL databases?",a:"MongoDB offers flexible schema-less documents that map directly to JavaScript objects, horizontal scaling via sharding, no migrations for evolving schemas, and better performance for read-heavy workloads with nested data like communities with members and tasks."},
+  {q:"What is JWT and how does authentication work?",a:"JWT (JSON Web Token) is a stateless authentication token with three parts: header, payload, signature. On login, server creates a signed JWT with user ID and role. Client sends it in Authorization header. Server verifies signature using JWT_SECRET."},
+  {q:"What is IPFS and why use it for certificates?",a:"IPFS is a decentralized peer-to-peer file system using content-addressing (CID hashes). Used for certificates because it ensures immutability — if the file changes, the hash changes. No central server dependency."},
+  {q:"Why Polygon Amoy testnet was chosen?",a:"Polygon Amoy (chain ID 80002) is Ethereum-compatible (EVM), offers near-zero transaction fees, fast block times (~2s), free test MATIC from faucets, and is the official Polygon testnet replacing Mumbai."},
+  {q:"What is ERC-5192 and how is it implemented?",a:"ERC-5192 is a soulbound NFT extension that makes tokens non-transferable. Implemented by overriding transferFrom, safeTransferFrom, and approve functions to always revert. The locked() function returns true."},
+  {q:"What is the difference between blockchain and traditional database?",a:"Blockchain is decentralized, immutable, transparent, and requires consensus. Database is centralized, mutable, fast, and controlled by an admin. Blockchain provides trust; database provides performance."},
+  {q:"How does NFT minting work step by step?",a:"1) Generate certificate image with node-canvas (3200x2200px)  2) Upload image to IPFS via Pinata  3) Create metadata JSON  4) Upload metadata to IPFS  5) Call mintCertificate() on smart contract  6) Save txHash + tokenId to MongoDB."},
+  {q:"What is Socket.IO and what features does it enable?",a:"Socket.IO enables bidirectional real-time communication via WebSocket with auto-reconnection and fallback. Enables DMs, typing indicators, read receipts, server channels, presence, and collaborative canvas."},
+  {q:"What is Tesseract.js and how is verification done?",a:"Tesseract.js is a JavaScript OCR engine that extracts text from images. Used for student ID verification: extract text → normalize → compare name/fields against registration data using string-similarity (85% threshold)."},
+  {q:"Explain the role-based access control system.",a:"Three roles: Student (join communities, complete tasks, earn NFTs), Teacher (create communities, manage tasks, issue certificates), Admin (platform governance, approve teachers, diagnostics). JWT payload includes role; middleware checks permissions."},
+  {q:"How are duplicate NFT mints prevented?",a:"SHA-256 hash from userId:communityId:taskId creates a unique issuance key. MongoDB distributed lock (findOneAndUpdate, 2min TTL) prevents concurrent mints. NFTJobQueue tracks job state (pending/processing/completed/failed)."},
+  {q:"What is the architecture of the project?",a:"Four-layer architecture: Presentation (React SPA) → API (Express REST) → Data (MongoDB Atlas) → Blockchain (Polygon Amoy + IPFS). Real-time layer via Socket.IO."},
+  {q:"What is wagmi and how is it used?",a:"wagmi is a React hooks library for Ethereum. Used for wallet connection (MetaMask, Coinbase, WalletConnect), reading contract data, and sending transactions. Configured with polygonAmoy chain and three connectors."},
+  {q:"Explain the complete project flow from user login to NFT certificate.",a:"Login → JWT Auth → Join Community → Complete Tasks → OCR Verify (if needed) → Generate Certificate → Upload to IPFS → Mint NFT on Polygon → View in Profile. All data persisted in MongoDB throughout."},
+  {q:"How are file uploads handled and secured?",a:"Multer middleware handles multipart/form-data uploads. Files organized by type under server/uploads/. Rate limited (30/hour for uploads). File size limited via express.json({limit:'50mb'})."},
+  {q:"What is the role of environment variables?",a:"ENV vars configure sensitive data: MONGO_URI, JWT_SECRET, WALLET_PRIVATE_KEY, CONTRACT_ADDRESS, PINATA keys. They keep credentials out of the codebase. Backend loads via dotenv from .env file."},
+  {q:"How does the SIWE (Sign-In with Ethereum) flow work?",a:"1) Frontend requests nonce from backend  2) Backend generates and stores nonce  3) User signs nonce with MetaMask  4) Backend recovers address from signature  5) If address matches stored nonce, user is authenticated and JWT issued."},
+  {q:"What testing is done in the project?",a:"Jest for unit tests (logger, models). Manual testing for API endpoints via Postman. Blockchain testing via Hardhat local network. Real-time testing via Socket.IO client connections."},
+  {q:"How would you scale this application?",a:"Horizontal scaling: multiple backend instances behind load balancer. MongoDB sharding. Caching with Redis. CDN for static assets. WebSocket sticky sessions. Microservices for heavy features (certificate generation, OCR processing)."}
+];
+
+// ========= RENDER =========
+function renderNodes(){
+  const grid = document.getElementById("nodesGrid");
+  grid.innerHTML = nodes.map(n => `
+    <div class="node-card fade-in" data-id="${n.id}"
+         onclick="openPanel('${n.id}')"
+         style="animation-delay:${Math.random()*0.3}s">
+      <div class="icon">${n.icon}</div>
+      <h3>${n.title}</h3>
+      <p>${n.short}</p>
+    </div>
+  `).join("");
+}
+
+function renderFlow(){
+  const el = document.getElementById("flowSteps");
+  el.innerHTML = flowSteps.map((s,i) => `
+    <div class="flow-step slide-up" style="animation-delay:${i*0.1}s">
+      <div class="dot">${s.icon}</div>
+      <div class="content">
+        <h4>${s.title}</h4>
+        <p>${s.desc}</p>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderTech(){
+  const el = document.getElementById("techGrid");
+  el.innerHTML = techStack.map(t => `
+    <div class="tech-item fade-in">
+      <div class="v">${t.ver}</div>
+      <div class="n">${t.name}</div>
+    </div>
+  `).join("");
+}
+
+// ========= PANEL =========
+function openPanel(id){
+  const node = nodes.find(n => n.id === id);
+  if(!node) return;
+  const el = document.getElementById("panelContent");
+  let html = `<h2>${node.icon} ${node.title}</h2>`;
+  node.sections.forEach(s => {
+    html += `<div class="panel-section"><h3>${s.icon || '📌'} ${s.title}</h3>`;
+    if(s.content) html += `<p>${s.content}</p>`;
+    if(s.flow) {
+      html += `<div class="flow-box">`;
+      s.flow.forEach(f => {
+        html += `<div class="step"><span class="num">${f.num}</span><span>${f.text}</span></div>`;
+      });
+      html += `</div>`;
+    }
+    if(s.code) html += `<div class="code-block">${escapeHtml(s.code)}</div>`;
+    if(s.qa) {
+      s.qa.forEach(qa => {
+        html += `<div class="qa-item" onclick="this.classList.toggle('open')">
+          <div class="q">❓ ${escapeHtml(qa.q)} <span class="toggle">▼</span></div>
+          <div class="a">${escapeHtml(qa.a)}</div>
+        </div>`;
+      });
+    }
+    html += `</div>`;
+  });
+  el.innerHTML = html;
+  document.getElementById("sidePanel").classList.add("open");
+  document.getElementById("panelOverlay").classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+
+function closePanel(){
+  document.getElementById("sidePanel").classList.remove("open");
+  document.getElementById("panelOverlay").classList.remove("active");
+  document.body.style.overflow = "";
+}
+
+// ========= VIVA =========
+let vivaIndex = 0;
+let vivaScore = 0;
+let vivaTotal = 0;
+let vivaAnswered = false;
+
+function openViva(){
+  vivaIndex = 0;
+  vivaScore = 0;
+  vivaTotal = vivaQuestions.length;
+  vivaAnswered = false;
+  document.getElementById("vivaModal").classList.add("active");
+  document.getElementById("vivaScore").style.display = "none";
+  document.getElementById("vivaProgress").style.width = "0%";
+  showVivaQuestion();
+}
+
+function closeViva(){
+  document.getElementById("vivaModal").classList.remove("active");
+}
+
+function showVivaQuestion(){
+  const q = vivaQuestions[vivaIndex];
+  document.getElementById("vivaQuestion").innerHTML = `
+    <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.5rem">
+      Question ${vivaIndex+1} of ${vivaTotal}
+    </div>
+    <div class="question">${escapeHtml(q.q)}</div>
+  `;
+  document.getElementById("vivaAnswer").className = "answer";
+  document.getElementById("vivaAnswer").textContent = q.a;
+  document.getElementById("vivaProgress").style.width = `${((vivaIndex+1)/vivaTotal)*100}%`;
+  vivaAnswered = false;
+  document.getElementById("vivaButtons").innerHTML = `
+    <button class="btn-reveal" onclick="revealAnswer()">🔍 Reveal Answer</button>
+    <button class="btn-next" onclick="nextViva()">Next →</button>
+  `;
+}
+
+function revealAnswer(){
+  if(vivaAnswered) return;
+  document.getElementById("vivaAnswer").classList.add("show");
+  vivaScore++;
+  vivaAnswered = true;
+}
+
+function nextViva(){
+  if(vivaIndex < vivaTotal - 1){
+    vivaIndex++;
+    showVivaQuestion();
+  } else {
+    const pct = Math.round((vivaScore/vivaTotal)*100);
+    document.getElementById("vivaQuestion").innerHTML = "";
+    document.getElementById("vivaAnswer").className = "answer";
+    document.getElementById("vivaButtons").innerHTML = `
+      <button class="btn-reveal" onclick="closeViva()">Close</button>
+      <button class="btn-next" onclick="openViva()">🔄 Restart</button>
+    `;
+    document.getElementById("vivaScore").style.display = "block";
+    document.getElementById("vivaScore").innerHTML = `
+      <div class="viva-score">
+        <div class="num">${vivaScore}/${vivaTotal}</div>
+        <div style="color:var(--text-secondary);font-size:0.9rem">${pct}% — ${pct >= 80 ? 'Excellent!' : pct >= 60 ? 'Good!' : 'Keep practicing!'}</div>
+      </div>
+    `;
+  }
+}
+
+// ========= SEARCH =========
+function filterNodes(val){
+  const cards = document.querySelectorAll(".node-card");
+  const q = val.toLowerCase();
+  cards.forEach(c => {
+    const text = c.textContent.toLowerCase();
+    c.style.display = text.includes(q) ? "block" : "none";
+  });
+}
+
+// ========= PARTICLES =========
+function initParticles(){
+  const canvas = document.getElementById("particles-canvas");
+  const ctx = canvas.getContext("2d");
+  let w,h, particles = [];
+
+  function resize(){
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  for(let i=0;i<80;i++){
+    particles.push({
+      x: Math.random()*w, y: Math.random()*h,
+      vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5,
+      r: Math.random()*2+1, a: Math.random()*0.5+0.1
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if(p.x < 0) p.x = w; if(p.x > w) p.x = 0;
+      if(p.y < 0) p.y = h; if(p.y > h) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(123,97,255,${p.a})`;
+      ctx.fill();
+    });
+    // connections
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if(dist < 150){
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x,particles[i].y);
+          ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.strokeStyle = `rgba(123,97,255,${0.1*(1-dist/150)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ========= UTILS =========
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ========= INIT =========
+renderNodes();
+renderFlow();
+renderTech();
+initParticles();
+
+// Intersection Observer for animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting) e.target.style.opacity = "1";
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll(".fade-in, .slide-up").forEach(el => {
+  el.style.opacity = "0";
+  observer.observe(el);
+});
+
+// Keyboard shortcuts
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape"){ closePanel(); closeViva(); }
+});
+</script>
+</body>
+</html>
