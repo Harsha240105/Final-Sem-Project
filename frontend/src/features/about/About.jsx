@@ -20,7 +20,7 @@ export default function About() {
         {/* Header */}
         <motion.div className="text-center space-y-4" {...fadeUp}>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 text-xs font-mono tracking-wider">
-            FINAL YEAR PROJECT 2024-2025
+            FINAL YEAR PROJECT 2025-2026
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-black">
             <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent bg-[length:200%_200%] animate-gradient">
@@ -175,7 +175,7 @@ export default function About() {
             Built with React 19 · Node.js · Express · MongoDB · Solidity · Polygon · IPFS · Socket.IO
           </p>
           <p className="text-xs text-gray-700 mt-2 font-mono">
-            &copy; 2024-2025 Final Year Project · All Rights Reserved
+            &copy; 2025-2026 Final Year Project · All Rights Reserved
           </p>
         </motion.div>
       </div>
